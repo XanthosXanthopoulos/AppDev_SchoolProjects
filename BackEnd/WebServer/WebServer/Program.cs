@@ -20,7 +20,7 @@ namespace WebServer
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseKestrel().UseUrls("http://localhost:5000", "https://localhost:5001", "https://192.168.1.109:5002").UseStartup<Startup>();
                 });
     }
 }
