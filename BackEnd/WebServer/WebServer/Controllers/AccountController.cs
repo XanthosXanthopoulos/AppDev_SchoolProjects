@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
+using WebServer.Data;
 using WebServer.Models.Api.Request;
 using WebServer.Models.Api.Response;
+using WebServer.Models.Database;
 using WebServer.Services;
 
 namespace WebServer.Controllers
@@ -17,12 +19,14 @@ namespace WebServer.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly JwtService jwt;
+        private readonly ApplicationDataDbContext _context;
 
-        public AccountController(IConfiguration config, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AccountController(IConfiguration config, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ApplicationDataDbContext context)
         {
 
             this.userManager = userManager;
             this.signInManager = signInManager;
+            _context = context;
 
             jwt = new JwtService(config);
         }
@@ -48,6 +52,9 @@ namespace WebServer.Controllers
 
                     if (createResult.Succeeded)
                     {
+                        await _context.Users.AddAsync(new UserModel { UserID = user.Id, Name = user.UserName });
+                        await _context.SaveChangesAsync();
+
                         return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = user.UserName, JWToken = jwt.GenerateSecurityToken(user.Email, user.Id) } };
                     }
                     else
@@ -88,7 +95,7 @@ namespace WebServer.Controllers
                 }
 
                 Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.CheckPasswordSignInAsync(user, userLoginRequest.Password, false);
-
+                
                 if (result.Succeeded)
                 {
                     return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = user.UserName, JWToken = jwt.GenerateSecurityToken(user.Email, user.Id) } };
