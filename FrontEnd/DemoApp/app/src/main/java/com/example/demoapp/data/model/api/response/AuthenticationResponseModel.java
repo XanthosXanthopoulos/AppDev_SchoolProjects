@@ -1,4 +1,4 @@
-package com.example.demoapp.data.model.api;
+package com.example.demoapp.data.model.api.response;
 
 public class AuthenticationResponseModel
 {

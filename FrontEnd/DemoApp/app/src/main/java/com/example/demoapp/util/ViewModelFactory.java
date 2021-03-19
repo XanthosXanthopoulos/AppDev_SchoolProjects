@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
 
-import com.example.demoapp.data.UserDataSource;
-import com.example.demoapp.data.UserRepository;
+import com.example.demoapp.data.datasource.ApiDataSource;
+import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.login.LoginViewModel;
 
 /**
@@ -22,7 +22,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory
     {
         if (modelClass.isAssignableFrom(LoginViewModel.class))
         {
-            return (T) new LoginViewModel(UserRepository.getInstance(new UserDataSource()));
+            return (T) new LoginViewModel(UserRepository.getInstance(new ApiDataSource()));
         }
         else
         {

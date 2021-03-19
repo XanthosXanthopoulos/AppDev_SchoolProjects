@@ -1,5 +1,6 @@
 package com.example.demoapp.ui.login;
 
+import androidx.annotation.WorkerThread;
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -8,30 +9,32 @@ import androidx.lifecycle.ViewModel;
 
 import android.util.Patterns;
 
-import com.example.demoapp.data.UserRepository;
-import com.example.demoapp.data.Result;
-import com.example.demoapp.data.model.LoggedInUser;
+import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.R;
+import com.example.demoapp.data.model.User;
+import com.example.demoapp.data.model.repository.RepositoryResponse;
 
 public class LoginViewModel extends ViewModel
 {
 
-    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private LiveData<LoginResult> loginResult;
-    private UserRepository userRepository;
+    private final MutableLiveData<LoginFormState> loginFormState;
+    private final LiveData<LoginResult> loginResult;
+    private final UserRepository userRepository;
 
     public LoginViewModel(UserRepository userRepository)
     {
         this.userRepository = userRepository;
-        loginResult = Transformations.map(userRepository.getResult(), new Function<Result<LoggedInUser>, LoginResult>()
+        loginFormState = new MutableLiveData<>();
+
+        loginResult = Transformations.map(userRepository.getResult(), new Function<RepositoryResponse<User>, LoginResult>()
         {
+            @WorkerThread
             @Override
-            public LoginResult apply(Result<LoggedInUser> input)
+            public LoginResult apply(RepositoryResponse<User> input)
             {
-                if (input instanceof Result.Success)
+                if (input.isSuccessful())
                 {
-                    LoggedInUser data = ((Result.Success<LoggedInUser>) input).getData();
-                    return new LoginResult(new LoggedInUserView(data.getUsername()));
+                    return new LoginResult(new LoggedInUserView(input.getResponse().getUsername()));
                 }
                 else
                 {
@@ -53,7 +56,6 @@ public class LoginViewModel extends ViewModel
 
     public void login(String username, String password)
     {
-        // can be launched in a separate asynchronous job
         userRepository.login(username, password);
     }
 

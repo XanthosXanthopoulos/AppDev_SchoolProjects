@@ -1,40 +1,35 @@
-package com.example.demoapp.data;
+package com.example.demoapp.data.datasource;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.example.demoapp.data.model.LoggedInUser;
-import com.example.demoapp.data.model.api.ApiResponse;
-import com.example.demoapp.data.model.api.AuthenticationResponseModel;
+import com.example.demoapp.data.model.User;
+import com.example.demoapp.data.model.api.request.*;
+import com.example.demoapp.data.model.api.response.*;
+import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.util.ApiHandler;
 import com.example.demoapp.util.ApiRoutes;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-
-/**
- * Class that handles authentication w/ login credentials and retrieves user information.
- */
-public class UserDataSource
+public class ApiDataSource
 {
-    MutableLiveData<AuthenticationResponseModel> result = new MutableLiveData<>();
-
-    public void login(String email, String password)
+    public LiveData<DataSourceResponse<User>> login(SingInCredentialsModel singInCredentials)
     {
         ApiHandler apiHandler = ApiHandler.getInstance();
         JSONObject postBody = new JSONObject();
+        MutableLiveData<DataSourceResponse<User>> result = new MutableLiveData<>();
 
         try
         {
-            postBody.put("Email", email);
-            postBody.put("Password", password);
+            postBody.put("Email", singInCredentials.getEmail());
+            postBody.put("Password", singInCredentials.getPassword());
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.LOGIN), postBody, new Response.Listener<JSONObject>()
             {
@@ -45,12 +40,15 @@ public class UserDataSource
 
                     if (apiResponse.isSuccessful())
                     {
-                        result.setValue(apiResponse.getResponse());
+                        User user = new User();
+                        user.setUsername(apiResponse.getResponse().getUsername());
+                        user.setJwToken(apiResponse.getResponse().getJwToken());
+
+                        result.setValue(new DataSourceResponse<>(user));
                     }
                     else
                     {
-                        System.err.println(apiResponse.getErrorMessage());
-                        result.setValue(null);
+                        result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
                     }
                 }
             }, new Response.ErrorListener()
@@ -59,7 +57,7 @@ public class UserDataSource
                 public void onErrorResponse(VolleyError error)
                 {
                     System.err.println(error.networkResponse);
-                    result.setValue(null);
+                    result.setValue(new DataSourceResponse<>("Network error"));
                 }
             });
 
@@ -69,15 +67,7 @@ public class UserDataSource
         {
 
         }
-    }
 
-    public MutableLiveData<AuthenticationResponseModel> getResult()
-    {
         return result;
-    }
-
-    public void logout()
-    {
-        // TODO: revoke authentication
     }
 }

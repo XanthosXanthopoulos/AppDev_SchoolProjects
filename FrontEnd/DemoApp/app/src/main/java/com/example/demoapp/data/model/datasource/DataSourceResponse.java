@@ -1,20 +1,26 @@
-package com.example.demoapp.data.model.api;
+package com.example.demoapp.data.model.datasource;
 
-public class ApiResponse<T>
+public class DataSourceResponse<T>
 {
+
     private boolean successful;
 
     private String errorMessage;
 
     private T response;
 
-    public ApiResponse() {}
-
-    public ApiResponse(boolean successful, String errorMessage, T response)
+    public DataSourceResponse(T response)
     {
-        this.successful = successful;
-        this.errorMessage = errorMessage;
+        this.successful = true;
+        this.errorMessage = null;
         this.response = response;
+    }
+
+    public DataSourceResponse(String errorMessage)
+    {
+        this.successful = false;
+        this.errorMessage = errorMessage;
+        this.response = null;
     }
 
     public boolean isSuccessful()
@@ -34,7 +40,7 @@ public class ApiResponse<T>
 
     public void setErrorMessage(String errorMessage)
     {
-        errorMessage = errorMessage;
+        this.errorMessage = errorMessage;
     }
 
     public T getResponse()
