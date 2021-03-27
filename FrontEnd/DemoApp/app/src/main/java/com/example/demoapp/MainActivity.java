@@ -45,15 +45,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //.setMapStyle(MapStyleOptions.loadRawResourceStyle());
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            private final LatLng MELBOURNE = new LatLng(-25.274398,133.775136);;
-            private final LatLng ADELAIDE = new LatLng(-25.274398,133.775136);;
-            private final LatLng BRISBANE = new LatLng(-25.274398,133.775136);;
-            private final LatLng SYDNEY = new LatLng(-25.274398,133.775136);;
-            private final LatLng PERTH = new LatLng(-25.274398,133.775136);;
+            private final LatLng MELBOURNE = new LatLng(-37.813628,144.963058);;
+            private final LatLng ADELAIDE = new LatLng(-34.928499,138.600746);;
+            private final LatLng BRISBANE = new LatLng(-27.469771,153.025124);;
+            private final LatLng SYDNEY = new LatLng(-33.86882,151.209296);;
+            private final LatLng PERTH = new LatLng(-31.952312,115.861309);;
 
             @Override
             public void onMapClick(LatLng latLng) {
-                LatLng lp = new LatLng(-25.274398,133.775136);
+//                LatLng lp = new LatLng(-25.274398,133.775136);
 //                LatLngBounds bounds = new LatLngBounds.Builder()
 //                        .include(PERTH)
 //                        .include(SYDNEY)
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        .include(BRISBANE)
 //                        .include(MELBOURNE)
 //                        .build();
-//                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+//                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions()
                         .position(latLng)
