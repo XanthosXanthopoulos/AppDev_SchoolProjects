@@ -150,15 +150,17 @@
             android:id="@+id/facebookLogin"
             android:layout_width="221dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:srcCompat="@drawable/facebook" />
+            android:layout_weight="1"/>
+<!--            app:srcCompat="@drawable/facebook"-->
+
 
         <ImageView
             android:id="@+id/googleLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:srcCompat="@drawable/google" />
+            />
+<!--        app:srcCompat="@drawable/google"-->
     </LinearLayout>
 
     <TextView
