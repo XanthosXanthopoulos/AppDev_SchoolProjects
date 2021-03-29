@@ -11,6 +11,8 @@ namespace WebServer.Data
 
         public DbSet<ImageModel> Images { get; set; }
 
+        public DbSet<Follow> Follows { get; set; }
+
         #endregion
 
         #region Constructor
@@ -18,6 +20,17 @@ namespace WebServer.Data
         public ApplicationDataDbContext(DbContextOptions<ApplicationDataDbContext> options) : base(options)
         {
 
+        }
+
+        #endregion
+
+        #region Overrides
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Follow>().HasKey(f => new { f.FolloweeID, f.FollowerID });
         }
 
         #endregion

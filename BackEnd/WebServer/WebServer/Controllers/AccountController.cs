@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebServer.Data;
 using WebServer.Models.Api.Request;
@@ -118,6 +119,74 @@ namespace WebServer.Controllers
 
             //TODO: Action to do when model is invalid
             return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "Invalid model state" };
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<ApiResponse<ProfileInfoResponseModel>> ProfileInfo()
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userID != null)
+            {
+                IdentityUser user = await userManager.FindByIdAsync(userID);
+                UserModel userInfo = await _context.Users.FindAsync(userID);
+
+                return new ApiResponse<ProfileInfoResponseModel>
+                {
+                    Response = new ProfileInfoResponseModel
+                    {
+                        Username = user.UserName,
+                        Email = user.Email,
+                        Name = userInfo.Name,
+                        Surname = userInfo.Surname,
+                        Birthday = userInfo.Birthday,
+                        Description = userInfo.Description,
+                        AccountType = userInfo.AccountType
+                    } 
+                };
+            }
+            else
+            {
+                return new ApiResponse<ProfileInfoResponseModel> { ErrorMessage = "User info not found" };
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<ApiResponse<AuthenticationResponseModel>> UpdateProfile([FromBody] ProfileInfoResponseModel profileInfo)
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userID != null)
+            {
+                IdentityUser user = await userManager.FindByIdAsync(userID);
+                UserModel userInfo = await _context.Users.FindAsync(userID);
+
+                if (!user.Email.Equals(profileInfo.Email, StringComparison.OrdinalIgnoreCase) && await userManager.FindByEmailAsync(profileInfo.Email) != null)
+                {
+                    return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "Email already exists" };
+                }
+
+                user.UserName = profileInfo.Username;
+                user.Email = profileInfo.Email;
+
+                userInfo.Name = profileInfo.Name;
+                userInfo.Surname = profileInfo.Surname;
+                userInfo.Birthday = profileInfo.Birthday;
+                userInfo.Description = profileInfo.Description;
+                userInfo.Country = profileInfo.Country;
+                userInfo.AccountType = profileInfo.AccountType;
+
+                await userManager.UpdateAsync(user);
+                await _context.SaveChangesAsync();
+
+                return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = profileInfo.Username } };
+            }
+            else
+            {
+                return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "User info not found" };
+            }
         }
     }
 }

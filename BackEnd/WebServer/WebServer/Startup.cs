@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using WebServer.Data;
+using WebServer.Hubs;
 using WebServer.Services;
 
 namespace WebServer
@@ -31,6 +32,8 @@ namespace WebServer
             services.AddControllers();
 
             services.AddTokenAuthentication(Configuration);
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +52,7 @@ namespace WebServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<NotificationsHub>("/notifications");
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();

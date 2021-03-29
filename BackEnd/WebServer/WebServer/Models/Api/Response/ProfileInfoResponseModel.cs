@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using WebServer.Models.Enums;
 
-namespace WebServer.Models.Database
+namespace WebServer.Models.Api.Response
 {
-    public class UserModel
+    public class ProfileInfoResponseModel
     {
-        [Key]
-        public string UserID { get; set; }
+        public string Username { get; set; }
+
+        public string Email { get; set; }
 
         public string Name { get; set; }
 
@@ -21,7 +23,5 @@ namespace WebServer.Models.Database
         public string Description { get; set; }
 
         public AccountType AccountType { get; set; }
-
-        public ICollection<ImageModel> Images { get; set; }
     }
 }
