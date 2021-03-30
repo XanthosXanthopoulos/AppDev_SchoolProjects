@@ -1,10 +1,9 @@
 package com.example.demoapp.ui.login;
 
-import android.app.Activity;
-
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -23,6 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.demoapp.R;
+import com.example.demoapp.data.view.AuthenticatedUserView;
+import com.example.demoapp.data.viewmodel.AuthenticationResult;
+import com.example.demoapp.ui.register.RegisterActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 public class LoginActivity extends AppCompatActivity
@@ -39,6 +41,7 @@ public class LoginActivity extends AppCompatActivity
 
         final EditText usernameEditText = findViewById(R.id.username);
         final EditText passwordEditText = findViewById(R.id.password);
+        final TextView gotoRegisterTextView = findViewById(R.id.gotoRegister);
         final Button loginButton = findViewById(R.id.login);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
@@ -62,10 +65,10 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
-        loginViewModel.getLoginResult().observe(this, new Observer<LoginResult>()
+        loginViewModel.getLoginResult().observe(this, new Observer<AuthenticationResult>()
         {
             @Override
-            public void onChanged(@Nullable LoginResult loginResult)
+            public void onChanged(@Nullable AuthenticationResult loginResult)
             {
                 if (loginResult == null) return;
 
@@ -127,9 +130,19 @@ public class LoginActivity extends AppCompatActivity
                 loginViewModel.login(usernameEditText.getText().toString(), passwordEditText.getText().toString());
             }
         });
+
+        gotoRegisterTextView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(v.getContext(), RegisterActivity.class);
+                v.getContext().startActivity(intent);
+            }
+        });
     }
 
-    private void updateUiWithUser(LoggedInUserView model)
+    private void updateUiWithUser(AuthenticatedUserView model)
     {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience

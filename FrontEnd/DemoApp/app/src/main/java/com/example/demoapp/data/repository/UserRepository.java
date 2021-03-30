@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer;
 
 import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.model.User;
+import com.example.demoapp.data.model.api.request.RegisterCredentialsModel;
 import com.example.demoapp.data.model.api.request.SingInCredentialsModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
@@ -58,6 +59,29 @@ public class UserRepository
     public void login(String username, String password)
     {
         LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.login(new SingInCredentialsModel(username, password));
+        result.addSource(dataSourceResult, new Observer<DataSourceResponse<User>>()
+        {
+            @Override
+            public void onChanged(@Nullable DataSourceResponse<User> user)
+            {
+                if (user.isSuccessful())
+                {
+                    setUser(user.getResponse());
+                    result.setValue(new RepositoryResponse<>(user.getResponse()));
+                }
+                else
+                {
+                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
+                }
+
+                result.removeSource(dataSourceResult);
+            }
+        });
+    }
+
+    public void register(String username, String email, String password, String confirmPassword)
+    {
+        LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.register(new RegisterCredentialsModel(username, email, password, confirmPassword));
         result.addSource(dataSourceResult, new Observer<DataSourceResponse<User>>()
         {
             @Override

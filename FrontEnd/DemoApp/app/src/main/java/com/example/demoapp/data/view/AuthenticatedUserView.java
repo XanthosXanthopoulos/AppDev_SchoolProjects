@@ -1,19 +1,21 @@
-package com.example.demoapp.ui.login;
+package com.example.demoapp.data.view;
+
+import android.security.keystore.UserNotAuthenticatedException;
 
 /**
  * Class exposing authenticated user details to the UI.
  */
-class LoggedInUserView
+public class AuthenticatedUserView
 {
     private final String displayName;
     //... other data fields that may be accessible to the UI
 
-    LoggedInUserView(String displayName)
+    public AuthenticatedUserView(String displayName)
     {
         this.displayName = displayName;
     }
 
-    String getDisplayName()
+    public String getDisplayName()
     {
         return displayName;
     }

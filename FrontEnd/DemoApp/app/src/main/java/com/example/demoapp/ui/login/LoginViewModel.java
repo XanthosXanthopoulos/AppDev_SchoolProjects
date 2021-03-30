@@ -13,12 +13,14 @@ import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
+import com.example.demoapp.data.view.AuthenticatedUserView;
+import com.example.demoapp.data.viewmodel.AuthenticationResult;
 
 public class LoginViewModel extends ViewModel
 {
 
     private final MutableLiveData<LoginFormState> loginFormState;
-    private final LiveData<LoginResult> loginResult;
+    private final LiveData<AuthenticationResult> loginResult;
     private final UserRepository userRepository;
 
     public LoginViewModel(UserRepository userRepository)
@@ -26,19 +28,19 @@ public class LoginViewModel extends ViewModel
         this.userRepository = userRepository;
         loginFormState = new MutableLiveData<>();
 
-        loginResult = Transformations.map(userRepository.getResult(), new Function<RepositoryResponse<User>, LoginResult>()
+        loginResult = Transformations.map(userRepository.getResult(), new Function<RepositoryResponse<User>, AuthenticationResult>()
         {
             @WorkerThread
             @Override
-            public LoginResult apply(RepositoryResponse<User> input)
+            public AuthenticationResult apply(RepositoryResponse<User> input)
             {
                 if (input.isSuccessful())
                 {
-                    return new LoginResult(new LoggedInUserView(input.getResponse().getUsername()));
+                    return new AuthenticationResult(new AuthenticatedUserView(input.getResponse().getUsername()));
                 }
                 else
                 {
-                    return new LoginResult(R.string.login_failed);
+                    return new AuthenticationResult(R.string.login_failed);
                 }
             }
         });
@@ -49,7 +51,7 @@ public class LoginViewModel extends ViewModel
         return loginFormState;
     }
 
-    LiveData<LoginResult> getLoginResult()
+    LiveData<AuthenticationResult> getLoginResult()
     {
         return loginResult;
     }

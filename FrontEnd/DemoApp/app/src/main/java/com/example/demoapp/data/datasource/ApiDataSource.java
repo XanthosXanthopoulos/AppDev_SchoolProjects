@@ -70,4 +70,57 @@ public class ApiDataSource
 
         return result;
     }
+
+    public LiveData<DataSourceResponse<User>> register(RegisterCredentialsModel registerCredentials)
+    {
+        ApiHandler apiHandler = ApiHandler.getInstance();
+        JSONObject postBody = new JSONObject();
+        MutableLiveData<DataSourceResponse<User>> result = new MutableLiveData<>();
+
+        try
+        {
+            postBody.put("Username", registerCredentials.getUsername());
+            postBody.put("Email", registerCredentials.getEmail());
+            postBody.put("Password", registerCredentials.getPassword());
+            postBody.put("ConfirmPassword", registerCredentials.getConfirmPassword());
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.REGISTER), postBody, new Response.Listener<JSONObject>()
+            {
+                @Override
+                public void onResponse(JSONObject response)
+                {
+                    ApiResponse<AuthenticationResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<AuthenticationResponseModel>>(){}.getType());
+
+                    if (apiResponse.isSuccessful())
+                    {
+                        User user = new User();
+                        user.setUsername(apiResponse.getResponse().getUsername());
+                        user.setJwToken(apiResponse.getResponse().getJwToken());
+
+                        result.setValue(new DataSourceResponse<>(user));
+                    }
+                    else
+                    {
+                        result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+                    }
+                }
+            }, new Response.ErrorListener()
+            {
+                @Override
+                public void onErrorResponse(VolleyError error)
+                {
+                    System.err.println(error.networkResponse);
+                    result.setValue(new DataSourceResponse<>("Network error"));
+                }
+            });
+
+            apiHandler.addToRequestQueue(request);
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        return result;
+    }
 }
