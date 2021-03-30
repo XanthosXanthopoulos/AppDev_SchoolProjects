@@ -31,6 +31,8 @@ namespace WebServer.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Follow>().HasKey(f => new { f.FolloweeID, f.FollowerID });
+            modelBuilder.Entity<Follow>().HasOne(f => f.Follower).WithMany().HasForeignKey(f => f.FollowerID);
+            modelBuilder.Entity<Follow>().HasOne(f => f.Followee).WithMany().HasForeignKey(f => f.FolloweeID).OnDelete(DeleteBehavior.NoAction);
         }
 
         #endregion

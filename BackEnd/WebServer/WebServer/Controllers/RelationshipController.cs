@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using WebServer.Data;
 using WebServer.Hubs;
+using WebServer.Models.Api.Request;
 using WebServer.Models.Database;
 
 namespace WebServer.Controllers
@@ -28,7 +29,7 @@ namespace WebServer.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Follow([FromBody] string followee)
+        public async Task<IActionResult> FollowRequest([FromBody] string followee)
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -39,19 +40,56 @@ namespace WebServer.Controllers
                     await _context.Follows.AddAsync(new Follow { FollowerID = userID, FolloweeID = followee, RequestTime = DateTime.Now, Accepted = false });
                     await _context.SaveChangesAsync();
 
-                    await _notificationsHub.Clients.User(followee).SendAsync("FollowRequest", userID);
+                    //TODO: Implement notification system
+                    //await _notificationsHub.Clients.User(followee).SendAsync("FollowRequest", userID);
+
+                    return Ok();
                 }
                 else
                 {
-                    StatusCode(StatusCodes.Status406NotAcceptable);
+                    return StatusCode(StatusCodes.Status406NotAcceptable);
                 }
             }
             else
             {
-
+                return StatusCode(StatusCodes.Status401Unauthorized);
             }
+        }
 
-            return StatusCode(StatusCodes.Status401Unauthorized);
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> FollowResponse([FromBody] FollowResponseModel response)
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userID != null)
+            {
+                Follow followRequest = await _context.Follows.FindAsync(userID, response.FollowerID);
+
+                if (followRequest != null)
+                {
+                    if (response.Accepted)
+                    {
+                        followRequest.Accepted = true;
+                    }
+                    else
+                    {
+                        _context.Follows.Remove(followRequest);
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status404NotFound);
+                }
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
         }
     }
 }

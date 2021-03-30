@@ -1,15 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Linq;
 using WebServer.Data;
 using WebServer.Models.Api.Request;
 using WebServer.Models.Api.Response;
 using WebServer.Models.Database;
 using WebServer.Services;
+using System.Collections.Generic;
 
 namespace WebServer.Controllers
 {
@@ -44,8 +47,8 @@ namespace WebServer.Controllers
                 {
                     IdentityUser user = new IdentityUser
                     {
-                        UserName = userRegistrationRequest.Name,
-                        NormalizedUserName = userRegistrationRequest.Name.ToLower(),
+                        UserName = userRegistrationRequest.Username,
+                        NormalizedUserName = userRegistrationRequest.Username.ToLower(),
                         Email = userRegistrationRequest.Email
                     };
 
@@ -119,6 +122,32 @@ namespace WebServer.Controllers
 
             //TODO: Action to do when model is invalid
             return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "Invalid model state" };
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Delete([FromBody] SingInCredentialsModel credentials)
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userID != null)
+            {
+                IdentityUser user = await userManager.FindByIdAsync(userID);
+                UserModel userInfo = await _context.Users.FindAsync(userID);
+
+                ICollection<Follow> follows = _context.Follows.Where(f => f.FolloweeID == userID).ToList();
+                _context.Follows.RemoveRange(follows);
+                _context.Users.Remove(userInfo);
+
+                await userManager.DeleteAsync(user);
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
         }
 
         [HttpGet]
