@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.login.LoginViewModel;
+import com.example.demoapp.ui.main.map.MapViewModel;
+import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.register.RegisterViewModel;
 
 /**
@@ -28,6 +30,14 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if(modelClass.isAssignableFrom(RegisterViewModel.class))
         {
             return (T) new RegisterViewModel(UserRepository.getInstance(new ApiDataSource()));
+        }
+        else if(modelClass.isAssignableFrom(MapViewModel.class))
+        {
+            return (T) new MapViewModel();
+        }
+        else if(modelClass.isAssignableFrom(ProfileViewModel.class))
+        {
+            return (T) new ProfileViewModel();
         }
         else
         {
