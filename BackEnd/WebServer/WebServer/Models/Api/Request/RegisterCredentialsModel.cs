@@ -6,7 +6,7 @@ namespace WebServer.Models.Api.Request
     {
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Username { get; set; }
 
         [EmailAddress(ErrorMessage = "Invalid email address")]
         [Required(ErrorMessage = "Email is required")]
