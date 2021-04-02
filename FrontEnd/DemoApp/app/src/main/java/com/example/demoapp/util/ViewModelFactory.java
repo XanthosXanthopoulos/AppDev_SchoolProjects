@@ -6,10 +6,11 @@ import androidx.annotation.NonNull;
 
 import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.repository.UserRepository;
-import com.example.demoapp.ui.login.LoginViewModel;
+import com.example.demoapp.ui.authentication.login.LoginViewModel;
+import com.example.demoapp.ui.main.account.AccountViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
-import com.example.demoapp.ui.register.RegisterViewModel;
+import com.example.demoapp.ui.authentication.register.RegisterViewModel;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -37,7 +38,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(ProfileViewModel.class))
         {
-            return (T) new ProfileViewModel();
+            return (T) new ProfileViewModel(UserRepository.getInstance(new ApiDataSource()));
+        }
+        else if(modelClass.isAssignableFrom(AccountViewModel.class))
+        {
+            return (T) new AccountViewModel(UserRepository.getInstance(new ApiDataSource()));
         }
         else
         {

@@ -1,16 +1,19 @@
-package com.example.demoapp.ui.register;
+package com.example.demoapp.ui.authentication.register;
+
+import android.os.Bundle;
 
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,30 +24,28 @@ import android.widget.Toast;
 import com.example.demoapp.R;
 import com.example.demoapp.data.view.AuthenticatedUserView;
 import com.example.demoapp.data.viewmodel.AuthenticationResult;
-import com.example.demoapp.ui.login.LoginActivity;
-import com.example.demoapp.ui.login.LoginViewModel;
 import com.example.demoapp.util.ViewModelFactory;
 
-public class RegisterActivity extends AppCompatActivity
+public class RegisterFragment extends Fragment
 {
     private RegisterViewModel registerViewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        View view = inflater.inflate(R.layout.fragment_register, container, false);
+
         registerViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(RegisterViewModel.class);
 
-        final EditText usernameEditText = findViewById(R.id.Register_Username);
-        final EditText emailEditText = findViewById(R.id.Register_Email);
-        final EditText passwordEditText = findViewById(R.id.Register_Password);
-        final EditText confirmPasswordEditText = findViewById(R.id.Register_ConfirmPassword);
-        final Button registerButton = findViewById(R.id.Register_Button);
-        final Button cancelButton = findViewById(R.id.Cancel_Button);
-        final ProgressBar loadingProgressBar = findViewById(R.id.Register_Loading);
+        final EditText usernameEditText = view.findViewById(R.id.Register_Username);
+        final EditText emailEditText = view.findViewById(R.id.Register_Email);
+        final EditText passwordEditText = view.findViewById(R.id.Register_Password);
+        final EditText confirmPasswordEditText = view.findViewById(R.id.Register_ConfirmPassword);
+        final Button registerButton = view.findViewById(R.id.Register_Button);
+        final Button cancelButton = view.findViewById(R.id.Cancel_Button);
+        final ProgressBar loadingProgressBar = view.findViewById(R.id.Register_Loading);
 
-        registerViewModel.getRegisterFormState().observe(this, new Observer<RegisterFormState>()
+        registerViewModel.getRegisterFormState().observe(getViewLifecycleOwner(), new Observer<RegisterFormState>()
         {
             @Override
             public void onChanged(RegisterFormState registerFormState)
@@ -72,7 +73,7 @@ public class RegisterActivity extends AppCompatActivity
             }
         });
 
-        registerViewModel.getRegistersResult().observe(this, new Observer<AuthenticationResult>()
+        registerViewModel.getRegistersResult().observe(getViewLifecycleOwner(), new Observer<AuthenticationResult>()
         {
             @Override
             public void onChanged(AuthenticationResult registerResult)
@@ -137,26 +138,20 @@ public class RegisterActivity extends AppCompatActivity
             }
         });
 
-        cancelButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(v.getContext(), LoginActivity.class);
-                v.getContext().startActivity(intent);
-            }
-        });
+        cancelButton.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_login));
+
+        return view;
     }
 
     private void updateUiWithUser(AuthenticatedUserView model)
     {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), welcome, Toast.LENGTH_LONG).show();
     }
 
     private void showRegisterFailed(@StringRes Integer errorString)
     {
-        Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), errorString, Toast.LENGTH_SHORT).show();
     }
 }

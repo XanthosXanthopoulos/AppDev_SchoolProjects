@@ -1,4 +1,4 @@
-package com.example.demoapp.ui.login;
+package com.example.demoapp.ui.authentication.login;
 
 import androidx.annotation.WorkerThread;
 import androidx.arch.core.util.Function;
@@ -9,12 +9,14 @@ import androidx.lifecycle.ViewModel;
 
 import android.util.Patterns;
 
+import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.view.AuthenticatedUserView;
 import com.example.demoapp.data.viewmodel.AuthenticationResult;
+import com.example.demoapp.ui.authentication.login.LoginFormState;
 
 public class LoginViewModel extends ViewModel
 {

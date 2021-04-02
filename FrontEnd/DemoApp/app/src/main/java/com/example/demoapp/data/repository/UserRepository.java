@@ -5,12 +5,18 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 
+import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.data.datasource.ApiDataSource;
+import com.example.demoapp.data.model.AccountType;
+import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.api.request.RegisterCredentialsModel;
 import com.example.demoapp.data.model.api.request.SingInCredentialsModel;
+import com.example.demoapp.data.model.api.response.ProfileInfoResponseModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
+
+import java.util.Date;
 
 /**
  * Class that requests authentication and user information from the remote data source and
@@ -28,6 +34,7 @@ public class UserRepository
     private UserRepository(ApiDataSource dataSource)
     {
         this.dataSource = dataSource;
+
         result = new MediatorLiveData<>();
     }
 
@@ -55,6 +62,8 @@ public class UserRepository
     {
         this.user = user;
     }
+
+    private User getUser() { return user; }
 
     public void login(String username, String password)
     {
@@ -91,6 +100,60 @@ public class UserRepository
                 {
                     setUser(user.getResponse());
                     result.setValue(new RepositoryResponse<>(user.getResponse()));
+                }
+                else
+                {
+                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
+                }
+
+                result.removeSource(dataSourceResult);
+            }
+        });
+    }
+
+    public void getProfileInfo()
+    {
+        LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.getProfileInfo(user.getJwToken());
+        result.addSource(dataSourceResult, new Observer<DataSourceResponse<User>>()
+        {
+            @Override
+            public void onChanged(@Nullable DataSourceResponse<User> user)
+            {
+                if (user.isSuccessful())
+                {
+                    getUser().setName(user.getResponse().getName());
+                    getUser().setSurname(user.getResponse().getSurname());
+                    getUser().setDescription(user.getResponse().getDescription());
+
+                    result.setValue(new RepositoryResponse<>(getUser()));
+                }
+                else
+                {
+                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
+                }
+
+                result.removeSource(dataSourceResult);
+            }
+        });
+    }
+
+    public void updateProfile(String username, String email, String name, String surname, String description, Date birthday, Country country, AccountType accountType)
+    {
+        String birthdayString = birthday.toString();
+
+        LiveData<DataSourceResponse<Boolean>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(username, email, name, surname, description, birthdayString, country, accountType), user.getJwToken());
+        result.addSource(dataSourceResult, new Observer<DataSourceResponse<Boolean>>()
+        {
+            @Override
+            public void onChanged(@Nullable DataSourceResponse<Boolean> user)
+            {
+                if (user.isSuccessful())
+                {
+                    getUser().setName(name);
+                    getUser().setSurname(surname);
+                    getUser().setDescription(description);
+
+                    result.setValue(new RepositoryResponse<>(getUser()));
                 }
                 else
                 {

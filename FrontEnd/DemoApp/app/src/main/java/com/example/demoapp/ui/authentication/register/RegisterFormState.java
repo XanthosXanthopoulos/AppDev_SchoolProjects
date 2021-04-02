@@ -1,4 +1,4 @@
-package com.example.demoapp.ui.register;
+package com.example.demoapp.ui.authentication.register;
 
 import androidx.annotation.Nullable;
 

@@ -1,19 +1,21 @@
-package com.example.demoapp.ui.login;
-
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
+package com.example.demoapp.ui.authentication.login;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,28 +26,27 @@ import android.widget.Toast;
 import com.example.demoapp.R;
 import com.example.demoapp.data.view.AuthenticatedUserView;
 import com.example.demoapp.data.viewmodel.AuthenticationResult;
-import com.example.demoapp.ui.register.RegisterActivity;
+import com.example.demoapp.ui.main.MainActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
-public class LoginActivity extends AppCompatActivity
+public class LoginFragment extends Fragment
 {
-
     private LoginViewModel loginViewModel;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
+
         loginViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(LoginViewModel.class);
 
-        final EditText usernameEditText = findViewById(R.id.username);
-        final EditText passwordEditText = findViewById(R.id.password);
-        final TextView gotoRegisterTextView = findViewById(R.id.gotoRegister);
-        final Button loginButton = findViewById(R.id.login);
-        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+        final EditText usernameEditText = view.findViewById(R.id.username);
+        final EditText passwordEditText = view.findViewById(R.id.password);
+        final TextView gotoRegisterTextView = view.findViewById(R.id.gotoRegister);
+        final Button loginButton = view.findViewById(R.id.login);
+        final ProgressBar loadingProgressBar = view.findViewById(R.id.loading);
 
-        loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>()
+        loginViewModel.getLoginFormState().observe(getViewLifecycleOwner(), new Observer<LoginFormState>()
         {
             @Override
             public void onChanged(@Nullable LoginFormState loginFormState)
@@ -65,7 +66,7 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
-        loginViewModel.getLoginResult().observe(this, new Observer<AuthenticationResult>()
+        loginViewModel.getLoginResult().observe(getViewLifecycleOwner(), new Observer<AuthenticationResult>()
         {
             @Override
             public void onChanged(@Nullable AuthenticationResult loginResult)
@@ -82,11 +83,10 @@ public class LoginActivity extends AppCompatActivity
                 if (loginResult.getSuccess() != null)
                 {
                     updateUiWithUser(loginResult.getSuccess());
-                }
-                //setResult(Activity.RESULT_OK);
 
-                //Complete and destroy login activity once successful
-                //finish();
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -131,26 +131,20 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
-        gotoRegisterTextView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(v.getContext(), RegisterActivity.class);
-                v.getContext().startActivity(intent);
-            }
-        });
+        gotoRegisterTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_register));
+
+        return view;
     }
 
     private void updateUiWithUser(AuthenticatedUserView model)
     {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), welcome, Toast.LENGTH_LONG).show();
     }
 
     private void showLoginFailed(@StringRes Integer errorString)
     {
-        Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), errorString, Toast.LENGTH_SHORT).show();
     }
 }

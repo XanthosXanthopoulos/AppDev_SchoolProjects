@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadingEdgeLength="150dp"
     android:requiresFadingEdge="vertical"
-    android:fadingEdgeLength="150dp">
+    tools:context="ui.main.account.AccountFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -30,21 +31,21 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="1000dp"
             app:cardPreventCornerOverlap="false"
-            app:layout_constraintWidth_percent="0.4"
             app:layout_constraintDimensionRatio="H,1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/view3">
+            app:layout_constraintTop_toBottomOf="@+id/view3"
+            app:layout_constraintWidth_percent="0.4">
 
             <ImageView
                 android:id="@+id/Register_ProfileImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/ic_launcher_background"/>
+                android:background="@drawable/ic_launcher_background" />
         </androidx.cardview.widget.CardView>
 
         <EditText
-            android:id="@+id/Register_Username"
+            android:id="@+id/Register_Name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
@@ -62,7 +63,7 @@
             app:layout_constraintTop_toBottomOf="@id/Register_ProfileImageContainer" />
 
         <EditText
-            android:id="@+id/Register_Email"
+            android:id="@+id/Register_Surname"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
@@ -76,7 +77,7 @@
             android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Register_Username" />
+            app:layout_constraintTop_toBottomOf="@+id/Register_Name" />
 
         <EditText
             android:id="@+id/Register_Description"
@@ -90,13 +91,13 @@
             android:background="@drawable/round_border"
             android:ems="10"
             android:gravity="top"
-            android:minLines="3"
             android:hint="@string/description"
+            android:minLines="3"
             android:padding="8dp"
-            app:passwordToggleEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Register_Email" />
+            app:layout_constraintTop_toBottomOf="@+id/Register_Surname"
+            app:passwordToggleEnabled="true" />
 
         <TextView
             android:id="@+id/Register_Birthday_Label"
@@ -109,9 +110,9 @@
             android:layout_marginRight="32dp"
             android:text="@string/birthday"
 
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintBottom_toBottomOf="@id/Register_Birthday"
             app:layout_constraintEnd_toStartOf="@id/Register_Birthday"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/Register_Description" />
 
@@ -124,26 +125,26 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             android:layout_marginRight="32dp"
-            android:datePickerMode="spinner"
             android:calendarViewShown="false"
+            android:datePickerMode="spinner"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/Register_Birthday_Label"
-            app:layout_constraintTop_toBottomOf="@+id/Register_Description"/>
+            app:layout_constraintTop_toBottomOf="@+id/Register_Description" />
 
         <TextView
             android:id="@+id/Register_Country_Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/country"
             android:layout_marginStart="32dp"
             android:layout_marginLeft="32dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             android:layout_marginRight="32dp"
+            android:text="@string/country"
 
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintBottom_toBottomOf="@id/Register_Country"
             app:layout_constraintEnd_toStartOf="@+id/Register_Country"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/Register_Birthday" />
 
@@ -159,18 +160,18 @@
 
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/Register_Birthday"
-            app:layout_constraintTop_toBottomOf="@+id/Register_Birthday"/>
+            app:layout_constraintTop_toBottomOf="@+id/Register_Birthday" />
 
         <TextView
             android:id="@+id/Register_Privacy_Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Privacy Type"
             android:layout_marginStart="32dp"
             android:layout_marginLeft="32dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             android:layout_marginRight="32dp"
+            android:text="Privacy Type"
 
             app:layout_constraintBottom_toBottomOf="@id/Register_Privacy"
             app:layout_constraintEnd_toStartOf="@+id/Register_Privacy"
@@ -189,7 +190,7 @@
             android:layout_marginRight="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/Register_Birthday"
-            app:layout_constraintTop_toBottomOf="@+id/Register_Country"/>
+            app:layout_constraintTop_toBottomOf="@+id/Register_Country" />
 
         <Button
             android:id="@+id/Register_Save_Profile"
