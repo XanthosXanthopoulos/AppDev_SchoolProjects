@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.main.trip.TripFragment">
+
+    <TextView
+        android:id="@+id/Trip_Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="20sp"
+        android:gravity="center_horizontal"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:background="#1976D2"
+        android:text="Title"
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:id="@+id/Trip_Description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/Trip_Title"
+        android:textSize="16sp"
+        android:padding="8dp"
+        android:text="Description" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/Trip_List"
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/Trip_Description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:scrollbars="vertical"
+        android:fadingEdgeLength="16dp"
+        android:requiresFadingEdge="vertical" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

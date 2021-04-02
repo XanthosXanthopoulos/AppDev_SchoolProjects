@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.R;
@@ -16,6 +17,9 @@ import com.example.demoapp.data.model.Trip;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Random;
+
+import static android.view.View.GONE;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
 {
@@ -42,6 +46,16 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
         holder.description.setText(items.get(position).getDescription());
         holder.country.setText(items.get(position).getCountry().toString());
         holder.date.setText(formatter.format(items.get(position).getDate()));
+
+        if (items.get(position).getUsername() == null) holder.getUsername().setVisibility(GONE);
+
+//        if (new Random().nextDouble() > 0.5)
+//        {
+//            StaggeredGridLayoutManager.LayoutParams layoutParams = new StaggeredGridLayoutManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//            layoutParams.setFullSpan(true);
+//            holder.itemView.setLayoutParams(layoutParams);
+//        }
+
     }
 
 
@@ -53,6 +67,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
 
     public static class ViewHolder extends RecyclerView.ViewHolder
     {
+        private TextView username;
         private TextView description;
         private TextView country;
         private TextView date;
@@ -61,6 +76,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
         {
             super(view);
 
+            username = (TextView) itemView.findViewById(R.id.Trip_Username);
             description = (TextView) itemView.findViewById(R.id.Description);
             country = (TextView) itemView.findViewById(R.id.Country_Description);
             date = (TextView) itemView.findViewById(R.id.Date_Description);
@@ -79,6 +95,11 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
         public TextView getDate()
         {
             return date;
+        }
+
+        public TextView getUsername()
+        {
+            return username;
         }
     }
 }

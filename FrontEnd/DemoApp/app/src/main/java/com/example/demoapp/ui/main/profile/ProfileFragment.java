@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -49,6 +50,8 @@ public class ProfileFragment extends Fragment
 
         TripAdapter rcAdapter = new TripAdapter(sList);
         recyclerView.setAdapter(rcAdapter);
+
+        view.findViewById(R.id.Register_ProfileImage).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
 
         return view;
     }

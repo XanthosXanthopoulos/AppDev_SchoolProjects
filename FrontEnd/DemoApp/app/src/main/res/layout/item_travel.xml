@@ -5,7 +5,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     card_view:cardUseCompatPadding="true"
-    card_view:contentPadding="5dp">
+    card_view:cardCornerRadius="5dp"
+    card_view:contentPaddingBottom="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,10 +15,9 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/BookName"
+            android:id="@+id/Trip_Username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -50,9 +50,8 @@
                 android:id="@+id/Country_Description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="6dp"
-                android:text="Country"
+                android:layout_margin="6dp"
+                card_view:layout_constraintWidth_percent="0.5"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toTopOf="parent" />
 
@@ -60,11 +59,10 @@
                 android:id="@+id/Date_Description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="6dp"
+                android:layout_margin="6dp"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintTop_toTopOf="parent"
-                android:text="12/1/2011"/>
+                card_view:layout_constraintWidth_percent="0.5"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
