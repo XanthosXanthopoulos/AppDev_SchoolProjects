@@ -19,12 +19,19 @@ import android.widget.SearchView;
 
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
+import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.TripContent;
+import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback
 {
@@ -55,8 +62,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap)
     {
         map = googleMap;
-        search_bar = (SearchView) getView().findViewById(R.id.search_bar);
+        search_bar = (SearchView) requireView().findViewById(R.id.search_bar);
         Drawable temp = search_bar.getBackground();
+        List<Place> PlacesList = getListItemData();
 
         search_bar.setOnSearchClickListener(new View.OnClickListener() {
             @SuppressLint("UseCompatLoadingForDrawables")
@@ -83,11 +91,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
                 if(!search_bar.hasFocus()) {
 
                     if(search_bar.isIconified()) {
-                        map.clear();
-                        map.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                .title(" Marker on the point I clicked "));
-                        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                        addMarker(latLng,null);
                     }
 
                     search_bar.setIconified(true);
@@ -113,6 +117,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
                     info.closeInfoWindow(marker);
                     return true;
                 }
+            }
+        });
+
+        search_bar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Place p = getPlaceData(PlacesList, query);
+                addMarker(Objects.requireNonNull(p).getCoordinates(),p.getDescription());
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
             }
         });
 
@@ -152,4 +170,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
+    public void addMarker(LatLng lng,String desc){
+        String title;
+        if(desc != null || desc.equals("")){
+            title = desc;
+        }else{
+            title = " Marker on the point I clicked ";
+        }
+        map.clear();
+        map.addMarker(new MarkerOptions()
+                .position(lng)
+                .title(title));
+        map.moveCamera(CameraUpdateFactory.newLatLng(lng));
+    }
+
+    private List<Place> getListItemData()
+    {
+        List<Place> listViewItems = new ArrayList<>();
+        String description = "The capital of Australia";
+
+        final Place MELBOURNE = new Place("MELBOURNE", description,new LatLng(-37.813628,144.963058));
+        final Place ADELAIDE = new Place("ADELAIDE",new LatLng(-34.928499,138.600746));
+        final Place BRISBANE = new Place("BRISBANE",new LatLng(-27.469771,153.025124));
+        final Place SYDNEY = new Place("SYDNEY",new LatLng(-33.86882,151.209296));
+        final Place PERTH = new Place("PERTH",new LatLng(-31.952312,115.861309));
+
+        listViewItems.add(MELBOURNE);
+        listViewItems.add(ADELAIDE);
+        listViewItems.add(BRISBANE);
+        listViewItems.add(SYDNEY);
+        listViewItems.add(PERTH);
+
+        return listViewItems;
+    }
+
+    private  Place getPlaceData(List<Place> placeList,String s){
+        for (int i = 0; i < placeList.size();i++){
+            if(placeList.get(i).getPlace().equals(s.toUpperCase())){
+                return placeList.get(i);
+            }
+        }
+        return null;
+    }
+
 }
