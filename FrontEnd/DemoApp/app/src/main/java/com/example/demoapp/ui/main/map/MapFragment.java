@@ -35,10 +35,12 @@ import java.util.Objects;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback
 {
+    private static final float MAPS_PATH_WIDTH = 10;
     private MapView mapView;
     private GoogleMap map;
     private SearchView search_bar;
     boolean visible;
+    PolylineOptions polylineOptions;
 
     private MapViewModel mapViewModel;
 
@@ -107,10 +109,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());;
+                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
+                List<LatLng> route = new ArrayList<>();
+                route.add(new LatLng(-35.016, 143.321));
+                route.add(new LatLng(-34.747, 145.592));
+                route.add(new LatLng(-34.364, 147.891));
+                route.add(new LatLng(-33.501, 150.217));
+                route.add(new LatLng(-32.306, 149.248));
+                route.add(new LatLng(-32.491, 147.309));
                 if(!visible){
                     visible = true;
                     info.getInfoWindow(marker);
+                    drawRoute(route);
                     return false;
                 }else {
                     visible = false;
@@ -173,7 +183,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
 
     public void addMarker(LatLng lng,String desc){
         String title;
-        if(desc != null || desc.equals("")){
+        if(desc != null){
             title = desc;
         }else{
             title = " Marker on the point I clicked ";
@@ -212,6 +222,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         }
         return null;
+    }
+
+    public void drawRoute(List<LatLng> location) {
+        polylineOptions = new PolylineOptions().width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(location);
+        Polyline polyLine = map.addPolyline(polylineOptions);
+        polyLine.setPoints(location);
     }
 
 }

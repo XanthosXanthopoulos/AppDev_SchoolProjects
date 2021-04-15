@@ -8,6 +8,8 @@ import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.ui.main.account.AccountViewModel;
+import com.example.demoapp.ui.main.dashboard.DashboardFragment;
+import com.example.demoapp.ui.main.dashboard.DashboardViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.authentication.register.RegisterViewModel;
@@ -43,6 +45,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if(modelClass.isAssignableFrom(AccountViewModel.class))
         {
             return (T) new AccountViewModel(UserRepository.getInstance(new ApiDataSource()));
+        }
+        else if(modelClass.isAssignableFrom(DashboardViewModel.class))
+        {
+            return (T) new DashboardViewModel(UserRepository.getInstance(new ApiDataSource()));
         }
         else
         {
