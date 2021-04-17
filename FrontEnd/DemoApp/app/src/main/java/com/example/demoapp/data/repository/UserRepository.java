@@ -165,6 +165,31 @@ public class UserRepository
         });
     }
 
+//    public void updateActivityList(String title, String type, String place, String description){
+//        LiveData<DataSourceResponse<Boolean>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(title, type, place, description), user.getJwToken());
+//        result.addSource(dataSourceResult, new Observer<DataSourceResponse<Boolean>>()
+//        {
+//            @Override
+//            public void onChanged(@Nullable DataSourceResponse<Boolean> user)
+//            {
+//                if (user.isSuccessful())
+//                {
+//                    getUser().setName(name);
+//                    getUser().setSurname(surname);
+//                    getUser().setDescription(description);
+//
+//                    result.setValue(new RepositoryResponse<>(getUser()));
+//                }
+//                else
+//                {
+//                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
+//                }
+//
+//                result.removeSource(dataSourceResult);
+//            }
+//        });
+//    }
+
     public LiveData<RepositoryResponse<User>> getResult()
     {
         return result;

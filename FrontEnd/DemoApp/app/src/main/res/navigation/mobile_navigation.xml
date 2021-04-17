@@ -35,4 +35,16 @@
         android:label="Trip"
         tools:layout="@layout/fragment_trip" />
 
+    <fragment
+        android:id="@+id/navigation_CreatePlan"
+        android:name="com.example.demoapp.ui.main.plan.CreatePlanFragment"
+        android:label="CreatePlan"
+        tools:layout="@layout/fragment_create_plan" />
+
+    <fragment
+        android:id="@+id/navigation_ViewPlan"
+        android:name="com.example.demoapp.ui.main.plan.ViewPlanFragment"
+        android:label="ViewPlan"
+        tools:layout="@layout/fragment_view__plan_" />
+
 </navigation>

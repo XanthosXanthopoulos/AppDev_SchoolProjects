@@ -52,6 +52,7 @@ public class ProfileFragment extends Fragment
         recyclerView.setAdapter(rcAdapter);
 
         view.findViewById(R.id.Register_ProfileImage).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
+        view.findViewById(R.id.Create_Plan).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));
 
         return view;
     }

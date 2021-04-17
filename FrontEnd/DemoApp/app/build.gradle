@@ -22,10 +22,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-//        debug {
-//            manifestPlaceholders = [ MAPS_API_KEY: "AIzaSyAxbRRMDly4v6n4hJj2aukMW0WHrIfuSjs"]
+        debug {
+            manifestPlaceholders = [ MAPS_API_KEY: "AIzaSyAxbRRMDly4v6n4hJj2aukMW0WHrIfuSjs"]
 //            manifestPlaceholders = [ GEOCODING_API_KEY: "AIzaSyB9m7JnvBSQ2bz0J3bTNtYZoDL92eVyOlg"]
-//        }
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
