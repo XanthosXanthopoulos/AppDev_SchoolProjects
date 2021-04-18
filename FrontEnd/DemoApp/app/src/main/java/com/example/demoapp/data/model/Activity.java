@@ -8,6 +8,11 @@ public class Activity extends Item
     private String address;
     private String type;
 
+    public Activity()
+    {
+        super(ContentType.ACTIVITY);
+    }
+
     public Activity(String title, String description, String tags, String address, String type)
     {
         super(ContentType.ACTIVITY);

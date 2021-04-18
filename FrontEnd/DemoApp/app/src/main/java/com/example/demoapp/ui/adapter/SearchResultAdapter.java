@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +19,7 @@ import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Trip;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.View.GONE;
@@ -29,9 +29,9 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private List<Item> items;
     private SimpleDateFormat formatter;
 
-    public SearchResultAdapter(List<Item> itemList)
+    public SearchResultAdapter()
     {
-        this.items = itemList;
+        this.items = new ArrayList<>();
         formatter = new SimpleDateFormat("yyyy-MM-dd");
     }
 
@@ -102,7 +102,14 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemViewType(int position)
     {
-        return items.get(position).getContentType().ordinal();
+        return items.get(position).getConteType().ordinal();
+    }
+
+    public void setItems(List<Item> items)
+    {
+        this.items.clear();
+        this.items.addAll(items);
+        notifyDataSetChanged();
     }
 
     public static class ActivityViewHolder extends RecyclerView.ViewHolder

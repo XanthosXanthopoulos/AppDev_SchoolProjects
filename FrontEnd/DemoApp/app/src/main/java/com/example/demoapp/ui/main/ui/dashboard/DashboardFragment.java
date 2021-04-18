@@ -16,13 +16,20 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Radius;
+import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.data.model.Type;
+import com.example.demoapp.ui.adapter.SearchResultAdapter;
+import com.example.demoapp.ui.adapter.TripAdapter;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.util.ViewModelFactory;
+
+import java.util.List;
 
 
 public class DashboardFragment extends Fragment
@@ -36,6 +43,7 @@ public class DashboardFragment extends Fragment
 
     private SearchView searchBar;
     private RecyclerView searchResultList;
+    SearchResultAdapter adapter;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -59,6 +67,11 @@ public class DashboardFragment extends Fragment
             @Override
             public boolean onQueryTextSubmit(String query)
             {
+                String country = ((Country)countrySpinner.getSelectedItem()).label;
+                String type = ((Type)typeSpinner.getSelectedItem()).label;
+                int radius = ((Radius)radiusSpinner.getSelectedItem()).radius;
+
+                dashboardViewModel.search(query, country, type, radius);
                 return false;
             }
 
@@ -69,7 +82,19 @@ public class DashboardFragment extends Fragment
             }
         });
 
+        StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        searchResultList.setLayoutManager(_sGridLayoutManager);
+        adapter = new SearchResultAdapter();
+        searchResultList.setAdapter(adapter);
 
+        dashboardViewModel.getSearchResult().observe(getViewLifecycleOwner(), new Observer<List<Item>>()
+        {
+            @Override
+            public void onChanged(List<Item> items)
+            {
+                adapter.setItems(items);
+            }
+        });
 
         return view;
     }

@@ -76,7 +76,7 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public int getItemViewType(int position)
     {
-        return items.get(position).getContentType().ordinal();
+        return items.get(position).getConteType().ordinal();
     }
 
     public static class ActivityViewHolder extends RecyclerView.ViewHolder

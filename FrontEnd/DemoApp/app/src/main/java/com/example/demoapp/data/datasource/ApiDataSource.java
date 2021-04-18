@@ -11,6 +11,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.ContentType;
+import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.api.request.*;
 import com.example.demoapp.data.model.api.response.*;
@@ -20,6 +22,8 @@ import com.example.demoapp.util.ApiRoutes;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
@@ -258,26 +262,54 @@ public class ApiDataSource
         return result;
     }
 
-    public LiveData<DataSourceResponse<List<Activity>>> search(SearchQueryModel query, String JWToken)
+    public LiveData<DataSourceResponse<List<Item>>> search(SearchQueryModel query, String JWToken)
     {
-        MutableLiveData<DataSourceResponse<List<Activity>>> result = new MutableLiveData<>();
+        MutableLiveData<DataSourceResponse<List<Item>>> result = new MutableLiveData<>();
         ApiHandler apiHandler = ApiHandler.getInstance();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPDATE_PROFILE), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH), null, new Response.Listener<JSONObject>()
         {
             @Override
             public void onResponse(JSONObject response)
             {
-                ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
+                List<Item> searchResults = new ArrayList<>();
+                try
+                {
+                    if (response.getBoolean("successful"))
+                    {
+                        JSONArray items = response.getJSONArray("response");
+                        Gson gson = new Gson();
 
-                if (apiResponse.isSuccessful())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
+                        for (int i = 0; i < items.length(); ++i)
+                        {
+                            ContentType contentType = gson.fromJson(items.getJSONObject(i).get("contentType").toString(), ContentType.class);
+
+                            switch (contentType)
+                            {
+                                case ACTIVITY:
+                                    Activity activity = gson.fromJson(items.getJSONObject(i).toString(), Activity.class);
+                                    searchResults.add(activity);
+                                    break;
+                                case IMAGE:
+                                    break;
+                                case TRIP:
+                                    break;
+                                default:
+                            }
+                        }
+                    }
+                    else
+                    {
+                        result.setValue(new DataSourceResponse<>(response.getString("errorMessage")));
+                    }
                 }
-                else
+                catch (JSONException e)
                 {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+                    e.printStackTrace();
+                    result.setValue(new DataSourceResponse<>("Response error"));
                 }
+
+                result.setValue(new DataSourceResponse<>(searchResults));
             }
         }, new Response.ErrorListener()
         {
@@ -292,7 +324,7 @@ public class ApiDataSource
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError
             {
-                Map<String, String> headers = super.getHeaders();
+                Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
                 return headers;
             }
@@ -301,7 +333,7 @@ public class ApiDataSource
             @Override
             protected Map<String, String> getParams() throws AuthFailureError
             {
-                Map<String, String> params = super.getParams();
+                Map<String, String> params = new HashMap<>();
                 //TODO: Add search parameters
                 return params;
             }

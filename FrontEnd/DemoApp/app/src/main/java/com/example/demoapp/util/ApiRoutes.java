@@ -8,6 +8,7 @@ public final class ApiRoutes
     public static final String REGISTER = "/account/register";
     public static final String PROFILE_INFO = "/account/profileinfo";
     public static final String UPDATE_PROFILE = "/account/updateprofile";
+    public static final String SEARCH = "/activity/activities";
 
     public static String getRoute(Route route)
     {
@@ -28,6 +29,7 @@ public final class ApiRoutes
         LOGOUT,
         REGISTER,
         PROFILE_INFO,
-        UPDATE_PROFILE
+        UPDATE_PROFILE,
+        SEARCH
     }
 }

@@ -2,15 +2,17 @@ package com.example.demoapp.data.model;
 
 public abstract class Item
 {
-    private final ContentType contentType;
+    public ContentType contentType;
 
-    public Item(ContentType contentType)
+    //public int contentType;
+
+    public Item(ContentType conteType)
     {
-        this.contentType = contentType;
+        this.contentType = conteType;
     }
 
 
-    public ContentType getContentType()
+    public ContentType getConteType()
     {
         return contentType;
     }

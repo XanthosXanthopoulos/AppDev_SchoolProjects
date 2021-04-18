@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
 
 import com.example.demoapp.data.datasource.ApiDataSource;
+import com.example.demoapp.data.repository.ContentRepository;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.ui.main.account.AccountViewModel;
@@ -47,7 +48,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(DashboardViewModel.class))
         {
-            return (T) new DashboardViewModel();
+            return (T) new DashboardViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else
         {
