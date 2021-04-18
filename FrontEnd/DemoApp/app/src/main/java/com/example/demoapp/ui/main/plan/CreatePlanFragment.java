@@ -62,7 +62,6 @@ public class CreatePlanFragment extends Fragment {
         countrySpinner = view.findViewById(R.id.Country_Plan);
         dateSpinner = view.findViewById(R.id.Date_Plan);
         countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
-//        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Date.values()));
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(_sGridLayoutManager);

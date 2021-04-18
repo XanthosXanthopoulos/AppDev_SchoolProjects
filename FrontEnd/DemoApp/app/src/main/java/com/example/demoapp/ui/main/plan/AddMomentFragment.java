@@ -75,8 +75,8 @@ public class AddMomentFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_add_moment, container, false);
         countrySpinner = view.findViewById(R.id.Country_Plan);
-        dateSpinner = view.findViewById(R.id.Country_Plan);
-        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
+        dateSpinner = view.findViewById(R.id.Date_Plan);
+
         countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
 
         recyclerView = view.findViewById(R.id.Create_Plan_List);
@@ -121,19 +121,6 @@ public class AddMomentFragment extends Fragment {
             }
         });
 
-        view.findViewById(R.id.create_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: add activity and dynamically fill the gaps
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
-                params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT; //1300
-                item.setLayoutParams(params);
-                item.setVisibility(View.VISIBLE);
-//                ActivityList.add(new Activity(title, desc, tags, address, type));
-            }
-
-        });
-
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -146,6 +133,17 @@ public class AddMomentFragment extends Fragment {
             }
 
         };
+
+        dateSpinner.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                new DatePickerDialog(requireActivity(), date, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
 
         view.findViewById(R.id.Add_memory_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));
 
