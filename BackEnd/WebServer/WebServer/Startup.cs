@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using WebServer.Data;
 using WebServer.Hubs;
 using WebServer.Services;
@@ -25,7 +26,7 @@ namespace WebServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDbContext<ApplicationDataDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ApplicationDataConnection")));
+            services.AddDbContext<ApplicationDataDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ApplicationDataConnection"), x => x.UseNetTopologySuite()));
 
             services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
@@ -56,7 +57,39 @@ namespace WebServer
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
-            serviceProvider.GetService<ApplicationDataDbContext>().Database.EnsureCreated();
+            if (serviceProvider.GetService<ApplicationDataDbContext>().Database.EnsureCreated())
+            {
+                ApplicationDataDbContext dbContext = serviceProvider.GetService<ApplicationDataDbContext>();
+
+                dbContext.Activities.Add(new Models.Database.Activity()
+                {
+                    Address = "1871  Poplar Lane",
+                    Description = "A fake activity",
+                    Coordinates = new NetTopologySuite.Geometries.Point(23.73543741130086, 37.9894702164558) { SRID = 4326 },
+                    Title = "Activity 1",
+                    Type = "Indor"
+                });
+
+                dbContext.Activities.Add(new Models.Database.Activity()
+                {
+                    Address = "187 Lane",
+                    Description = "A fake activity",
+                    Coordinates = new NetTopologySuite.Geometries.Point(23.720947233378396, 37.982539628169874) { SRID = 4326 },
+                    Title = "Activity 2",
+                    Type = "Indor"
+                });
+
+                dbContext.Activities.Add(new Models.Database.Activity()
+                {
+                    Address = "Poplar Lane",
+                    Description = "A fake activity",
+                    Coordinates = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 },
+                    Title = "Activity 3",
+                    Type = "Indor"
+                });
+
+                dbContext.SaveChanges();
+            }
         }
     }
 }

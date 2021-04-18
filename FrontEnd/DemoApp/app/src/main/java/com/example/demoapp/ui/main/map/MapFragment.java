@@ -37,6 +37,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
+        
+
         return view;
     }
 

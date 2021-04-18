@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -75,6 +76,8 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
         public ViewHolder(View view)
         {
             super(view);
+
+            itemView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
 
             username = (TextView) itemView.findViewById(R.id.Trip_Username);
             description = (TextView) itemView.findViewById(R.id.Description);

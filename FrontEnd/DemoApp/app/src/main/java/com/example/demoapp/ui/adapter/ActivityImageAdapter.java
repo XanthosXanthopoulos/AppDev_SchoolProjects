@@ -56,6 +56,7 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
                 viewHolder.address.setText(item.getAddress());
                 viewHolder.type.setText(item.getType());
                 viewHolder.tags.setText("Tags: " + item.getTags());
+
                 layoutParams.setFullSpan(true);
                 break;
 
