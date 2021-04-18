@@ -2,7 +2,7 @@ package com.example.demoapp.data.model;
 
 import android.graphics.Bitmap;
 
-public class Image extends TripContent
+public class Image extends Item
 {
     private Bitmap image;
 

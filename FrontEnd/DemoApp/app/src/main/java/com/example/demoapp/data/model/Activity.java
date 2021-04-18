@@ -1,6 +1,6 @@
 package com.example.demoapp.data.model;
 
-public class Activity extends TripContent
+public class Activity extends Item
 {
     private String title;
     private String description;

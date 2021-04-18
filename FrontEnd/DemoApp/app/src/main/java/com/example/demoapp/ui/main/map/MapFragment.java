@@ -6,21 +6,16 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Activity;
-import com.example.demoapp.data.model.TripContent;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.gms.maps.*;
@@ -55,7 +50,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        
 
         return view;
     }
@@ -68,53 +62,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         Drawable temp = search_bar.getBackground();
         List<Place> PlacesList = getListItemData();
 
-        search_bar.setOnSearchClickListener(new View.OnClickListener() {
+        search_bar.setOnSearchClickListener(new View.OnClickListener()
+        {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 search_bar.setBackground(getResources().getDrawable(R.drawable.search_bar));
             }
         });
 
-        search_bar.setOnCloseListener(new SearchView.OnCloseListener(){
-
+        search_bar.setOnCloseListener(new SearchView.OnCloseListener()
+        {
             @Override
-            public boolean onClose() {
+            public boolean onClose()
+            {
                 search_bar.setBackground(temp);
                 return false;
             }
         });
 
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
+        {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
-            public void onMapClick(LatLng latLng) {
+            public void onMapClick(LatLng latLng)
+            {
 
-                if(!search_bar.hasFocus()) {
+                if (!search_bar.hasFocus())
+                {
 
-                    if(search_bar.isIconified()) {
-                        addMarker(latLng,null);
+                    if (search_bar.isIconified())
+                    {
+                        addMarker(latLng, null);
                     }
 
                     search_bar.setIconified(true);
                     search_bar.setBackground(temp);
 
-                }else{
+                }
+                else
+                {
                     search_bar.clearFocus();
                     search_bar.setBackground(temp);
                 }
             }
         });
 
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+        {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());;
-                if(!visible){
+            public boolean onMarkerClick(Marker marker)
+            {
+                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
+                ;
+                if (!visible)
+                {
                     visible = true;
                     info.getInfoWindow(marker);
                     return false;
-                }else {
+                }
+                else
+                {
                     visible = false;
                     info.closeInfoWindow(marker);
                     return true;
@@ -122,16 +131,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         });
 
-        search_bar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        search_bar.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+        {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String query)
+            {
                 Place p = getPlaceData(PlacesList, query);
-                addMarker(Objects.requireNonNull(p).getCoordinates(),p.getDescription());
+                addMarker(Objects.requireNonNull(p).getCoordinates(), p.getDescription());
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String newText)
+            {
                 return false;
             }
         });
@@ -173,11 +185,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         mapView.onLowMemory();
     }
 
-    public void addMarker(LatLng lng,String desc){
+    public void addMarker(LatLng lng, String desc)
+    {
         String title;
-        if(desc != null || desc.equals("")){
+        if (desc != null || desc.equals(""))
+        {
             title = desc;
-        }else{
+        }
+        else
+        {
             title = " Marker on the point I clicked ";
         }
         map.clear();
@@ -192,11 +208,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         List<Place> listViewItems = new ArrayList<>();
         String description = "The capital of Australia";
 
-        final Place MELBOURNE = new Place("MELBOURNE", description,new LatLng(-37.813628,144.963058));
-        final Place ADELAIDE = new Place("ADELAIDE",new LatLng(-34.928499,138.600746));
-        final Place BRISBANE = new Place("BRISBANE",new LatLng(-27.469771,153.025124));
-        final Place SYDNEY = new Place("SYDNEY",new LatLng(-33.86882,151.209296));
-        final Place PERTH = new Place("PERTH",new LatLng(-31.952312,115.861309));
+        final Place MELBOURNE = new Place("MELBOURNE", description, new LatLng(-37.813628, 144.963058));
+        final Place ADELAIDE = new Place("ADELAIDE", new LatLng(-34.928499, 138.600746));
+        final Place BRISBANE = new Place("BRISBANE", new LatLng(-27.469771, 153.025124));
+        final Place SYDNEY = new Place("SYDNEY", new LatLng(-33.86882, 151.209296));
+        final Place PERTH = new Place("PERTH", new LatLng(-31.952312, 115.861309));
 
         listViewItems.add(MELBOURNE);
         listViewItems.add(ADELAIDE);
@@ -207,9 +223,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         return listViewItems;
     }
 
-    private  Place getPlaceData(List<Place> placeList,String s){
-        for (int i = 0; i < placeList.size();i++){
-            if(placeList.get(i).getPlace().equals(s.toUpperCase())){
+    private Place getPlaceData(List<Place> placeList, String s)
+    {
+        for (int i = 0; i < placeList.size(); i++)
+        {
+            if (placeList.get(i).getPlace().equals(s.toUpperCase()))
+            {
                 return placeList.get(i);
             }
         }

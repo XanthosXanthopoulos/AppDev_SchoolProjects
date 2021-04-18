@@ -4,7 +4,7 @@ import com.android.volley.toolbox.StringRequest;
 
 import java.util.Date;
 
-public class Trip
+public class Trip extends Item
 {
     private String username;
     private String description;
@@ -13,6 +13,7 @@ public class Trip
 
     public Trip(String description, com.example.demoapp.data.model.Country country, Date date)
     {
+        super(ContentType.TRIP);
         this.description = description;
         Country = country;
         this.date = date;

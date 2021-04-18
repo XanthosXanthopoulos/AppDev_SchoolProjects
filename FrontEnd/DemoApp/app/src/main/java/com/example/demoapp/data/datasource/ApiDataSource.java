@@ -1,5 +1,6 @@
 package com.example.demoapp.data.datasource;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -9,6 +10,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.api.request.*;
 import com.example.demoapp.data.model.api.response.*;
@@ -21,7 +23,9 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ApiDataSource
@@ -250,6 +254,60 @@ public class ApiDataSource
         {
 
         }
+
+        return result;
+    }
+
+    public LiveData<DataSourceResponse<List<Activity>>> search(SearchQueryModel query, String JWToken)
+    {
+        MutableLiveData<DataSourceResponse<List<Activity>>> result = new MutableLiveData<>();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPDATE_PROFILE), null, new Response.Listener<JSONObject>()
+        {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
+
+                if (apiResponse.isSuccessful())
+                {
+                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
+                }
+                else
+                {
+                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+                }
+            }
+        }, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                System.err.println(error.networkResponse);
+                result.setValue(new DataSourceResponse<>("Network error"));
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError
+            {
+                Map<String, String> headers = super.getHeaders();
+                headers.put("Authorization", "Bearer " + JWToken);
+                return headers;
+            }
+
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError
+            {
+                Map<String, String> params = super.getParams();
+                //TODO: Add search parameters
+                return params;
+            }
+        };
+
+        apiHandler.addToRequestQueue(request);
 
         return result;
     }

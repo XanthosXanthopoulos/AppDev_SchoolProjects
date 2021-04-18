@@ -11,6 +11,7 @@ import com.example.demoapp.ui.main.account.AccountViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.authentication.register.RegisterViewModel;
+import com.example.demoapp.ui.main.ui.dashboard.DashboardViewModel;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -43,6 +44,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if(modelClass.isAssignableFrom(AccountViewModel.class))
         {
             return (T) new AccountViewModel(UserRepository.getInstance(new ApiDataSource()));
+        }
+        else if(modelClass.isAssignableFrom(DashboardViewModel.class))
+        {
+            return (T) new DashboardViewModel();
         }
         else
         {

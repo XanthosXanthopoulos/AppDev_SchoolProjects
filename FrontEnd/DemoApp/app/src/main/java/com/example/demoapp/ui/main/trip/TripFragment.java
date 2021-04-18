@@ -14,14 +14,9 @@ import android.view.ViewGroup;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
-import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.Trip;
-import com.example.demoapp.data.model.TripContent;
+import com.example.demoapp.data.model.Item;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
-import com.example.demoapp.ui.adapter.TripAdapter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +35,7 @@ public class TripFragment extends Fragment
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(_sGridLayoutManager);
 
-        List<TripContent> sList = getListItemData();
+        List<Item> sList = getListItemData();
 
         ActivityImageAdapter rcAdapter = new ActivityImageAdapter(sList);
         recyclerView.setAdapter(rcAdapter);
@@ -48,9 +43,9 @@ public class TripFragment extends Fragment
         return view;
     }
 
-    private List<TripContent> getListItemData()
+    private List<Item> getListItemData()
     {
-        List<TripContent> listViewItems = new ArrayList<>();
+        List<Item> listViewItems = new ArrayList<>();
 
         String title = "Lorem ipsum";
         String desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce elementum neque non sapien sagittis, vestibulum dignissim ipsum pellentesque. Sed fringilla vulputate urna et consectetur.";

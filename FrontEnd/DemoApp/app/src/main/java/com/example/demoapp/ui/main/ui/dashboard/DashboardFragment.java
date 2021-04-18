@@ -4,15 +4,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.demoapp.R;
+import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Radius;
+import com.example.demoapp.data.model.Type;
+import com.example.demoapp.ui.main.profile.ProfileViewModel;
+import com.example.demoapp.util.ViewModelFactory;
 
 
 public class DashboardFragment extends Fragment
@@ -20,21 +30,47 @@ public class DashboardFragment extends Fragment
 
     private DashboardViewModel dashboardViewModel;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState)
+    private Spinner countrySpinner;
+    private Spinner typeSpinner;
+    private Spinner radiusSpinner;
+
+    private SearchView searchBar;
+    private RecyclerView searchResultList;
+
+
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        final TextView textView = root.findViewById(R.id.text_dashboard);
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
+
+        dashboardViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(DashboardViewModel.class);
+
+        countrySpinner = view.findViewById(R.id.country_select);
+        typeSpinner = view.findViewById(R.id.type_select);
+        radiusSpinner = view.findViewById(R.id.radius_select);
+        searchBar = view.findViewById(R.id.search_bar);
+        searchResultList = view.findViewById(R.id.search_result_list);
+
+        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
+        typeSpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Type.values()));
+        radiusSpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Radius.values()));
+
+        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
             @Override
-            public void onChanged(@Nullable String s)
+            public boolean onQueryTextSubmit(String query)
             {
-                textView.setText(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText)
+            {
+                return false;
             }
         });
-        return root;
+
+
+
+        return view;
     }
 }

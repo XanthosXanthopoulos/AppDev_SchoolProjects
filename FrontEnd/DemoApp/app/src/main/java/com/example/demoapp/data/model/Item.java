@@ -1,10 +1,10 @@
 package com.example.demoapp.data.model;
 
-public abstract class TripContent
+public abstract class Item
 {
     private final ContentType contentType;
 
-    public TripContent(ContentType contentType)
+    public Item(ContentType contentType)
     {
         this.contentType = contentType;
     }

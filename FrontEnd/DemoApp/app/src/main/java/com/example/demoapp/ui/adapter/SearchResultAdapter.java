@@ -4,25 +4,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.Trip;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+import static android.view.View.GONE;
+
+public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private List<Item> items;
+    private SimpleDateFormat formatter;
 
-    public ActivityImageAdapter(List<Item> itemList)
+    public SearchResultAdapter(List<Item> itemList)
     {
         this.items = itemList;
+        formatter = new SimpleDateFormat("yyyy-MM-dd");
     }
 
     @NonNull
@@ -32,8 +42,11 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
         switch (viewType)
         {
             case 0:
-                return new ActivityImageAdapter.ActivityViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_activity, null));
+                return new ActivityViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_activity, null));
             case 1:
+                return new ImageViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, null));
+            case 2:
+                return new TripViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_travel, null));
             default:
                 return null;
         }
@@ -42,26 +55,39 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
-
         StaggeredGridLayoutManager.LayoutParams layoutParams = new StaggeredGridLayoutManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         switch (holder.getItemViewType())
         {
             case 0:
-                ActivityViewHolder viewHolder = (ActivityViewHolder)holder;
-                Activity item = (Activity)items.get(position);
+                ActivityViewHolder activityViewHolder = (ActivityViewHolder)holder;
+                Activity activity = (Activity)items.get(position);
 
-                viewHolder.title.setText(item.getTitle());
-                viewHolder.description.setText(item.getDescription());
-                viewHolder.address.setText(item.getAddress());
-                viewHolder.type.setText(item.getType());
-                viewHolder.tags.setText("Tags: " + item.getTags());
+                activityViewHolder.title.setText(activity.getTitle());
+                activityViewHolder.description.setText(activity.getDescription());
+                activityViewHolder.address.setText(activity.getAddress());
+                activityViewHolder.type.setText(activity.getType());
+                activityViewHolder.tags.setText("Tags: " + activity.getTags());
 
                 layoutParams.setFullSpan(true);
                 break;
 
             case 2:
+                ImageViewHolder imageViewHolder = (ImageViewHolder)holder;
+                Image image = (Image) items.get(position);
 
+                imageViewHolder.image.setImageBitmap(image.getImage());
+
+                layoutParams.setFullSpan(true);
                 break;
+            case 3:
+                TripViewHolder tripViewHolder = (TripViewHolder)holder;
+                Trip trip = (Trip) items.get(position);
+
+                tripViewHolder.description.setText(trip.getDescription());
+                tripViewHolder.country.setText(trip.getCountry().toString());
+                tripViewHolder.date.setText(formatter.format(trip.getDate()));
+
+                if (trip.getUsername() == null) tripViewHolder.getUsername().setVisibility(GONE);
         }
 
         holder.itemView.setLayoutParams(layoutParams);
@@ -132,10 +158,53 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public static class ImageViewHolder extends RecyclerView.ViewHolder
     {
+        private ImageView image;
 
         public ImageViewHolder(@NonNull View itemView)
         {
             super(itemView);
+
+            image = itemView.findViewById(R.id.image);
+        }
+    }
+
+    public static class TripViewHolder extends RecyclerView.ViewHolder
+    {
+        private TextView username;
+        private TextView description;
+        private TextView country;
+        private TextView date;
+
+        public TripViewHolder(View view)
+        {
+            super(view);
+
+            itemView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
+
+            username = (TextView) itemView.findViewById(R.id.Trip_Username);
+            description = (TextView) itemView.findViewById(R.id.Description);
+            country = (TextView) itemView.findViewById(R.id.Country_Description);
+            date = (TextView) itemView.findViewById(R.id.Date_Description);
+        }
+
+        public TextView getDescription()
+        {
+            return description;
+        }
+
+        public TextView getCountry()
+        {
+            return country;
+        }
+
+        public TextView getDate()
+        {
+            return date;
+        }
+
+        public TextView getUsername()
+        {
+            return username;
         }
     }
 }
