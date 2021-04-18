@@ -50,7 +50,8 @@
                 android:id="@+id/Title_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp" />
+                android:layout_marginEnd="15dp"
+                android:hint="Title"/>
 
         </LinearLayout>
 

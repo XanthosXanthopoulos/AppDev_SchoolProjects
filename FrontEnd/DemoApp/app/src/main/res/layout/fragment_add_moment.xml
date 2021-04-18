@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.main.plan.CreatePlanFragment">
+    tools:context=".ui.main.plan.AddMomentFragment">
 
     <TextView
         android:id="@+id/Create_Plan_Title"
@@ -44,9 +44,10 @@
         android:id="@+id/plan_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+
         app:layout_constraintTop_toBottomOf="@+id/Create_Plan_Title"
-        app:layout_constraintBottom_toTopOf="@id/Create_Plan_List"
-        android:orientation="vertical">
+        app:layout_constraintBottom_toTopOf="@id/Create_Plan_List">
 
         <EditText
             android:id="@+id/Title_Plan"
@@ -97,29 +98,27 @@
                 android:id="@+id/Add_memory_btn"
                 android:layout_width="80dp"
                 android:layout_height="40dp"
-                android:background="@drawable/round_border"
-                android:backgroundTint="#5F6CAF"
                 android:padding="5dp"
-                android:paddingEnd="6dp"
+                android:backgroundTint="#313C77"
                 android:text="Add memory"
                 android:autoSizeTextType="uniform"
                 android:autoSizeMinTextSize="10dp"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
-                />
+                android:textColor="@color/white" />
 
             <android.widget.Button
                 android:id="@+id/Add_moment_btn"
                 android:layout_width="80dp"
                 android:layout_height="40dp"
-                android:backgroundTint="#313C77"
+                android:background="@drawable/round_border"
+                android:backgroundTint="#5F6CAF"
                 android:padding="5dp"
+                android:paddingStart="6dp"
                 android:text="Add moment"
                 android:autoSizeTextType="uniform"
                 android:autoSizeMinTextSize="10dp"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
-                />
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -131,14 +130,12 @@
         android:layout_height="0dp"
         android:layout_gravity="bottom"
         android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:scrollbars="vertical"
         android:fadingEdgeLength="16dp"
         android:requiresFadingEdge="vertical"
+        android:scrollbars="vertical"
 
-        app:layout_constraintBottom_toTopOf="@id/pop_up_layout"
-        app:layout_constraintTop_toBottomOf="@id/plan_data" />
+        app:layout_constraintBottom_toBottomOf="@id/pop_up_layout"
+        app:layout_constraintTop_toBottomOf="@id/plan_data"/>
 
     <LinearLayout
         android:id="@+id/pop_up_layout"

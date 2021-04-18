@@ -47,4 +47,10 @@
         android:label="ViewPlan"
         tools:layout="@layout/fragment_view__plan_" />
 
+    <fragment
+        android:id="@+id/navigation_AddMoment"
+        android:name="com.example.demoapp.ui.main.plan.AddMomentFragment"
+        android:label="AddMoment"
+        tools:layout="@layout/fragment_add_moment" />
+
 </navigation>

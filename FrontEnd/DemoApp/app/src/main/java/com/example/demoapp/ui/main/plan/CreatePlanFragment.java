@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -78,6 +79,8 @@ public class CreatePlanFragment extends Fragment {
             }
 
         });
+
+        view.findViewById(R.id.Add_moment_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_AddMoment));
 
         item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
             @Override
