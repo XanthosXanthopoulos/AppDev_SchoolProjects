@@ -1,6 +1,7 @@
 package com.example.demoapp.ui.main.plan;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,22 +15,33 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.TripContent;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class CreatePlanFragment extends Fragment {
     List<TripContent> ActivityList = new ArrayList<>() ;
     RecyclerView recyclerView;
+    Spinner countrySpinner;
+    EditText dateSpinner;
+    final Calendar myCalendar = Calendar.getInstance();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +49,7 @@ public class CreatePlanFragment extends Fragment {
 
     }
 
-    @SuppressLint("ResourceType")
+    @SuppressLint({"ResourceType", "CutPasteId"})
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -46,6 +58,11 @@ public class CreatePlanFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.Create_Plan_List);
         recyclerView.setHasFixedSize(true);
+
+        countrySpinner = view.findViewById(R.id.Country_Plan);
+        dateSpinner = view.findViewById(R.id.Date_Plan);
+        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
+//        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Date.values()));
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(_sGridLayoutManager);
@@ -80,6 +97,30 @@ public class CreatePlanFragment extends Fragment {
 
         });
 
+        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                // TODO Auto-generated method stub
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, month);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateLabel();
+            }
+
+        };
+
+        dateSpinner.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                new DatePickerDialog(requireActivity(), date, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
         view.findViewById(R.id.Add_moment_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_AddMoment));
 
         item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
@@ -109,6 +150,22 @@ public class CreatePlanFragment extends Fragment {
         return ActivityList;
     }
 
+    public void setDateSpinner(EditText dateSpinner) {
+        this.dateSpinner = dateSpinner;
+    }
+
+    public EditText getDateSpinner() {
+        return dateSpinner;
+    }
+
+    public void setCountrySpinner(Spinner countrySpinner) {
+        this.countrySpinner = countrySpinner;
+    }
+
+    public Spinner getCountrySpinner() {
+        return countrySpinner;
+    }
+
     private List<TripContent> updateListItemData(List<TripContent> activities){
 
         List<TripContent> ActivityList = activities;
@@ -128,6 +185,13 @@ public class CreatePlanFragment extends Fragment {
         ActivityList.add(new Activity(title, description, tags, address, type));
 
         return ActivityList;
+    }
+
+    private void updateLabel() {
+        String myFormat = "dd/MM/yy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.UK);
+
+        dateSpinner.setText(sdf.format(myCalendar.getTime()));
     }
 
 }

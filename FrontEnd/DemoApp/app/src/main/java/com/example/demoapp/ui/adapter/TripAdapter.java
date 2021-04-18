@@ -1,9 +1,11 @@
 package com.example.demoapp.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Trip;
 
 import java.text.SimpleDateFormat;
@@ -24,6 +27,7 @@ import static android.view.View.GONE;
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
 {
     private List<Trip> items;
+    @SuppressLint("SimpleDateFormat")
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     public TripAdapter(List<Trip> itemList)
@@ -43,9 +47,13 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        holder.description.setText(items.get(position).getDescription());
-        holder.country.setText(items.get(position).getCountry().toString());
-        holder.date.setText(formatter.format(items.get(position).getDate()));
+        if(items.get(position).getImage() != null) holder.image.setImageBitmap(items.get(position).getImage().getImage());
+        if(items.get(position).getDescription() != null) holder.description.setText(items.get(position).getDescription());
+        else holder.getDescription().setVisibility(GONE);
+        if(items.get(position).getCountry() != null) holder.country.setText(items.get(position).getCountry().toString());
+        else holder.getCountry().setVisibility(GONE);
+        if(items.get(position).getDate() != null) holder.date.setText(formatter.format(items.get(position).getDate()));
+        else holder.getDate().setVisibility(GONE);
 
         if (items.get(position).getUsername() == null) holder.getUsername().setVisibility(GONE);
 
@@ -71,11 +79,13 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
         private TextView description;
         private TextView country;
         private TextView date;
+        private ImageView image;
 
         public ViewHolder(View view)
         {
             super(view);
 
+            image = (ImageView) itemView.findViewById(R.id.Image_area);
             username = (TextView) itemView.findViewById(R.id.Trip_Username);
             description = (TextView) itemView.findViewById(R.id.Description);
             country = (TextView) itemView.findViewById(R.id.Country_Description);
