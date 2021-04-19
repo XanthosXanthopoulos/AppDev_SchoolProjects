@@ -34,7 +34,7 @@ public class DashboardFragment extends Fragment {
 
         dashboardViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(DashboardViewModel.class);
 
-        RecyclerView recyclerView = view.findViewById(R.id.Profile_List);
+        RecyclerView recyclerView = view.findViewById(R.id.search_result_list);
         recyclerView.setHasFixedSize(true);
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);

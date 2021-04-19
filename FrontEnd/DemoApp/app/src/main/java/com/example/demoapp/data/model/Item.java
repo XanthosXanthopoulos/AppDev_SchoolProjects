@@ -6,13 +6,13 @@ public abstract class Item
 
     //public int contentType;
 
-    public Item(ContentType conteType)
+    public Item(ContentType contentType)
     {
-        this.contentType = conteType;
+        this.contentType = contentType;
     }
 
 
-    public ContentType getConteType()
+    public ContentType getContentType()
     {
         return contentType;
     }

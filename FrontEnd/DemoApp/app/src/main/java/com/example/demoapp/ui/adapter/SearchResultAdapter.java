@@ -102,7 +102,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemViewType(int position)
     {
-        return items.get(position).getConteType().ordinal();
+        return items.get(position).getContentType().ordinal();
     }
 
     public void setItems(List<Item> items)

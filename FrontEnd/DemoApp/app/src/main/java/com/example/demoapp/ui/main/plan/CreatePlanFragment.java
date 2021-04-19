@@ -25,6 +25,7 @@ import android.widget.Spinner;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Item;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
 
 import java.text.SimpleDateFormat;
@@ -36,7 +37,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class CreatePlanFragment extends Fragment {
-    List<TripContent> ActivityList = new ArrayList<>() ;
+    List<Item> ActivityList = new ArrayList<>() ;
     RecyclerView recyclerView;
     Spinner countrySpinner;
     EditText dateSpinner;
@@ -143,7 +144,7 @@ public class CreatePlanFragment extends Fragment {
 
     }
 
-    private List<TripContent> getListItemData()
+    private List<Item> getListItemData()
     {
         return ActivityList;
     }
@@ -164,9 +165,9 @@ public class CreatePlanFragment extends Fragment {
         return countrySpinner;
     }
 
-    private List<TripContent> updateListItemData(List<TripContent> activities){
+    private List<Item> updateListItemData(List<Item> activities){
 
-        List<TripContent> ActivityList = activities;
+        List<Item> ActivityList = activities;
 
         final EditText t = (EditText)requireActivity().findViewById(R.id.Title_text);
         final EditText desc = (EditText)requireActivity().findViewById(R.id.Description_text);

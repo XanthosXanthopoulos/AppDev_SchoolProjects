@@ -12,6 +12,7 @@ public class Trip extends Item
 
     public Trip(Image img, String description, Country country, Date date)
     {
+        super(ContentType.TRIP);
         image = img;
         this.description = description;
         this.country = country;
