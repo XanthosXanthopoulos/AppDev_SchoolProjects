@@ -20,7 +20,6 @@ import android.widget.SearchView;
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
-import com.example.demoapp.data.model.TripContent;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.gms.maps.*;

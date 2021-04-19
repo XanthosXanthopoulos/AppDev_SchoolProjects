@@ -25,7 +25,6 @@ import android.widget.Spinner;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.TripContent;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
 
 import java.text.SimpleDateFormat;
