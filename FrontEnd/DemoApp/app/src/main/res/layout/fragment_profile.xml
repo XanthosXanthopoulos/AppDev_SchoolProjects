@@ -63,7 +63,7 @@
         app:layout_constraintTop_toTopOf="@id/Register_ProfileImageContainer"
         app:layout_constraintBottom_toBottomOf="@id/Register_ProfileImageContainer"/>
 
-    <Button
+    <android.widget.Button
         android:id="@+id/Create_Plan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
         android:layout_marginBottom="16dp"
 
         android:background="@drawable/round_bg"
-        android:text="Create plan"
+        android:text="Create memory"
         android:textSize="18sp"
         android:textStyle="bold" />
 

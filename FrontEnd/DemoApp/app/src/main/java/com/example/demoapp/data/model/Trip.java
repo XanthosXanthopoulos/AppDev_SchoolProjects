@@ -1,22 +1,37 @@
 package com.example.demoapp.data.model;
 
-import com.android.volley.toolbox.StringRequest;
-
 import java.util.Date;
 
 public class Trip extends Item
 {
+    private Image image;
     private String username;
     private String description;
-    private Country Country;
+    private Country country;
     private Date date;
 
-    public Trip(String description, com.example.demoapp.data.model.Country country, Date date)
+    public Trip(Image img, String description, Country country, Date date)
+    {
+        image = img;
+        this.description = description;
+        this.country = country;
+        this.date = date;
+    }
+
+    public Trip(String description, Country country, Date date)
     {
         super(ContentType.TRIP);
         this.description = description;
-        Country = country;
+        this.country = country;
         this.date = date;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
     }
 
     public String getDescription()
@@ -29,14 +44,13 @@ public class Trip extends Item
         this.description = description;
     }
 
-    public Country getCountry()
-    {
-        return Country;
+    public Country getCountry() {
+        return country;
     }
 
     public void setCountry(Country country)
     {
-        Country = country;
+        this.country = country;
     }
 
     public Date getDate()

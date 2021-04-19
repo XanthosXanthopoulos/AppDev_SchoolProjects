@@ -1,47 +1,40 @@
-package com.example.demoapp.ui.main.profile;
-
-import androidx.lifecycle.ViewModelProvider;
+package com.example.demoapp.ui.main.dashboard;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.ui.adapter.TripAdapter;
-import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class ProfileFragment extends Fragment
-{
+public class DashboardFragment extends Fragment {
 
-    private ProfileViewModel profileViewModel;
+    private DashboardViewModel dashboardViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        profileViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(ProfileViewModel.class);
+        dashboardViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(DashboardViewModel.class);
 
-        RecyclerView recyclerView = view.findViewById(R.id.Trip_List);
+        RecyclerView recyclerView = view.findViewById(R.id.Profile_List);
         recyclerView.setHasFixedSize(true);
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -51,9 +44,6 @@ public class ProfileFragment extends Fragment
 
         TripAdapter rcAdapter = new TripAdapter(sList);
         recyclerView.setAdapter(rcAdapter);
-
-        view.findViewById(R.id.Register_ProfileImage).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
-        view.findViewById(R.id.Create_Plan).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));
 
         return view;
     }
@@ -78,4 +68,16 @@ public class ProfileFragment extends Fragment
 
         return listViewItems;
     }
+
+    private Trip SearchList(List<Trip> trip_list, String s){
+
+        for (int i = 0; i < trip_list.size();i++){
+            if(trip_list.get(i).getCountry().toString().equals(s.toUpperCase()) || trip_list.get(i).getUsername().equals(s.toUpperCase()) || trip_list.get(i).getDescription().contains(s.toUpperCase())){
+                return trip_list.get(i);
+            }
+        }
+        return null;
+
+    }
+
 }
