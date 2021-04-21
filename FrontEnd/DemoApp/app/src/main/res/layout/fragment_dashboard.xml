@@ -23,29 +23,59 @@
 
     </RelativeLayout>
 
-    <Spinner
+    <AutoCompleteTextView
         android:id="@+id/country_select"
-        android:layout_width="160dp"
-        android:layout_height="30dp"
-        android:layout_margin="16dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/round_border"
+        android:hint="@string/country"
+        android:padding="6dp"
+        app:layout_constraintEnd_toStartOf="@id/city_select"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_area" />
+
+    <AutoCompleteTextView
+        android:id="@+id/city_select"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/round_border"
+        android:hint="@string/city"
+        android:padding="6dp"
+        app:layout_constraintEnd_toStartOf="@id/locate_button"
+        app:layout_constraintStart_toEndOf="@id/country_select"
         app:layout_constraintTop_toBottomOf="@id/search_area" />
 
     <Spinner
         android:id="@+id/type_select"
-        android:layout_width="110dp"
+        android:layout_width="0dp"
         android:layout_height="30dp"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/search_area"
-        app:layout_constraintStart_toEndOf="@id/country_select"/>
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/country_select"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/radius_select"/>
 
     <Spinner
         android:id="@+id/radius_select"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="30dp"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/search_area"
-        app:layout_constraintStart_toEndOf="@id/type_select"/>
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/country_select"
+        app:layout_constraintStart_toEndOf="@id/type_select"
+        app:layout_constraintEnd_toStartOf="@id/locate_button"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_result_list"
@@ -59,6 +89,29 @@
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/type_select" />
+
+    <ImageButton
+        android:id="@+id/locate_button"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_area"
+        app:layout_constraintBottom_toTopOf="@id/search_result_list"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/location_pin"/>
+
+    <TextView
+        android:id="@+id/list_message"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/search_result_list"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/no_results_found"
+        android:textAlignment="center"
+        android:gravity="center"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

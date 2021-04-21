@@ -25,10 +25,12 @@
     <string name="surname">Surname</string>
     <string name="description">Description</string>
     <string name="birthday">Birthday</string>
-    <string name="country">Country</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="travel_thumbnail">Travel thumbnail</string>
+    <string name="no_results_found">No results found</string>
+    <string name="city">City</string>
+    <string name="country">Country</string>
 </resources>

@@ -2,13 +2,14 @@ package com.example.demoapp.data.model;
 
 public enum Country
 {
-        AF("Afghanistan", 1),
-        AX("Åland Islands", 2),
-        AL("Albania", 3),
-        DZ("Algeria", 4),
-        AS("American Samoa", 5),
-        AD("Andorra", 6),
-        AO("Angola", 7);
+    ANY("Select country", 0),
+    AF("Afghanistan", 1),
+    AX("Åland Islands", 2),
+    AL("Albania", 3),
+    DZ("Algeria", 4),
+    AS("American Samoa", 5),
+    AD("Andorra", 6),
+    AO("Angola", 7);
 //        Anguilla")] AI = 8,
 //        Antarctica")] AQ = 9,
 //        Antigua and Barbuda")] AG = 10,
