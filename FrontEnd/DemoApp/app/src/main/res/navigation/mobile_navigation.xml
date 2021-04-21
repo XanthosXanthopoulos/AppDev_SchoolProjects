@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.example.demoapp.ui.main.ui.dashboard.DashboardFragment"
+        android:name="com.example.demoapp.ui.main.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
@@ -34,5 +34,23 @@
         android:name="com.example.demoapp.ui.main.trip.TripFragment"
         android:label="Trip"
         tools:layout="@layout/fragment_trip" />
+
+    <fragment
+        android:id="@+id/navigation_CreatePlan"
+        android:name="com.example.demoapp.ui.main.plan.CreatePlanFragment"
+        android:label="CreatePlan"
+        tools:layout="@layout/fragment_create_plan" />
+
+    <fragment
+        android:id="@+id/navigation_ViewPlan"
+        android:name="com.example.demoapp.ui.main.plan.ViewPlanFragment"
+        android:label="ViewPlan"
+        tools:layout="@layout/fragment_view__plan_" />
+
+    <fragment
+        android:id="@+id/navigation_AddMoment"
+        android:name="com.example.demoapp.ui.main.plan.AddMomentFragment"
+        android:label="AddMoment"
+        tools:layout="@layout/fragment_add_moment" />
 
 </navigation>

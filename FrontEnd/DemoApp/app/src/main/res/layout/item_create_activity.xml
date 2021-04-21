@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardUseCompatPadding="true"
+    card_view:cardCornerRadius="5dp"
+    card_view:contentPaddingBottom="6dp">
+
+    <LinearLayout
+        android:id="@+id/pop_up_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/white_panel"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Add activity:"
+            android:textSize="60px"
+            android:textColor="@color/white"
+            android:background="@drawable/round_bg"
+            android:padding="10dp"
+            android:layout_gravity="center"/>
+
+        <EditText
+            android:id="@+id/Title_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/round_border"
+            android:padding="10dp"
+            android:hint="Title" />
+
+        <EditText
+            android:id="@+id/Type_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/round_border"
+            android:padding="10dp"
+            android:hint="Type" />
+
+        <EditText
+            android:id="@+id/Place_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/round_border"
+            android:padding="10dp"
+            android:hint="Place" />
+
+        <EditText
+            android:id="@+id/Description_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/round_border"
+            android:padding="10dp"
+            android:hint="Description" />
+
+        <EditText
+            android:id="@+id/Time_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/round_border"
+            android:padding="10dp"
+            android:hint="Time" />
+
+        <android.widget.Button
+            android:id="@+id/Submit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/cross_btn"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="X"
+        android:textColor="@color/light_gray"
+        android:textSize="15dp" />
+
+</androidx.cardview.widget.CardView>
