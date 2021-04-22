@@ -4,5 +4,6 @@ public enum ContentType
 {
     ACTIVITY,
     IMAGE,
-    TRIP
+    TRIP,
+    POST
 }

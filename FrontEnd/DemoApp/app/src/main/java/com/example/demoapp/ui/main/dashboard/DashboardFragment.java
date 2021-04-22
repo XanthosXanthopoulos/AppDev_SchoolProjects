@@ -1,8 +1,7 @@
-package com.example.demoapp.ui.main.ui.dashboard;
+package com.example.demoapp.ui.main.dashboard;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -11,10 +10,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -25,11 +22,8 @@ import com.example.demoapp.R;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Radius;
-import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.data.model.Type;
 import com.example.demoapp.ui.adapter.SearchResultAdapter;
-import com.example.demoapp.ui.adapter.TripAdapter;
-import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.io.Serializable;

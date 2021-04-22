@@ -9,10 +9,11 @@ import com.example.demoapp.data.repository.ContentRepository;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.ui.main.account.AccountViewModel;
+import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.authentication.register.RegisterViewModel;
-import com.example.demoapp.ui.main.ui.dashboard.DashboardViewModel;
+import com.example.demoapp.ui.main.dashboard.DashboardViewModel;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -49,6 +50,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if(modelClass.isAssignableFrom(DashboardViewModel.class))
         {
             return (T) new DashboardViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if(modelClass.isAssignableFrom(HomeViewModel.class))
+        {
+            return (T) new HomeViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else
         {

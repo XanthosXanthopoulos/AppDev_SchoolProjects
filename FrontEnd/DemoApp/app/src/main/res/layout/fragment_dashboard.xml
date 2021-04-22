@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.ui.dashboard.DashboardFragment">
+    tools:context=".ui.main.dashboard.DashboardFragment">
 
     <RelativeLayout
         android:id="@+id/search_area"

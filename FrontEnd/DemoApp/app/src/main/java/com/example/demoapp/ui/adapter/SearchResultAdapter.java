@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.model.Trip;
 
 import java.text.SimpleDateFormat;
@@ -47,6 +49,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 return new ImageViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, null));
             case 2:
                 return new TripViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_travel, null));
+            case 3:
+                return new PostViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, null));
             default:
                 return null;
         }
@@ -71,7 +75,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 layoutParams.setFullSpan(true);
                 break;
 
-            case 2:
+            case 1:
                 ImageViewHolder imageViewHolder = (ImageViewHolder)holder;
                 Image image = (Image) items.get(position);
 
@@ -79,7 +83,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 layoutParams.setFullSpan(true);
                 break;
-            case 3:
+            case 2:
                 TripViewHolder tripViewHolder = (TripViewHolder)holder;
                 Trip trip = (Trip) items.get(position);
 
@@ -88,6 +92,13 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 tripViewHolder.date.setText(formatter.format(trip.getDate()));
 
                 if (trip.getUsername() == null) tripViewHolder.getUsername().setVisibility(GONE);
+                break;
+            case 3:
+                PostViewHolder postViewHolder = (PostViewHolder)holder;
+                Post post = (Post) items.get(position);
+
+                postViewHolder.getUsername().setText(post.getUsername());
+                break;
         }
 
         holder.itemView.setLayoutParams(layoutParams);
@@ -212,6 +223,51 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public TextView getUsername()
         {
             return username;
+        }
+    }
+
+    public static class PostViewHolder extends RecyclerView.ViewHolder
+    {
+        private ImageView accountImage;
+        private TextView username;
+        private ImageView planImage;
+        private ImageButton approveButton;
+        private ImageButton commentButton;
+
+        public PostViewHolder(View view)
+        {
+            super(view);
+
+            accountImage = (ImageView) view.findViewById(R.id.account_image);
+            username =  view.findViewById(R.id.account_name);
+            planImage = (ImageView) view.findViewById(R.id.plan_image);
+            approveButton = (ImageButton) view.findViewById(R.id.approve_button);
+            commentButton = (ImageButton) view.findViewById(R.id.comment_button);
+        }
+
+        public ImageView getAccountImage()
+        {
+            return accountImage;
+        }
+
+        public TextView getUsername()
+        {
+            return username;
+        }
+
+        public ImageView getPlanImage()
+        {
+            return planImage;
+        }
+
+        public ImageButton getApproveButton()
+        {
+            return approveButton;
+        }
+
+        public ImageButton getCommentButton()
+        {
+            return commentButton;
         }
     }
 }
