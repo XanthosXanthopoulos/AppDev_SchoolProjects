@@ -96,14 +96,7 @@ public class AddMomentFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // TODO: add activity and dynamically fill the gaps
-//                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
-//                params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT; //1300
-//                item.setLayoutParams(params);
-//                item.setVisibility(View.VISIBLE);
-//                ActivityList.add(new Activity(title, desc, tags, address, type));
-
                 onImageGalleryClicked(v);
-
             }
         });
 
@@ -119,8 +112,6 @@ public class AddMomentFragment extends Fragment {
             }
 
         };
-
-//        view.findViewById(R.id.Add_memory_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));
 
     }
 

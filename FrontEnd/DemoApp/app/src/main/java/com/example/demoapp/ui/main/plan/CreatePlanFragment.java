@@ -109,16 +109,14 @@ public class CreatePlanFragment extends Fragment {
             }
         });
 
-//        view.findViewById(R.id.Add_moment_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_AddMoment));
-
         item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                    item.removeAllViews();
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
-                params.height = 1;
-                item.setLayoutParams(params);
-                item.setVisibility(View.INVISIBLE);
+//                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
+//                params.height = 1;
+//                item.setLayoutParams(params);
+                item.setVisibility(View.GONE);
             }
         });
 

@@ -63,11 +63,10 @@ public class AddMemoryFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // TODO: add activity and dynamically fill the gaps
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
-                params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT; //1300
-                item.setLayoutParams(params);
+//                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
+//                params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT; //1300
+//                item.setLayoutParams(params);
                 item.setVisibility(View.VISIBLE);
-//                ActivityList.add(new Activity(title, desc, tags, address, type));
             }
 
         });
