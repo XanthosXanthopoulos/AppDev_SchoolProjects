@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -14,7 +13,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,7 +25,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -38,13 +35,10 @@ import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.ui.adapter.TripAdapter;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -72,14 +66,9 @@ public class AddMomentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_add_moment, container, false);
-        countrySpinner = view.findViewById(R.id.Country_Plan);
-        dateSpinner = view.findViewById(R.id.Date_Plan);
 
-        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
-
-        recyclerView = view.findViewById(R.id.Create_Plan_List);
+        recyclerView = view.findViewById(R.id.Image_List);
         recyclerView.setHasFixedSize(true);
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
@@ -89,9 +78,6 @@ public class AddMomentFragment extends Fragment {
         recyclerView.setAdapter(rcAdapter);
 
         return view;
-
-        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_create_plan, container, false);
     }
 
     @Override
@@ -134,18 +120,7 @@ public class AddMomentFragment extends Fragment {
 
         };
 
-        dateSpinner.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(requireActivity(), date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
-
-        view.findViewById(R.id.Add_memory_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));
+//        view.findViewById(R.id.Add_memory_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));
 
     }
 
@@ -244,6 +219,10 @@ public class AddMomentFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.UK);
 
         dateSpinner.setText(sdf.format(myCalendar.getTime()));
+    }
+
+    public static AddMomentFragment getInstance(){
+        return new AddMomentFragment();
     }
 
 }

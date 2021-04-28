@@ -11,7 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.viewpager.widget.ViewPager;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +28,9 @@ import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.ViewPagerAdapter;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
+import com.google.android.material.tabs.TabLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,8 +41,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class CreatePlanFragment extends Fragment {
-    List<Item> ActivityList = new ArrayList<>() ;
-    RecyclerView recyclerView;
+
     Spinner countrySpinner;
     EditText dateSpinner;
     final Calendar myCalendar = Calendar.getInstance();
@@ -46,7 +49,6 @@ public class CreatePlanFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @SuppressLint({"ResourceType", "CutPasteId"})
@@ -56,23 +58,23 @@ public class CreatePlanFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_create_plan, container, false);
 
-        recyclerView = view.findViewById(R.id.Create_Plan_List);
-        recyclerView.setHasFixedSize(true);
-
         countrySpinner = view.findViewById(R.id.Country_Plan);
         dateSpinner = view.findViewById(R.id.Date_Plan);
         countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
 
-        StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(_sGridLayoutManager);
+        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        TabLayout tablayout = (TabLayout) view.findViewById(R.id.tabLayout);
 
-        ActivityImageAdapter rcAdapter = new ActivityImageAdapter(getListItemData());
-        recyclerView.setAdapter(rcAdapter);
+        ViewPagerAdapter vpAdapter = new ViewPagerAdapter(getChildFragmentManager());
+
+        vpAdapter.addFragment(AddMemoryFragment.getInstance(), "Add Memory");
+        vpAdapter.addFragment(AddMomentFragment.getInstance(), "Add Moment");
+        System.out.println(vpAdapter.getCount());
+        viewPager.setAdapter(vpAdapter);
+        tablayout.setupWithViewPager(viewPager);
 
         return view;
 
-        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_create_plan, container, false);
     }
 
     @Override
@@ -82,19 +84,6 @@ public class CreatePlanFragment extends Fragment {
         LinearLayout item = requireActivity().findViewById(R.id.pop_up_layout);
         View child = getLayoutInflater().inflate(R.layout.item_create_activity,null);
         item.addView(child);
-
-        view.findViewById(R.id.create_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: add activity and dynamically fill the gaps
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
-                params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT; //1300
-                item.setLayoutParams(params);
-                item.setVisibility(View.VISIBLE);
-//                ActivityList.add(new Activity(title, desc, tags, address, type));
-            }
-
-        });
 
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
@@ -120,7 +109,7 @@ public class CreatePlanFragment extends Fragment {
             }
         });
 
-        view.findViewById(R.id.Add_moment_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_AddMoment));
+//        view.findViewById(R.id.Add_moment_btn).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_AddMoment));
 
         item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,20 +122,6 @@ public class CreatePlanFragment extends Fragment {
             }
         });
 
-        item.findViewById(R.id.Submit_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                    item.removeAllViews();
-                ActivityImageAdapter rcAdapter = new ActivityImageAdapter(updateListItemData(getListItemData()));
-                recyclerView.setAdapter(rcAdapter);
-            }
-        });
-
-    }
-
-    private List<Item> getListItemData()
-    {
-        return ActivityList;
     }
 
     public void setDateSpinner(EditText dateSpinner) {
@@ -163,27 +138,6 @@ public class CreatePlanFragment extends Fragment {
 
     public Spinner getCountrySpinner() {
         return countrySpinner;
-    }
-
-    private List<Item> updateListItemData(List<Item> activities){
-
-        List<Item> ActivityList = activities;
-
-        final EditText t = (EditText)requireActivity().findViewById(R.id.Title_text);
-        final EditText desc = (EditText)requireActivity().findViewById(R.id.Description_text);
-//        final EditText tgs = (EditText)requireActivity().findViewById(R.id.);
-        final EditText add = (EditText)requireActivity().findViewById(R.id.Place_text);
-        final EditText tp = (EditText)requireActivity().findViewById(R.id.Type_text);
-
-        String title = t.getText().toString();
-        String description = desc.getText().toString();
-        String tags = null;
-        String address = add.getText().toString();
-        String type = tp.getText().toString();
-
-        ActivityList.add(new Activity(title, description, tags, address, type));
-
-        return ActivityList;
     }
 
     private void updateLabel() {
