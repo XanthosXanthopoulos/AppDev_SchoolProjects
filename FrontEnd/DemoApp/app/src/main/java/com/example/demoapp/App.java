@@ -5,10 +5,13 @@ import android.app.Application;
 import android.content.ContentProvider;
 import android.os.Build;
 
+import com.example.demoapp.data.datasource.DiskDataSource;
 import com.example.demoapp.util.ApiHandler;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -45,7 +48,8 @@ public class App extends Application
         handleSSLHandshake();
 
         ApiHandler.initialize(this);
-
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        DiskDataSource.init(this, executorService);
     }
 
     @SuppressLint("TrulyRandom")

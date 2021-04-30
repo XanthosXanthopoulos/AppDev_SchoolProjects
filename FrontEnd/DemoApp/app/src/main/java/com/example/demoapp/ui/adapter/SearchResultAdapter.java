@@ -28,6 +28,11 @@ import static android.view.View.GONE;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
+    public List<Item> getItems()
+    {
+        return items;
+    }
+
     private List<Item> items;
     private SimpleDateFormat formatter;
 
@@ -98,6 +103,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 Post post = (Post) items.get(position);
 
                 postViewHolder.getUsername().setText(post.getUsername());
+                postViewHolder.getAccountImage().setImageBitmap(post.getAccountImage());
+
                 break;
         }
 
