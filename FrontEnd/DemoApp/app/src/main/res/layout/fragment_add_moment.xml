@@ -1,178 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.main.plan.AddMomentFragment">
-
-    <TextView
-        android:id="@+id/Create_Plan_Title"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="#1976D2"
-        android:gravity="center"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:text="Create a plan for your trip!"
-        android:textColor="#ffffff"
-        android:textSize="20sp"
-
-        app:layout_constraintBottom_toTopOf="@+id/Create_Plan_List"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <android.widget.Button
-        android:id="@+id/create_btn"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="4dp"
-        android:background="@drawable/circle"
-        android:gravity="center"
-        android:text="+"
-        android:textSize="30dp"
-        android:textColor="@color/dark_gray"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Create_Plan_Title" />
-
-    <LinearLayout
-        android:id="@+id/plan_data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-
-        app:layout_constraintTop_toBottomOf="@+id/Create_Plan_Title"
-        app:layout_constraintBottom_toTopOf="@id/Create_Plan_List">
-
-        <EditText
-            android:id="@+id/Title_Plan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_border"
-            android:gravity="left"
-            android:paddingStart="10dp"
-            android:padding = "3dp"
-            android:hint="Title"
-            android:textColor="#313C77"
-            android:textSize="19sp" />
-
-        <Spinner
-            android:id="@+id/Country_Plan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_border"
-            android:gravity="left"
-            android:paddingStart="10dp"
-            android:padding = "3dp"
-            android:hint="Country"
-            android:textColor="#313C77"
-            android:textSize="19sp"
-            android:drawSelectorOnTop="true"/>
-
-        <EditText
-            android:id="@+id/Date_Plan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_border"
-            android:calendarViewShown="false"
-            android:drawSelectorOnTop="true"
-            android:paddingStart="10dp"
-            android:padding = "3dp"
-            android:hint="Date"
-            android:textColor="#313C77"
-            android:textSize="19sp"
-            android:clickable="false"
-            android:cursorVisible="false"
-            android:focusableInTouchMode="true"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-            android:background="@drawable/round_border"
-            android:backgroundTint="#313C77"
-            android:layout_marginTop="5dp">
-
-            <android.widget.Button
-                android:id="@+id/Add_memory_btn"
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:padding="5dp"
-                android:background="@drawable/round_border"
-                android:backgroundTint="#313C77"
-                android:text="Add memory"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="10dp"
-                android:textAllCaps="false"
-                android:textColor="@color/white" />
-
-            <android.widget.Button
-                android:id="@+id/Add_moment_btn"
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:background="@drawable/round_border"
-                android:backgroundTint="#5F6CAF"
-                android:padding="5dp"
-                android:paddingStart="6dp"
-                android:text="Add moment"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="10dp"
-                android:textAllCaps="false"
-                android:textColor="@color/white" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+    tools:context=".ui.main.plan.moment.AddMomentFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/Create_Plan_List"
+        android:id="@+id/moment_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_gravity="bottom"
-        android:layout_marginTop="16dp"
-        android:fadingEdgeLength="16dp"
-        android:requiresFadingEdge="vertical"
-        android:scrollbars="vertical"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="10dp"
+        app:layout_constraintBottom_toTopOf="@id/add_image_button"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        app:layout_constraintBottom_toBottomOf="@id/pop_up_layout"
-        app:layout_constraintTop_toBottomOf="@id/plan_data"/>
-
-    <LinearLayout
-        android:id="@+id/pop_up_layout"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/white_panel"
-        android:orientation="vertical"
-
-        android:visibility="invisible"
+    <Button
+        android:id="@+id/add_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/add_moment"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/Create_Plan_List">
-
-    </LinearLayout>
-
-    <android.widget.Button
-        android:id="@+id/Submit_Plan_btn"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:autoSizeMinTextSize="10dp"
-        android:autoSizeTextType="uniform"
-        android:background="@drawable/round_border"
-        android:backgroundTint="#313C77"
-        android:padding="5dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginEnd="7dp"
-        android:text="✓Submit Plan"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

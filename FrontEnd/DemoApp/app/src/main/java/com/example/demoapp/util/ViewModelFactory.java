@@ -11,6 +11,7 @@ import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.ui.main.account.AccountViewModel;
 import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
+import com.example.demoapp.ui.main.plan.moment.AddMomentViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.authentication.register.RegisterViewModel;
 import com.example.demoapp.ui.main.dashboard.DashboardViewModel;
@@ -54,6 +55,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if(modelClass.isAssignableFrom(HomeViewModel.class))
         {
             return (T) new HomeViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if(modelClass.isAssignableFrom(AddMomentViewModel.class))
+        {
+            return (T) new AddMomentViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else
         {

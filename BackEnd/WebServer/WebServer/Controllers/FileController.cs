@@ -114,7 +114,6 @@ namespace WebServer.Controllers
 
             string[] files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "FileStorage"), id + ".*");
 
-            // Get all bytes of the file and return the file with the specified file contents 
             byte[] data = await System.IO.File.ReadAllBytesAsync(files[0]);
             if (new FileExtensionContentTypeProvider().TryGetContentType(files[0], out string mimeType))
             {
