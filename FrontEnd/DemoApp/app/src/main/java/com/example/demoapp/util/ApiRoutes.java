@@ -5,7 +5,7 @@ import java.util.Map;
 
 public final class ApiRoutes
 {
-    private static final String BASE = "https://192.168.1.109:5002/api";
+    private static final String BASE = "https://192.168.2.7:5002/api";
 
     public static final String LOGIN = "/account/login";
     public static final String REGISTER = "/account/register";

@@ -111,7 +111,7 @@ public class DiskDataSource
         return result;
     }
 
-    public void publishResult(MutableLiveData<DataSourceResponse<Bitmap>> result, Bitmap image, String imageID)
+    private void publishResult(MutableLiveData<DataSourceResponse<Bitmap>> result, Bitmap image, String imageID)
     {
         handler.post(() ->
         {

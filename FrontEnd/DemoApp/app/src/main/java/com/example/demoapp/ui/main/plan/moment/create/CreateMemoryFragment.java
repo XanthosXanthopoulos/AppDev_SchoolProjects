@@ -14,14 +14,14 @@ import android.view.ViewGroup;
 
 import com.example.demoapp.R;
 
-public class CreateMomentFragment extends Fragment
+public class CreateMemoryFragment extends Fragment
 {
 
-    private CreateMomentViewModel mViewModel;
+    private CreateMemoryViewModel mViewModel;
 
-    public static CreateMomentFragment newInstance()
+    public static CreateMemoryFragment newInstance()
     {
-        return new CreateMomentFragment();
+        return new CreateMemoryFragment();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class CreateMomentFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(CreateMomentViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(CreateMemoryViewModel.class);
         // TODO: Use the ViewModel
     }
 
