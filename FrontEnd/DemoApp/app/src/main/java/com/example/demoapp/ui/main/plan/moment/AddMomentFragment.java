@@ -86,17 +86,13 @@ public class AddMomentFragment extends Fragment
         momentList.setLayoutManager(new GridLayoutManager(getContext(), 3));
         momentList.setAdapter(adapter);
 
-        addImageButton.setOnClickListener(new View.OnClickListener()
+        addImageButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Pictures"), IMAGE_SELECT);
-            }
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Pictures"), IMAGE_SELECT);
         });
 
         return view;

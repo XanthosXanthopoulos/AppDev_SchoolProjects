@@ -124,17 +124,6 @@ public class ContentRepository
                 profileResult.removeSource(diskResult);
             }
         });
-
-//        LiveData<DataSourceResponse<Bitmap>> webResult = dataSource.requestImage(imageID, "");
-//        profileResult.addSource(webResult, new Observer<DataSourceResponse<Bitmap>>()
-//        {
-//            @Override
-//            public void onChanged(DataSourceResponse<Bitmap> response)
-//            {
-//                profileResult.setValue(new RepositoryResponse<>(new ItemUpdate(position, response.getResponse())));
-//                profileResult.removeSource(webResult);
-//            }
-//        });
     }
 
     public LiveData<RepositoryResponse<List<Item>>> getSearchResult()
