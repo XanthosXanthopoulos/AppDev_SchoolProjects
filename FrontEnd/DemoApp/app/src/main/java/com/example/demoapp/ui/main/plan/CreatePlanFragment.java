@@ -62,7 +62,7 @@ public class CreatePlanFragment extends Fragment
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setAdapter(new ViewPagerAdapter(this));
 
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memory", "Moment"}[position])).attach();
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memories", "Moments"}[position])).attach();
 
         return view;
     }

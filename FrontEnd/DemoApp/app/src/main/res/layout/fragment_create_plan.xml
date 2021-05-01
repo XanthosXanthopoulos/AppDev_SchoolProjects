@@ -94,14 +94,14 @@
             android:cursorVisible="false"
             android:focusableInTouchMode="true"/>
 
-
-
     </LinearLayout>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
+        app:tabTextAppearance="@style/CustomTabText"
         app:layout_constraintTop_toBottomOf="@id/plan_data"/>
 
     <androidx.viewpager2.widget.ViewPager2

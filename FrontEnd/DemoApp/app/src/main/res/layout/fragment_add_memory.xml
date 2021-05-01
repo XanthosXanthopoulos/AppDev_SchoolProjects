@@ -20,6 +20,9 @@
         android:layout_marginBottom="10dp"
         android:text="Find Memory"
         android:layout_marginLeft="15dp"
+        android:textAllCaps="false"
+        android:textSize="16dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/split_label"
         app:layout_constraintStart_toStartOf="parent" />
@@ -33,6 +36,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
+
         app:layout_constraintStart_toEndOf="@id/find_memory_button"
         app:layout_constraintEnd_toStartOf="@id/create_memory_button"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -43,8 +47,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="create Memory"
+        android:text="Create Memory"
         android:layout_marginRight="15dp"
+        android:textAllCaps="false"
+        android:textSize="16dp"
+
         app:layout_constraintStart_toEndOf="@id/split_label"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
