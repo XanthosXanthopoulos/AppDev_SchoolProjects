@@ -1,5 +1,8 @@
 package com.example.demoapp.data.datasource;
 
+import android.graphics.Bitmap;
+import android.widget.ImageView;
+
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -8,11 +11,13 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.ContentType;
 import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.api.request.*;
 import com.example.demoapp.data.model.api.response.*;
@@ -328,14 +333,105 @@ public class ApiDataSource
                 headers.put("Authorization", "Bearer " + JWToken);
                 return headers;
             }
+        };
 
-            @Nullable
+        apiHandler.addToRequestQueue(request);
+
+        return result;
+    }
+
+    public LiveData<DataSourceResponse<Bitmap>> requestImage(String imageID, String JWToken)
+    {
+        MutableLiveData<DataSourceResponse<Bitmap>> result = new MutableLiveData<>();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("id", imageID);
+
+
+        ImageRequest request = new ImageRequest(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new Response.Listener<Bitmap>()
+        {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError
+            public void onResponse(Bitmap response)
             {
-                Map<String, String> params = new HashMap<>();
-                //TODO: Add search parameters
-                return params;
+                result.setValue(new DataSourceResponse<>(response));
+            }
+        }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                System.err.println(error.networkResponse);
+                result.setValue(new DataSourceResponse<>("Network Error"));
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders()
+            {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + JWToken);
+                return headers;
+            }
+        };
+
+        apiHandler.addToRequestQueue(request);
+
+        return result;
+    }
+
+    public LiveData<DataSourceResponse<List<Item>>> getFeed(String JWToken)
+    {
+        MutableLiveData<DataSourceResponse<List<Item>>> result = new MutableLiveData<>();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.FEED), null, new Response.Listener<JSONObject>()
+        {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                try
+                {
+                    if (!response.getBoolean("successful"))
+                    {
+                        result.setValue(new DataSourceResponse<>(response.getString("errorMessage")));
+                        return;
+                    }
+
+                    List<Item> feed = new ArrayList<>();
+
+                    JSONArray items = response.getJSONArray("response");
+                    Gson gson = new Gson();
+
+                    for (int i = 0; i < items.length(); ++i)
+                    {
+                        feed.add(gson.fromJson(items.getJSONObject(i).toString(), Post.class));
+                    }
+
+                    result.setValue(new DataSourceResponse<>(feed));
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    result.setValue(new DataSourceResponse<>("Deserialization error."));
+                }
+            }
+        }, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                System.err.println(error.networkResponse);
+                result.setValue(new DataSourceResponse<>("Network error"));
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError
+            {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + JWToken);
+                return headers;
             }
         };
 

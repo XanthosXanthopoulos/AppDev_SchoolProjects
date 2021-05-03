@@ -11,9 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,9 +27,10 @@ import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
-import com.example.demoapp.data.model.ViewPagerAdapter;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
+import com.example.demoapp.ui.adapter.ViewPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,109 +40,30 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class CreatePlanFragment extends Fragment {
-
+public class CreatePlanFragment extends Fragment
+{
+    List<Item> ActivityList = new ArrayList<>();
+    RecyclerView recyclerView;
     Spinner countrySpinner;
     EditText dateSpinner;
     final Calendar myCalendar = Calendar.getInstance();
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
 
     @SuppressLint({"ResourceType", "CutPasteId"})
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
         View view = inflater.inflate(R.layout.fragment_create_plan, container, false);
 
-        countrySpinner = view.findViewById(R.id.Country_Plan);
-        dateSpinner = view.findViewById(R.id.Date_Plan);
-        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, Country.values()));
+        tabLayout = view.findViewById(R.id.tab_layout);
+        viewPager = view.findViewById(R.id.view_pager);
+        viewPager.setAdapter(new ViewPagerAdapter(this));
 
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        TabLayout tablayout = (TabLayout) view.findViewById(R.id.tabLayout);
-
-        ViewPagerAdapter vpAdapter = new ViewPagerAdapter(getChildFragmentManager());
-
-        vpAdapter.addFragment(AddMemoryFragment.getInstance(), "Add Memory");
-        vpAdapter.addFragment(AddMomentFragment.getInstance(), "Add Moment");
-        System.out.println(vpAdapter.getCount());
-        viewPager.setAdapter(vpAdapter);
-        tablayout.setupWithViewPager(viewPager);
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memories", "Moments"}[position])).attach();
 
         return view;
-
     }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        LinearLayout item = requireActivity().findViewById(R.id.pop_up_layout);
-        View child = getLayoutInflater().inflate(R.layout.item_create_activity,null);
-        item.addView(child);
-
-        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                // TODO Auto-generated method stub
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, month);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateLabel();
-            }
-
-        };
-
-        dateSpinner.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(requireActivity(), date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
-
-        item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                    item.removeAllViews();
-//                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)item.getLayoutParams();
-//                params.height = 1;
-//                item.setLayoutParams(params);
-                item.setVisibility(View.GONE);
-            }
-        });
-
-    }
-
-    public void setDateSpinner(EditText dateSpinner) {
-        this.dateSpinner = dateSpinner;
-    }
-
-    public EditText getDateSpinner() {
-        return dateSpinner;
-    }
-
-    public void setCountrySpinner(Spinner countrySpinner) {
-        this.countrySpinner = countrySpinner;
-    }
-
-    public Spinner getCountrySpinner() {
-        return countrySpinner;
-    }
-
-    private void updateLabel() {
-        String myFormat = "dd/MM/yy"; //In which you need put here
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.UK);
-
-        dateSpinner.setText(sdf.format(myCalendar.getTime()));
-    }
-
 }

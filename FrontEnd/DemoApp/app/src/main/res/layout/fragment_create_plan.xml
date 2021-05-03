@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/Create_Plan_Title"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:background="#1976D2"
         android:gravity="center"
         android:paddingTop="8dp"
@@ -18,21 +18,29 @@
         android:textColor="#ffffff"
         android:textSize="20sp"
 
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
+    <ImageButton
+        android:id="@+id/upload_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/ic_upload"
+        android:backgroundTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/Create_Plan_Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/plan_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Create_Plan_Title">
+        app:layout_constraintTop_toBottomOf="@+id/Create_Plan_Title"
+        android:orientation="vertical">
 
         <EditText
             android:id="@+id/Title_Plan"
@@ -40,24 +48,31 @@
             android:layout_height="wrap_content"
             android:background="@drawable/round_border"
             android:gravity="left"
-            android:hint="Title"
-            android:padding="3dp"
             android:paddingStart="10dp"
+            android:padding = "6dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:hint="Title"
             android:textColor="#313C77"
             android:textSize="19sp" />
 
         <Spinner
             android:id="@+id/Country_Plan"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_border"
-            android:drawSelectorOnTop="true"
+            android:layout_height="30dp"
             android:gravity="left"
-            android:hint="Country"
-            android:padding="3dp"
             android:paddingStart="10dp"
+            android:padding = "3dp"
+            android:hint="Country"
             android:textColor="#313C77"
-            android:textSize="19sp" />
+            android:textSize="19sp"
+            android:drawSelectorOnTop="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"/>
 
         <EditText
             android:id="@+id/Date_Plan"
@@ -65,80 +80,35 @@
             android:layout_height="wrap_content"
             android:background="@drawable/round_border"
             android:calendarViewShown="false"
+            android:drawSelectorOnTop="true"
+            android:paddingStart="10dp"
+            android:padding = "6dp"
+            android:hint="Date"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:textColor="#313C77"
+            android:textSize="19sp"
             android:clickable="false"
             android:cursorVisible="false"
-            android:drawSelectorOnTop="true"
-            android:focusableInTouchMode="true"
-            android:hint="Date"
-            android:padding="3dp"
-            android:paddingStart="10dp"
-            android:textColor="#313C77"
-            android:textSize="19sp" />
+            android:focusableInTouchMode="true"/>
 
     </LinearLayout>
 
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
+        android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/round_border"
-        android:backgroundTint="#313C77"
 
-        app:layout_constraintBottom_toTopOf="@+id/viewpager"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout2"
-        app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
-        app:tabIndicatorColor="@color/white"
-        app:tabIndicatorFullWidth="false"
-        app:tabRippleColor="#5F6CAF"
-        app:tabSelectedTextColor="@color/white"
-        app:tabTextColor="#D3ECFD" />
+        app:tabTextAppearance="@style/CustomTabText"
+        app:layout_constraintTop_toBottomOf="@id/plan_data"/>
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewpager"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-
-        app:layout_constraintBottom_toTopOf="@+id/pop_up_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout">
-
-    </androidx.viewpager.widget.ViewPager>
-
-    <LinearLayout
-        android:id="@+id/pop_up_layout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@drawable/white_panel"
-        android:orientation="vertical"
-        android:visibility="gone"
-
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewpager">
-
-    </LinearLayout>
-
-    <android.widget.Button
-        android:id="@+id/Submit_Plan_btn"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="10dp"
-        android:autoSizeMinTextSize="10dp"
-        android:autoSizeTextType="uniform"
-        android:background="@drawable/round_border"
-        android:backgroundTint="#313C77"
-        android:padding="5dp"
-        android:layout_marginLeft="5dp"
-        android:text="✓Submit Plan"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tab_layout"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

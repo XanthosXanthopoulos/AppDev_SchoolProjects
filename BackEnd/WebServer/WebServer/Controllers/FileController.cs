@@ -75,42 +75,54 @@ namespace WebServer.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> Download(string id)
+        [AllowAnonymous]
+        public async Task<IActionResult> Download(string? id)
         {
-            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (_context.Images.Any(image => image.UserID == userID && image.ImageID == id))
+            //if (_context.Images.Any(image => image.UserID == userID && image.ImageID == id))
+            //{
+            //    string[] files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "FileStorage"), id + ".*");
+
+            //    if (files.Length > 0)
+            //    {
+            //        // Get all bytes of the file and return the file with the specified file contents 
+            //        byte[] data = await System.IO.File.ReadAllBytesAsync(files[0]);
+            //        if (new FileExtensionContentTypeProvider().TryGetContentType(files[0], out string mimeType))
+            //        {
+            //            return File(data, mimeType);
+            //        }
+            //        else
+            //        {
+            //            return File(data, "application/octet-stream");
+            //        }
+            //    }
+            //    else
+            //    {
+            //        // since file does not exist remove it from database
+            //        ImageModel image = new ImageModel { ImageID = id };
+            //        _context.Images.Attach(image);
+            //        _context.Images.Remove(image);
+            //        await _context.SaveChangesAsync();
+
+            //        // return error if file not found
+            //        return StatusCode(StatusCodes.Status500InternalServerError);
+            //    }
+            //}
+
+            //return StatusCode(StatusCodes.Status403Forbidden);
+
+            string[] files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "FileStorage"), id + ".*");
+
+            byte[] data = await System.IO.File.ReadAllBytesAsync(files[0]);
+            if (new FileExtensionContentTypeProvider().TryGetContentType(files[0], out string mimeType))
             {
-                string[] files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "FileStorage"), id + ".*");
-
-                if (files.Length > 0)
-                {
-                    // Get all bytes of the file and return the file with the specified file contents 
-                    byte[] data = await System.IO.File.ReadAllBytesAsync(files[0]);
-                    if (new FileExtensionContentTypeProvider().TryGetContentType(files[0], out string mimeType))
-                    {
-                        return File(data, mimeType);
-                    }
-                    else
-                    {
-                        return File(data, "application/octet-stream");
-                    }
-                }
-                else
-                {
-                    // since file does not exist remove it from database
-                    ImageModel image = new ImageModel { ImageID = id };
-                    _context.Images.Attach(image);
-                    _context.Images.Remove(image);
-                    await _context.SaveChangesAsync();
-
-                    // return error if file not found
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
+                return File(data, mimeType);
             }
-
-            return StatusCode(StatusCodes.Status403Forbidden);
+            else
+            {
+                return File(data, "application/octet-stream");
+            }
         }
     }
 }

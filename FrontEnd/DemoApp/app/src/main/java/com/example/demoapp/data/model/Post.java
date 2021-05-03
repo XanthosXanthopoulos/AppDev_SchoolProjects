@@ -7,10 +7,12 @@ import java.util.Date;
 public class Post extends Item
 {
     private Bitmap accountImage;
+    private String profileImageID;
+    private String thumbnailImageID;
     private String username;
     private Bitmap planImage;
     private String description;
-    private Country Country;
+    private Country country;
     private Date date;
 
     public Post()
@@ -26,7 +28,7 @@ public class Post extends Item
         this.username = username;
         this.planImage = planImage;
         this.description = description;
-        Country = country;
+        this.country = country;
         this.date = date;
     }
 
@@ -62,12 +64,12 @@ public class Post extends Item
 
     public Country getCountry()
     {
-        return Country;
+        return country;
     }
 
     public void setCountry(Country country)
     {
-        Country = country;
+        this.country = country;
     }
 
     public Date getDate()
@@ -88,5 +90,25 @@ public class Post extends Item
     public void setUsername(String username)
     {
         this.username = username;
+    }
+
+    public String getProfileImageID()
+    {
+        return profileImageID;
+    }
+
+    public void setProfileImageID(String profileImageID)
+    {
+        this.profileImageID = profileImageID;
+    }
+
+    public String getThumbnailImageID()
+    {
+        return thumbnailImageID;
+    }
+
+    public void setThumbnailImageID(String thumbnailImageID)
+    {
+        this.thumbnailImageID = thumbnailImageID;
     }
 }
