@@ -1,4 +1,4 @@
-package com.example.demoapp.ui.main.plan.moment.create;
+package com.example.demoapp.ui.main.plan.memory.create;
 
 import androidx.lifecycle.ViewModelProvider;
 

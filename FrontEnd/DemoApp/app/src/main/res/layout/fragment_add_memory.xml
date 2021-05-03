@@ -8,8 +8,12 @@
         android:id="@+id/memory_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:fadingEdge="horizontal"
+        android:requiresFadingEdge="vertical"
         android:fadingEdgeLength="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+
         app:layout_constraintBottom_toTopOf="@id/find_memory_button"
         app:layout_constraintTop_toTopOf="parent" />
 
