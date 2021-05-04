@@ -17,9 +17,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -45,8 +47,9 @@ public class CreatePlanFragment extends Fragment
 {
     List<Item> ActivityList = new ArrayList<>();
     RecyclerView recyclerView;
-    Spinner countrySpinner;
+    AutoCompleteTextView countrySpinner;
     EditText dateSpinner;
+    ImageButton calendarIcon;
     final Calendar myCalendar = Calendar.getInstance();
 
 
@@ -59,12 +62,16 @@ public class CreatePlanFragment extends Fragment
     {
         View view = inflater.inflate(R.layout.fragment_create_plan, container, false);
 
+        countrySpinner = view.findViewById(R.id.country_plan);
         dateSpinner = view.findViewById(R.id.Date_Plan);
+        calendarIcon = view.findViewById(R.id.calendar_button);
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setAdapter(new ViewPagerAdapter(this));
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memories", "Moments"}[position])).attach();
+
+        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, Country.values()));
 
         return view;
     }
@@ -88,7 +95,7 @@ public class CreatePlanFragment extends Fragment
 
         };
 
-        dateSpinner.setOnClickListener(new View.OnClickListener() {
+        calendarIcon.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -96,6 +103,26 @@ public class CreatePlanFragment extends Fragment
                 new DatePickerDialog(requireActivity(), date, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+        dateSpinner.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(dateSpinner.getHint().toString().equals("Date")){
+                    dateSpinner.setHint("dd/mm/yyyy");
+                }else{
+                    dateSpinner.setHint("Date");
+                }
+            }
+        });
+
+        view.findViewById(R.id.upload_button).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+
             }
         });
 
