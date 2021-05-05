@@ -14,6 +14,8 @@ namespace WebServer.Models.Database
 
         public string Location { get; set; }
 
+        public bool IsProfile { get; set; }
+
         [ForeignKey("User")]
         public string UserID { get; set; }
 

@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
 
 import com.example.demoapp.data.datasource.ApiDataSource;
+import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.repository.ContentRepository;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.ui.main.account.AccountViewModel;
+import com.example.demoapp.ui.main.follow.FollowViewModel;
 import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.plan.moment.AddMomentViewModel;
@@ -30,11 +32,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory
     {
         if (modelClass.isAssignableFrom(LoginViewModel.class))
         {
-            return (T) new LoginViewModel(UserRepository.getInstance(new ApiDataSource()));
+            return (T) new LoginViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
         }
         else if(modelClass.isAssignableFrom(RegisterViewModel.class))
         {
-            return (T) new RegisterViewModel(UserRepository.getInstance(new ApiDataSource()));
+            return (T) new RegisterViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
         }
         else if(modelClass.isAssignableFrom(MapViewModel.class))
         {
@@ -42,11 +44,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(ProfileViewModel.class))
         {
-            return (T) new ProfileViewModel(UserRepository.getInstance(new ApiDataSource()));
+            return (T) new ProfileViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
         }
         else if(modelClass.isAssignableFrom(AccountViewModel.class))
         {
-            return (T) new AccountViewModel(UserRepository.getInstance(new ApiDataSource()));
+            return (T) new AccountViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
         }
         else if(modelClass.isAssignableFrom(DashboardViewModel.class))
         {
@@ -59,6 +61,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if(modelClass.isAssignableFrom(AddMomentViewModel.class))
         {
             return (T) new AddMomentViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if (modelClass.isAssignableFrom(FollowViewModel.class))
+        {
+            return (T) new FollowViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
         }
         else
         {

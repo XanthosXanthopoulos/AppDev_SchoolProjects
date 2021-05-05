@@ -46,14 +46,13 @@ namespace WebServer
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
                 endpoints.MapHub<NotificationsHub>("/notifications");
+                endpoints.MapControllers();
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();

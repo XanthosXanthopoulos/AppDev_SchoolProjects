@@ -20,7 +20,7 @@ import com.example.demoapp.data.viewmodel.ItemUpdate;
 
 import java.util.List;
 
-public class ContentRepository
+public class ContentRepository extends Repository
 {
     private static volatile ContentRepository instance;
     private final ApiDataSource dataSource;
@@ -73,7 +73,7 @@ public class ContentRepository
 
     public void updateFeed()
     {
-        LiveData<DataSourceResponse<List<Item>>> dataSourceResult = dataSource.getFeed("");
+        LiveData<DataSourceResponse<List<Item>>> dataSourceResult = dataSource.getFeed(loadFromPrefs("JWToken"));
         feedResult.addSource(dataSourceResult, new Observer<DataSourceResponse<List<Item>>>()
         {
             @Override
@@ -93,57 +93,13 @@ public class ContentRepository
         });
     }
 
-    public void getProfileImage(String imageID, int position)
-    {
-        DiskDataSource source = DiskDataSource.getInstance();
-        LiveData<DataSourceResponse<Bitmap>> diskResult = source.loadImage(imageID);
-        profileResult.addSource(diskResult, new Observer<DataSourceResponse<Bitmap>>()
-        {
-            @Override
-            public void onChanged(DataSourceResponse<Bitmap> response)
-            {
-                if (response.isSuccessful())
-                {
-                    profileResult.setValue(new RepositoryResponse<>(new ItemUpdate(position, response.getResponse())));
-                }
-                else
-                {
-                    LiveData<DataSourceResponse<Bitmap>> webResult = dataSource.requestImage(imageID, "");
-                    profileResult.addSource(webResult, new Observer<DataSourceResponse<Bitmap>>()
-                    {
-                        @Override
-                        public void onChanged(DataSourceResponse<Bitmap> response)
-                        {
-                            profileResult.setValue(new RepositoryResponse<>(new ItemUpdate(position, response.getResponse())));
-                            source.storeImage(imageID, ".jpg", response.getResponse());
-                            profileResult.removeSource(webResult);
-                        }
-                    });
-                }
-
-                profileResult.removeSource(diskResult);
-            }
-        });
-    }
-
     public LiveData<RepositoryResponse<List<Item>>> getSearchResult()
     {
         return searchResult;
     }
 
-
     public MediatorLiveData<RepositoryResponse<List<Item>>> getFeedResult()
     {
         return feedResult;
-    }
-
-    public MediatorLiveData<RepositoryResponse<ItemUpdate>> getProfileResult()
-    {
-        return profileResult;
-    }
-
-    public MediatorLiveData<RepositoryResponse<Bitmap>> getPlanResult()
-    {
-        return planResult;
     }
 }

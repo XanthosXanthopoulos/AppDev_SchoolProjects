@@ -7,7 +7,9 @@ namespace WebServer.Models.Api.Request
 {
     public class FollowResponseModel
     {
-        public string FollowerID { get; set; }
+        public string UserID { get; set; }
+
+        public string ProfileImageID { get; set; }
 
         public bool Accepted { get; set; }
     }

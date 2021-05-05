@@ -1,5 +1,6 @@
 package com.example.demoapp.ui.adapter;
 
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +14,27 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.example.demoapp.App;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.model.Trip;
+import com.example.demoapp.util.ApiRoutes;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.view.View.GONE;
+import static com.example.demoapp.App.SHARED_PREFS;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -35,11 +45,13 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private List<Item> items;
     private SimpleDateFormat formatter;
+    private SharedPreferences sharedPreferences;
 
     public SearchResultAdapter()
     {
         this.items = new ArrayList<>();
         formatter = new SimpleDateFormat("yyyy-MM-dd");
+        this.sharedPreferences = App.getInstance().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
     }
 
     @NonNull
@@ -103,7 +115,12 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 Post post = (Post) items.get(position);
 
                 postViewHolder.getUsername().setText(post.getUsername());
-                postViewHolder.getAccountImage().setImageBitmap(post.getAccountImage());
+
+                HashMap<String, String> params = new HashMap<>();
+                params.put("id", post.getProfileImageID());
+                GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
+
+                Glide.with(App.getInstance()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(postViewHolder.accountImage);
 
                 break;
         }

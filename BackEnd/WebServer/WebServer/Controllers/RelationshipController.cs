@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,7 +65,7 @@ namespace WebServer.Controllers
 
             if (userID != null)
             {
-                Follow followRequest = await _context.Follows.FindAsync(userID, response.FollowerID);
+                Follow followRequest = await _context.Follows.FindAsync(userID, response.UserID);
 
                 if (followRequest != null)
                 {
@@ -90,6 +91,34 @@ namespace WebServer.Controllers
             {
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<List<FollowResponseModel>> GetFollowers()
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            List<FollowResponseModel> result = (from u in _context.Users
+                                                 from f in _context.Follows
+                                                 where f.FolloweeID == userID
+                                                 select new FollowResponseModel { UserID = f.FollowerID, Accepted = f.Accepted }).ToList();
+
+            return result;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<List<FollowResponseModel>> GetFollowees()
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            List<FollowResponseModel> result = (from u in _context.Users
+                                                from f in _context.Follows
+                                                where f.FollowerID == userID
+                                                select new FollowResponseModel { UserID = f.FolloweeID, Accepted = f.Accepted }).ToList();
+
+            return result;
         }
     }
 }

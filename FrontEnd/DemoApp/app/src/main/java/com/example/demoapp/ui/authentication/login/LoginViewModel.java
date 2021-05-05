@@ -38,7 +38,7 @@ public class LoginViewModel extends ViewModel
             {
                 if (input.isSuccessful())
                 {
-                    return new AuthenticationResult(new AuthenticatedUserView(input.getResponse().getUsername()));
+                    return new AuthenticationResult(new AuthenticatedUserView(input.getResponse().getJwToken()));
                 }
                 else
                 {

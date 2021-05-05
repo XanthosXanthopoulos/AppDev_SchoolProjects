@@ -75,7 +75,7 @@ namespace WebServer.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> Download(string? id)
         {
             //string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

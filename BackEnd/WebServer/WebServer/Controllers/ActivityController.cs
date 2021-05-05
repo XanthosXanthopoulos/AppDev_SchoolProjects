@@ -70,7 +70,7 @@ namespace WebServer.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ApiResponse<ICollection<PostResponseModel>>> Feed()
         {
             ApiResponse<ICollection<PostResponseModel>> apiResponse = new ApiResponse<ICollection<PostResponseModel>> { Response = new List<PostResponseModel>() };

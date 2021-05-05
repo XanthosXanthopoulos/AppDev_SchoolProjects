@@ -53,4 +53,10 @@
         android:label="AddMoment"
         tools:layout="@layout/fragment_add_moment" />
 
+    <fragment
+        android:id="@+id/navigation_follows"
+        android:name="com.example.demoapp.ui.main.follow.FollowFragment"
+        android:label="Follows"
+        tools:layout="@layout/fragment_follow" />
+
 </navigation>

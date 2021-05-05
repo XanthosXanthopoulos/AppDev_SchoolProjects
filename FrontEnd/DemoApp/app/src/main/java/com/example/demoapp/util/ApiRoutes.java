@@ -5,7 +5,7 @@ import java.util.Map;
 
 public final class ApiRoutes
 {
-    private static final String BASE = "https://192.168.2.7:5002/api";
+    private static final String BASE = "http://192.168.1.109:5000/api";
 
     public static final String LOGIN = "/account/login";
     public static final String REGISTER = "/account/register";
@@ -14,6 +14,7 @@ public final class ApiRoutes
     public static final String SEARCH = "/activity/activities";
     public static final String FEED = "/activity/feed";
     public static final String IMAGE_DOWNLOAD = "/file/download";
+    public static final String NOTIFICATION_HUB = "/notifications";
 
     public static String getRoute(Route route)
     {
@@ -62,6 +63,7 @@ public final class ApiRoutes
         UPDATE_PROFILE,
         SEARCH,
         FEED,
-        IMAGE_DOWNLOAD
+        IMAGE_DOWNLOAD,
+        NOTIFICATION_HUB
     }
 }

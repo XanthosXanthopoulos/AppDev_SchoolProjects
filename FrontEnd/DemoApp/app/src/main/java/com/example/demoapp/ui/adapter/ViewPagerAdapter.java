@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.demoapp.ui.main.dashboard.DashboardFragment;
+import com.example.demoapp.ui.main.follow.FollowFragment;
 import com.example.demoapp.ui.main.map.MapFragment;
 import com.example.demoapp.ui.main.plan.memory.AddMemoryFragment;
 import com.example.demoapp.ui.main.plan.moment.AddMomentFragment;
@@ -23,7 +24,8 @@ public class ViewPagerAdapter extends FragmentStateAdapter
         switch (position)
         {
             case 0:
-                return new AddMemoryFragment();
+                //return new AddMemoryFragment();
+                return new FollowFragment();
             case 1:
                 return new AddMomentFragment();
             default:

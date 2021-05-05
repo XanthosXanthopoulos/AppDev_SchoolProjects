@@ -15,9 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.FragmentContent;
 import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.ui.adapter.TripAdapter;
 import com.example.demoapp.ui.authentication.login.LoginViewModel;
@@ -32,14 +34,20 @@ import java.util.List;
 public class ProfileFragment extends Fragment
 {
 
-    private ProfileViewModel profileViewModel;
+    private ProfileViewModel viewModel;
+
+    private TextView followsTextView;
+    private TextView followersTextView;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        profileViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(ProfileViewModel.class);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(ProfileViewModel.class);
+
+        followsTextView = view.findViewById(R.id.follows);
+        followersTextView = view.findViewById(R.id.followers);
 
         RecyclerView recyclerView = view.findViewById(R.id.Trip_List);
         recyclerView.setHasFixedSize(true);
@@ -51,6 +59,14 @@ public class ProfileFragment extends Fragment
 
         TripAdapter rcAdapter = new TripAdapter(sList);
         recyclerView.setAdapter(rcAdapter);
+
+        Bundle followArgs = new Bundle();
+        followArgs.putSerializable("contentType", FragmentContent.FOLLOWS);
+        followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_follows, followArgs));
+
+        Bundle followerArgs = new Bundle();
+        followerArgs.putSerializable("contentType", FragmentContent.FOLLOWERS);
+        followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_follows, followerArgs));
 
         view.findViewById(R.id.Register_ProfileImage).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
         view.findViewById(R.id.Create_Plan).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));

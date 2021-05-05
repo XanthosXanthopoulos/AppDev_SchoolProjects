@@ -59,17 +59,6 @@ public class HomeFragment extends Fragment
             }
         });
 
-        homeViewModel.getProfileImageUpdate().observe(getViewLifecycleOwner(), new Observer<ItemUpdate>()
-        {
-            @Override
-            public void onChanged(ItemUpdate itemUpdate)
-            {
-                Post p = (Post)adapter.getItems().get(itemUpdate.getPosition());
-                p.setAccountImage(itemUpdate.getImage());
-                adapter.notifyItemChanged(itemUpdate.getPosition());
-            }
-        });
-
         homeViewModel.getFeed();
 
         return view;
