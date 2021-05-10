@@ -6,11 +6,9 @@ import java.util.Date;
 
 public class Post extends Item
 {
-    private Bitmap accountImage;
     private String profileImageID;
     private String thumbnailImageID;
     private String username;
-    private Bitmap planImage;
     private String description;
     private Country country;
     private Date date;
@@ -24,32 +22,10 @@ public class Post extends Item
     {
         super(ContentType.POST);
 
-        this.accountImage = accountImage;
         this.username = username;
-        this.planImage = planImage;
         this.description = description;
         this.country = country;
         this.date = date;
-    }
-
-    public Bitmap getAccountImage()
-    {
-        return accountImage;
-    }
-
-    public void setAccountImage(Bitmap accountImage)
-    {
-        this.accountImage = accountImage;
-    }
-
-    public Bitmap getPlanImage()
-    {
-        return planImage;
-    }
-
-    public void setPlanImage(Bitmap planImage)
-    {
-        this.planImage = planImage;
     }
 
     public String getDescription()

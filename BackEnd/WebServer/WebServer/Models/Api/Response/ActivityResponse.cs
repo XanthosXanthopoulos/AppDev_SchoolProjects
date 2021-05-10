@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebServer.Models.Api.Response
 {
-    public class ActivityRespone
+    public class ActivityResponse
     {
         public string ContentType { get; set; }
 

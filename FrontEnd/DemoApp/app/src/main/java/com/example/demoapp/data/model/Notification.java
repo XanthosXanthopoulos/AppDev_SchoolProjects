@@ -1,4 +1,4 @@
-package com.example.demoapp.data.model.repository;
+package com.example.demoapp.data.model;
 
 public class Notification
 {

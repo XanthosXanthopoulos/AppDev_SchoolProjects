@@ -1,7 +1,5 @@
 package com.example.demoapp.ui.main.home;
 
-import android.graphics.Bitmap;
-
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
@@ -9,10 +7,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.model.Item;
-import com.example.demoapp.data.model.Post;
+import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
-import com.example.demoapp.data.viewmodel.ItemUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +17,13 @@ import java.util.List;
 public class HomeViewModel extends ViewModel
 {
     private ContentRepository repository;
+    private NotificationHub hub;
     private final LiveData<List<Item>> feedResult;
 
-    public HomeViewModel(ContentRepository repository)
+    public HomeViewModel(ContentRepository repository, NotificationHub hub)
     {
         this.repository = repository;
-
-        NotificationHub.getInstance();
-        NotificationHub.init("");
-
+        this.hub = hub;
 
         feedResult = Transformations.map(repository.getFeedResult(), new Function<RepositoryResponse<List<Item>>, List<Item>>()
         {
@@ -55,5 +50,10 @@ public class HomeViewModel extends ViewModel
     public LiveData<List<Item>> getFeedResult()
     {
         return feedResult;
+    }
+
+    public LiveData<List<Notification>> getNotifications()
+    {
+        return hub.getNotificationsLiveData();
     }
 }

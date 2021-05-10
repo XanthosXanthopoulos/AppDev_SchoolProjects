@@ -56,7 +56,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(HomeViewModel.class))
         {
-            return (T) new HomeViewModel(ContentRepository.getInstance(new ApiDataSource()));
+            return (T) new HomeViewModel(ContentRepository.getInstance(new ApiDataSource()), NotificationHub.getInstance());
         }
         else if(modelClass.isAssignableFrom(AddMomentViewModel.class))
         {

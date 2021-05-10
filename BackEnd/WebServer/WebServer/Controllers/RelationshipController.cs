@@ -100,9 +100,10 @@ namespace WebServer.Controllers
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             List<FollowResponseModel> result = (from u in _context.Users
-                                                 from f in _context.Follows
-                                                 where f.FolloweeID == userID
-                                                 select new FollowResponseModel { UserID = f.FollowerID, Accepted = f.Accepted }).ToList();
+                                                from f in _context.Follows
+                                                where f.FolloweeID == userID
+                                                orderby f.Accepted
+                                                select new FollowResponseModel { UserID = f.FollowerID, Accepted = f.Accepted }).ToList();
 
             return result;
         }
@@ -116,6 +117,7 @@ namespace WebServer.Controllers
             List<FollowResponseModel> result = (from u in _context.Users
                                                 from f in _context.Follows
                                                 where f.FollowerID == userID
+                                                orderby f.Accepted
                                                 select new FollowResponseModel { UserID = f.FolloweeID, Accepted = f.Accepted }).ToList();
 
             return result;

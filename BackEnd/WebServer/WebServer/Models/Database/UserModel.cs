@@ -22,6 +22,8 @@ namespace WebServer.Models.Database
 
         public AccountType AccountType { get; set; }
 
-        public ICollection<ImageModel> Images { get; set; }
+        public Image ProfileImage { get; set; }
+
+        public ICollection<Post> Posts { get; set; }
     }
 }

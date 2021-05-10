@@ -65,8 +65,7 @@ namespace WebServer
                     Address = "1871  Poplar Lane",
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.73543741130086, 37.9894702164558) { SRID = 4326 },
-                    Title = "Activity 1",
-                    Type = "Indor"
+                    Title = "Activity 1"
                 });
 
                 dbContext.Activities.Add(new Models.Database.Activity()
@@ -74,8 +73,7 @@ namespace WebServer
                     Address = "187 Lane",
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.720947233378396, 37.982539628169874) { SRID = 4326 },
-                    Title = "Activity 2",
-                    Type = "Indor"
+                    Title = "Activity 2"
                 });
 
                 dbContext.Activities.Add(new Models.Database.Activity()
@@ -83,8 +81,7 @@ namespace WebServer
                     Address = "Poplar Lane",
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 },
-                    Title = "Activity 3",
-                    Type = "Indor"
+                    Title = "Activity 3"
                 });
 
                 dbContext.SaveChanges();

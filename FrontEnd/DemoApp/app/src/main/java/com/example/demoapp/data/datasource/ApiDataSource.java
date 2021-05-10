@@ -439,4 +439,47 @@ public class ApiDataSource
 
         return result;
     }
+
+//    public LiveData<DataSourceResponse<Post>> getPost(int postID, String JWToken)
+//    {
+//        MutableLiveData<DataSourceResponse<Post>> result = new MutableLiveData<>();
+//        ApiHandler apiHandler = ApiHandler.getInstance();
+//
+//        HashMap<String, String> params = new HashMap<>();
+//        params.put("postID", String.valueOf(postID));
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST, params), null, new Response.Listener<JSONObject>()
+//        {
+//            @Override
+//            public void onResponse(JSONObject response)
+//            {
+//                ApiResponse<AuthenticationResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<AuthenticationResponseModel>>(){}.getType());
+//
+//                if (apiResponse.isSuccessful())
+//                {
+//                    User user = new User();
+//                    user.setUsername(apiResponse.getResponse().getUsername());
+//                    user.setJwToken(apiResponse.getResponse().getJwToken());
+//
+//                    result.setValue(new DataSourceResponse<>(user));
+//                }
+//                else
+//                {
+//                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+//                }
+//            }
+//        }, new Response.ErrorListener()
+//        {
+//            @Override
+//            public void onErrorResponse(VolleyError error)
+//            {
+//                System.err.println(error.networkResponse);
+//                result.setValue(new DataSourceResponse<>("Network error"));
+//            }
+//        });
+//
+//        apiHandler.addToRequestQueue(request);
+//
+//
+//        return result;
+//    }
 }

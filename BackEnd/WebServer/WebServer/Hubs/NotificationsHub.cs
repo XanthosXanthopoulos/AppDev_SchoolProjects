@@ -10,7 +10,7 @@ using WebServer.Data;
 
 namespace WebServer.Hubs
 {
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class NotificationsHub : Hub
     {
         private ApplicationDataDbContext _context;
@@ -22,9 +22,7 @@ namespace WebServer.Hubs
 
         public override Task OnConnectedAsync()
         {
-            //Groups.AddToGroupAsync(Context.ConnectionId, Context.User.Identity.Name);
-
-            Console.WriteLine(Context.ConnectionId + " Connected");
+            Groups.AddToGroupAsync(Context.ConnectionId, Context.User.Identity.Name);
 
             return base.OnConnectedAsync();
         }
@@ -48,7 +46,7 @@ namespace WebServer.Hubs
         {
             string userID = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            await Clients.Groups(followerID).SendAsync("acceptRequest", userID);
+            await Clients.Groups(followerID).SendAsync("declineRequest", userID);
         }
 
         public async Task Unfollow(string followeeID)
