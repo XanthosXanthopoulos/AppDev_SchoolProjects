@@ -14,6 +14,7 @@ import com.example.demoapp.ui.main.follow.FollowViewModel;
 import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.plan.CreatePlanViewModel;
+import com.example.demoapp.ui.main.plan.ViewPlanViewModel;
 import com.example.demoapp.ui.main.plan.memory.AddMemoryViewModel;
 import com.example.demoapp.ui.main.plan.memory.create.CreateMemoryViewModel;
 import com.example.demoapp.ui.main.plan.moment.AddMomentViewModel;
@@ -80,6 +81,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if (modelClass.isAssignableFrom(CreatePlanViewModel.class))
         {
             return (T) new CreatePlanViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if (modelClass.isAssignableFrom(ViewPlanViewModel.class))
+        {
+            return (T) new ViewPlanViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else
         {

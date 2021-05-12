@@ -1,6 +1,7 @@
 package com.example.demoapp.ui.adapter;
 
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,6 +121,10 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
 
                 Glide.with(App.getInstance()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(postViewHolder.accountImage);
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("PostID", post.getPostID());
+                postViewHolder.accountImage.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_ViewPlan, bundle));
 
                 break;
         }

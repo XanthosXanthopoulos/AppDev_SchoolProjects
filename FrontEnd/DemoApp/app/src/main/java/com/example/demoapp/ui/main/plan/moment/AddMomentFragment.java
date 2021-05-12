@@ -88,14 +88,14 @@ public class AddMomentFragment extends Fragment
         momentList.setLayoutManager(new GridLayoutManager(getContext(), 3));
         momentList.setAdapter(adapter);
 
-        viewModel.getImagesLiveData().observe(getViewLifecycleOwner(), new Observer<Iterable<Uri>>()
+        viewModel.getImagesLiveData().observe(getViewLifecycleOwner(), new Observer<Iterable<String>>()
         {
             @Override
-            public void onChanged(Iterable<Uri> uris)
+            public void onChanged(Iterable<String> paths)
             {
-                List<Uri> items = new ArrayList<>();
-                uris.forEach(items::add);
-                adapter.setItems(items);
+                List<Uri> uris = new ArrayList<>();
+                paths.forEach(path -> uris.add(Uri.parse(path)));
+                adapter.setItems(uris);
             }
         });
 

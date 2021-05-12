@@ -2,65 +2,99 @@ package com.example.demoapp.ui.main.plan;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.viewpager2.widget.CompositePageTransformer;
+import androidx.viewpager2.widget.MarginPageTransformer;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.demoapp.R;
+import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.Post;
+import com.example.demoapp.ui.adapter.ImageUriAdapter;
+import com.example.demoapp.ui.adapter.ImageUrlAdapter;
+import com.example.demoapp.ui.adapter.SearchResultAdapter;
+import com.example.demoapp.util.ViewModelFactory;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ViewPlanFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class ViewPlanFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class ViewPlanFragment extends Fragment
+{
+    private ViewPlanViewModel viewModel;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public ViewPlanFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment View_Plan_Fragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ViewPlanFragment newInstance(String param1, String param2) {
-        ViewPlanFragment fragment = new ViewPlanFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private RecyclerView activityList;
+    private SearchResultAdapter adapter;
+    private ViewPager2 viewPager2;
+    private ImageUrlAdapter slideshowAdapter;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.fragment_view_plan, container, false);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_view__plan_, container, false);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(ViewPlanViewModel.class);
+
+        activityList = view.findViewById(R.id.activity_list);
+        viewPager2 = viewPager2.findViewById(R.id.post_images);
+
+        StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+        activityList.setLayoutManager(_sGridLayoutManager);
+
+        adapter = new SearchResultAdapter();
+        activityList.setAdapter(adapter);
+
+        slideshowAdapter = new ImageUrlAdapter(getContext());
+
+        viewPager2.setAdapter(slideshowAdapter);
+        viewPager2.setClipToPadding(false);
+        viewPager2.setClipChildren(false);
+        viewPager2.setOffscreenPageLimit(3);
+        viewPager2.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
+
+        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
+        compositePageTransformer.addTransformer(new MarginPageTransformer(40));
+        compositePageTransformer.addTransformer(new ViewPager2.PageTransformer()
+        {
+            @Override
+            public void transformPage(@NonNull View page, float position)
+            {
+                float r = 1 - Math.abs(position);
+                page.setScaleY(0.85F + r * 0.15f);
+            }
+        });
+        viewPager2.setPageTransformer(compositePageTransformer);
+//        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+//            @Override
+//            public void onPageSelected(int position) {
+//                super.onPageSelected(position);
+//                sliderHanlder.removeCallbacks(sliderRunnable);
+//                sliderHanlder.postDelayed(sliderRunnable,3000); // Slider duration 3 seconds
+//            }
+//        });
+
+        viewModel.getPostLiveData().observe(getViewLifecycleOwner(), new Observer<Post>()
+        {
+            @Override
+            public void onChanged(Post post)
+            {
+                if (post == null) return;
+
+                adapter.setItems(new ArrayList<>(post.getActivities()));
+                slideshowAdapter.setItems(new ArrayList<>(post.getImages()));
+            }
+        });
+
+        viewModel.loadPost(getArguments().getInt("PostID"));
+
+        return view;
     }
 }

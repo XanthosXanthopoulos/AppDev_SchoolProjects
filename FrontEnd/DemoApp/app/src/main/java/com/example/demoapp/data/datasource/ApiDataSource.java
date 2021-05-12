@@ -460,13 +460,11 @@ public class ApiDataSource
             @Override
             public void onResponse(JSONObject response)
             {
-                ApiResponse<PostResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<PostResponseModel>>(){}.getType());
+                ApiResponse<Post> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<Post>>(){}.getType());
 
                 if (apiResponse.isSuccessful())
                 {
-                    Post post = new Post();
-
-                    result.setValue(new DataSourceResponse<>(post));
+                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
                 }
                 else
                 {
@@ -496,7 +494,8 @@ public class ApiDataSource
         ApiHandler apiHandler = ApiHandler.getInstance();
         ImageLoader imageLoader = ImageLoader.getInstance();
 
-        LinkedList<Uri> pendingImages = new LinkedList<>(post.getImages());
+        LinkedList<Uri> pendingImages = new LinkedList<>();
+        post.getImages().forEach(path -> pendingImages.add(Uri.parse(path)));
         LinkedList<Activity> pendingActivities = new LinkedList<>(post.getActivities());
 
         LinkedList<String> imageIDs = new LinkedList<>();

@@ -11,6 +11,7 @@ import java.util.List;
 
 public class Post extends Item
 {
+    private int postID;
     private String profileImageID;
     private String thumbnailImageID;
     private String username;
@@ -19,7 +20,7 @@ public class Post extends Item
     private Date date;
 
     private Deque<Activity> activities;
-    private Deque<Uri> images;
+    private Deque<String> images;
 
     public Post()
     {
@@ -100,12 +101,12 @@ public class Post extends Item
         this.activities = activities;
     }
 
-    public Deque<Uri> getImages()
+    public Deque<String> getImages()
     {
         return images;
     }
 
-    public void setImages(Deque<Uri> images)
+    public void setImages(Deque<String> images)
     {
         this.images = images;
     }
@@ -118,5 +119,15 @@ public class Post extends Item
     public void setTitle(String title)
     {
         this.title = title;
+    }
+
+    public int getPostID()
+    {
+        return postID;
+    }
+
+    public void setPostID(int postID)
+    {
+        this.postID = postID;
     }
 }

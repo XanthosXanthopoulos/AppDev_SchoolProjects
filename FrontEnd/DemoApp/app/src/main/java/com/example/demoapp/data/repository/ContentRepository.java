@@ -4,10 +4,12 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 
 import androidx.annotation.Nullable;
+import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.model.Activity;
@@ -29,6 +31,7 @@ public class ContentRepository extends Repository
     private final MediatorLiveData<RepositoryResponse<List<Item>>> searchResult;
     private final MediatorLiveData<RepositoryResponse<List<Item>>> feedResult;
     private final MediatorLiveData<RepositoryResponse<Boolean>> uploadResult;
+    private final MediatorLiveData<RepositoryResponse<Post>> postResult;
 
     private final MutableLiveData<Activity> currentActivity;
     private final MutableLiveData<Post> currentPost;
@@ -40,6 +43,7 @@ public class ContentRepository extends Repository
         searchResult = new MediatorLiveData<>();
         feedResult = new MediatorLiveData<>();
         uploadResult = new MediatorLiveData<>();
+        postResult = new MediatorLiveData<>();
 
         currentActivity = new MutableLiveData<>();
         currentPost = new MutableLiveData<>();
@@ -132,7 +136,7 @@ public class ContentRepository extends Repository
         });
     }
 
-    public void addImages(List<Uri> images)
+    public void addImages(List<String> images)
     {
         Post post = currentPost.getValue();
         post.getImages().addAll(images);
@@ -155,6 +159,28 @@ public class ContentRepository extends Repository
         {
             currentPost.setValue(new Post());
         }
+    }
+
+    public void loadPost(int postID)
+    {
+        LiveData<DataSourceResponse<Post>> result = dataSource.getPost(postID, loadFromPrefs("JWToken"));
+        postResult.addSource(result, new Observer<DataSourceResponse<Post>>()
+        {
+            @Override
+            public void onChanged(DataSourceResponse<Post> postDataSourceResponse)
+            {
+                if (postDataSourceResponse.isSuccessful())
+                {
+                    postResult.setValue(new RepositoryResponse<>(postDataSourceResponse.getResponse()));
+                }
+                else
+                {
+                    postResult.setValue(new RepositoryResponse<>(postDataSourceResponse.getErrorMessage()));
+                }
+
+                postResult.removeSource(result);
+            }
+        });
     }
 
     public void resetPostData()

@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.repository.ContentRepository;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,16 +18,16 @@ public class AddMomentViewModel extends ViewModel{
 
     private ContentRepository repository;
 
-    private final LiveData<Iterable<Uri>> imagesLiveData;
+    private final LiveData<Iterable<String>> imagesLiveData;
 
     public AddMomentViewModel(ContentRepository repository)
     {
         this.repository = repository;
 
-        imagesLiveData = Transformations.map(repository.getCurrentPost(), new Function<Post, Iterable<Uri>>()
+        imagesLiveData = Transformations.map(repository.getCurrentPost(), new Function<Post, Iterable<String>>()
         {
             @Override
-            public Iterable<Uri> apply(Post post)
+            public Iterable<String> apply(Post post)
             {
                 if (post == null)
                 {
@@ -42,10 +43,12 @@ public class AddMomentViewModel extends ViewModel{
 
     public void addImages(List<Uri> images)
     {
-        repository.addImages(images);
+        List<String> paths = new ArrayList<>(images.size());
+        images.forEach(uri -> paths.add(uri.toString()));
+        repository.addImages(paths);
     }
 
-    public LiveData<Iterable<Uri>> getImagesLiveData()
+    public LiveData<Iterable<String>> getImagesLiveData()
     {
         return imagesLiveData;
     }
