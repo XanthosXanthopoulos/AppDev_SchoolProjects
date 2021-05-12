@@ -14,8 +14,11 @@ public final class ApiRoutes
     public static final String SEARCH = "/activity/activities";
     public static final String FEED = "/activity/feed";
     public static final String IMAGE_DOWNLOAD = "/file/download";
+    public static final String IMAGE_UPLOAD = "/file/uploadfile";
     public static final String NOTIFICATION_HUB = "/notifications";
     public static final String GET_POST = "/post/getpost";
+    public static final String UPLOAD_ACTIVITY = "/activity/uploadactivity";
+    public static final String UPLOAD_POST = "/post/uploadpost";
 
     public static String getRoute(Route route)
     {
@@ -65,7 +68,10 @@ public final class ApiRoutes
         SEARCH,
         FEED,
         IMAGE_DOWNLOAD,
+        IMAGE_UPLOAD,
         NOTIFICATION_HUB,
-        GET_POST
+        GET_POST,
+        UPLOAD_ACTIVITY,
+        UPLOAD_POST
     }
 }

@@ -2,26 +2,30 @@ package com.example.demoapp.data.model;
 
 public class Activity extends Item
 {
+    private String id;
     private String title;
     private String description;
     private String tags;
     private String address;
-    private String type;
+    private Country country;
+    private double latitude;
+    private double longtitude;
 
     public Activity()
     {
         super(ContentType.ACTIVITY);
     }
 
-    public Activity(String title, String description, String tags, String address, String type)
+    public Activity(String id, String title, String description, String tags, Country country, String address)
     {
         super(ContentType.ACTIVITY);
 
+        this.id = id;
         this.title = title;
         this.description = description;
         this.tags = tags;
         this.address = address;
-        this.type = type;
+        this.country = country;
     }
 
     public String getTitle()
@@ -64,13 +68,23 @@ public class Activity extends Item
         this.address = address;
     }
 
-    public String getType()
+    public String getId()
     {
-        return type;
+        return id;
     }
 
-    public void setType(String type)
+    public void setId(String id)
     {
-        this.type = type;
+        this.id = id;
+    }
+
+    public Country getCountry()
+    {
+        return country;
+    }
+
+    public void setCountry(Country country)
+    {
+        this.country = country;
     }
 }

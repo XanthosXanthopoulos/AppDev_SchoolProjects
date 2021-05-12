@@ -54,6 +54,12 @@
         tools:layout="@layout/fragment_add_moment" />
 
     <fragment
+        android:id="@+id/navigation_createMemory"
+        android:name="com.example.demoapp.ui.main.plan.memory.create.CreateMemoryFragment"
+        android:label="CreateMemory"
+        tools:layout="@layout/fragment_create_memory"/>
+
+    <fragment
         android:id="@+id/navigation_follows"
         android:name="com.example.demoapp.ui.main.follow.FollowFragment"
         android:label="Follows"

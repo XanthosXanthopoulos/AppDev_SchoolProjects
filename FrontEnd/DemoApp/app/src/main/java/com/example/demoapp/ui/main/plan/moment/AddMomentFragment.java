@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -40,6 +41,7 @@ import android.widget.Toast;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Image;
+import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.ui.adapter.ImageUriAdapter;
 import com.example.demoapp.ui.adapter.SearchResultAdapter;
@@ -86,6 +88,17 @@ public class AddMomentFragment extends Fragment
         momentList.setLayoutManager(new GridLayoutManager(getContext(), 3));
         momentList.setAdapter(adapter);
 
+        viewModel.getImagesLiveData().observe(getViewLifecycleOwner(), new Observer<Iterable<Uri>>()
+        {
+            @Override
+            public void onChanged(Iterable<Uri> uris)
+            {
+                List<Uri> items = new ArrayList<>();
+                uris.forEach(items::add);
+                adapter.setItems(items);
+            }
+        });
+
         addImageButton.setOnClickListener(v ->
         {
             Intent intent = new Intent();
@@ -121,7 +134,7 @@ public class AddMomentFragment extends Fragment
                 URIs.add(data.getData());
             }
 
-            adapter.setItems(URIs);
+            viewModel.addImages(URIs);
         }
     }
 }

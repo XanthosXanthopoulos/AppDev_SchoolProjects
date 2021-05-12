@@ -24,8 +24,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter
         switch (position)
         {
             case 0:
-                //return new AddMemoryFragment();
-                return new FollowFragment();
+                return new AddMemoryFragment();
             case 1:
                 return new AddMomentFragment();
             default:

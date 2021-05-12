@@ -62,11 +62,11 @@ public class ProfileFragment extends Fragment
 
         Bundle followArgs = new Bundle();
         followArgs.putSerializable("contentType", FragmentContent.FOLLOWS);
-        followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_follows, followArgs));
+        //followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_follows, followArgs));
 
         Bundle followerArgs = new Bundle();
         followerArgs.putSerializable("contentType", FragmentContent.FOLLOWERS);
-        followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_follows, followerArgs));
+        //followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_follows, followerArgs));
 
         view.findViewById(R.id.Register_ProfileImage).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
         view.findViewById(R.id.Create_Plan).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreatePlan));

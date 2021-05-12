@@ -1,19 +1,21 @@
 package com.example.demoapp.data.datasource;
 
 import android.graphics.Bitmap;
+import android.location.Address;
+import android.net.Uri;
+import android.util.Log;
 import android.widget.ImageView;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.ContentType;
 import com.example.demoapp.data.model.Item;
@@ -24,16 +26,22 @@ import com.example.demoapp.data.model.api.response.*;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.util.ApiHandler;
 import com.example.demoapp.util.ApiRoutes;
+import com.example.demoapp.util.ImageLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -440,46 +448,171 @@ public class ApiDataSource
         return result;
     }
 
-//    public LiveData<DataSourceResponse<Post>> getPost(int postID, String JWToken)
-//    {
-//        MutableLiveData<DataSourceResponse<Post>> result = new MutableLiveData<>();
-//        ApiHandler apiHandler = ApiHandler.getInstance();
-//
-//        HashMap<String, String> params = new HashMap<>();
-//        params.put("postID", String.valueOf(postID));
-//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST, params), null, new Response.Listener<JSONObject>()
-//        {
-//            @Override
-//            public void onResponse(JSONObject response)
-//            {
-//                ApiResponse<AuthenticationResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<AuthenticationResponseModel>>(){}.getType());
-//
-//                if (apiResponse.isSuccessful())
-//                {
-//                    User user = new User();
-//                    user.setUsername(apiResponse.getResponse().getUsername());
-//                    user.setJwToken(apiResponse.getResponse().getJwToken());
-//
-//                    result.setValue(new DataSourceResponse<>(user));
-//                }
-//                else
-//                {
-//                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-//                }
-//            }
-//        }, new Response.ErrorListener()
-//        {
-//            @Override
-//            public void onErrorResponse(VolleyError error)
-//            {
-//                System.err.println(error.networkResponse);
-//                result.setValue(new DataSourceResponse<>("Network error"));
-//            }
-//        });
-//
-//        apiHandler.addToRequestQueue(request);
-//
-//
-//        return result;
-//    }
+    public LiveData<DataSourceResponse<Post>> getPost(int postID, String JWToken)
+    {
+        MutableLiveData<DataSourceResponse<Post>> result = new MutableLiveData<>();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("postID", String.valueOf(postID));
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST, params), null, new Response.Listener<JSONObject>()
+        {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                ApiResponse<PostResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<PostResponseModel>>(){}.getType());
+
+                if (apiResponse.isSuccessful())
+                {
+                    Post post = new Post();
+
+                    result.setValue(new DataSourceResponse<>(post));
+                }
+                else
+                {
+                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+                }
+            }
+        }, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                System.err.println(error.networkResponse);
+                result.setValue(new DataSourceResponse<>("Network error"));
+            }
+        });
+
+        apiHandler.addToRequestQueue(request);
+
+
+        return result;
+    }
+
+    public LiveData<DataSourceResponse<Boolean>> uploadPost(Post post, String JWToken)
+    {
+        MutableLiveData<DataSourceResponse<Boolean>> result = new MutableLiveData<>();
+        JSONObject postBody = new JSONObject();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+        ImageLoader imageLoader = ImageLoader.getInstance();
+
+        LinkedList<Uri> pendingImages = new LinkedList<>(post.getImages());
+        LinkedList<Activity> pendingActivities = new LinkedList<>(post.getActivities());
+
+        LinkedList<String> imageIDs = new LinkedList<>();
+        LinkedList<String> activityIDs = new LinkedList<>();
+
+        Response.ErrorListener errorListener = new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                result.setValue(new DataSourceResponse<>(false));
+            }
+        };
+
+        postUpload = new Response.Listener<JSONObject>()
+        {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                result.setValue(new DataSourceResponse<>(true));
+            }
+        };
+
+        activityUpload = new Response.Listener<JSONObject>()
+        {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                JsonObjectRequest request;
+
+                if (pendingActivities.isEmpty())
+                {
+                    request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD), null, postUpload, errorListener);
+                }
+                else
+                {
+                    request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD), null, activityUpload, errorListener);
+                }
+
+                apiHandler.addToRequestQueue(request);
+            }
+        };
+
+        imageUpload = new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                ImageUploadRequest request;
+                imageIDs.add(response);
+
+                if (pendingImages.isEmpty())
+                {
+                    //request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD), null, activityUpload, errorListener);
+                    result.setValue(new DataSourceResponse<>(true));
+                    return;
+                }
+                else
+                {
+                    request = new ImageUploadRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_UPLOAD), pendingImages.pop(), JWToken, imageUpload, errorListener);
+                }
+
+                apiHandler.addToRequestQueue(request);
+            }
+        };
+
+        while (!pendingActivities.isEmpty() && !pendingActivities.peek().getId().isEmpty())
+        {
+            activityIDs.add(pendingActivities.pop().getId());
+        }
+
+        Request<?> initialRequest;
+        if (!pendingImages.isEmpty())
+        {
+            initialRequest = new ImageUploadRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_UPLOAD), pendingImages.pop(), JWToken, imageUpload, errorListener);
+        }
+        else if (!pendingActivities.isEmpty())
+        {
+            Activity activity = pendingActivities.pop();
+            JSONObject activitySubmitModel = new JSONObject();
+            try
+            {
+                activitySubmitModel.put("Title", activity.getTitle());
+                activitySubmitModel.put("Description", activity.getDescription());
+                activitySubmitModel.put("Address", activity.getAddress());
+                activitySubmitModel.put("Country", activity.getCountry().code);
+                activitySubmitModel.put("Tags", activity.getTags());
+            }
+            catch (JSONException e)
+            {
+                e.printStackTrace();
+            }
+            initialRequest = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener);
+        }
+        else
+        {
+            JSONObject postSubmitModel = new JSONObject();
+            try
+            {
+                postSubmitModel.put("Title", post.getTitle());
+                postSubmitModel.put("Description", post.getDescription());
+                postSubmitModel.put("Date", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(post.getDate()));
+            }
+            catch (JSONException e)
+            {
+                e.printStackTrace();
+            }
+            initialRequest = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_POST), postSubmitModel, postUpload, errorListener);
+        }
+
+        apiHandler.addToRequestQueue(initialRequest);
+
+        return result;
+    }
+
+    private Response.Listener<JSONObject> activityUpload = null;
+    private Response.Listener<String> imageUpload = null;
+    private Response.Listener<JSONObject> postUpload = null;
 }

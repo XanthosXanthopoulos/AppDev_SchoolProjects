@@ -31,12 +31,13 @@ namespace WebServer.Controllers
             if (ModelState.IsValid && file != null && file.ContentType.StartsWith("image"))
             {
                 string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                string fileID = Guid.NewGuid().ToString() + new FileExtensionContentTypeProvider().Mappings.FirstOrDefault(type => type.Value == file.ContentType).Key;
+                string fileID = Guid.NewGuid().ToString();
+                string filename = fileID + new FileExtensionContentTypeProvider().Mappings.FirstOrDefault(type => type.Value == file.ContentType).Key;
 
                 string directory = Path.Combine(Environment.CurrentDirectory, "FileStorage");
                 Directory.CreateDirectory(directory);
 
-                var filePath = Path.Combine(directory, fileID);
+                var filePath = Path.Combine(directory, filename);
 
                 // Create a new file in the home-guac directory with the newly generated file name
                 using (FileStream stream = new FileStream(filePath, FileMode.Create))

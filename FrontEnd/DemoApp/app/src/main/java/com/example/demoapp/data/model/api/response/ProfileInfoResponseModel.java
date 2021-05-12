@@ -6,19 +6,12 @@ import com.example.demoapp.data.model.AccountType;
 public class ProfileInfoResponseModel
 {
     private String username;
-
     private String email;
-
     private String name;
-
     private String surname;
-
     private String birthday;
-
     private Country country;
-
     private String description;
-
     private AccountType accountType;
 
     public ProfileInfoResponseModel(String username, String email, String name, String surname, String description, String birthday, Country country, AccountType accountType)
