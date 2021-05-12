@@ -26,7 +26,7 @@ namespace WebServer.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> UploadActivity([FromBody] ActivitySubmitModel activitySubmit)
         {
             Activity activity = new Activity
@@ -35,7 +35,7 @@ namespace WebServer.Controllers
                 City = activitySubmit.City,
                 Country = activitySubmit.Country,
                 Description = activitySubmit.Description,
-                Tags = activitySubmit.Tags,
+                Tags = activitySubmit.Tags.Split(","),
                 Title = activitySubmit.Title,
                 Coordinates = new Point(activitySubmit.Longtitude, activitySubmit.Latitude) { SRID = 4326 }
             };

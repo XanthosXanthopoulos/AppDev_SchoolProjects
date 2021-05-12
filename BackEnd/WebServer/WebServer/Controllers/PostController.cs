@@ -113,6 +113,8 @@ namespace WebServer.Controllers
             return new ApiResponse<PostResponseModel> { Response = result };
         }
 
+        [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> UploadPost([FromBody] PostSubmitModel postSubmit)
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

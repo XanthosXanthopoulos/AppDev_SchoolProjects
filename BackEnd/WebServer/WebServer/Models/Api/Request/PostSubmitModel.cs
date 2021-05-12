@@ -14,6 +14,8 @@ namespace WebServer.Models.Api.Request
 
         public Country Country { get; set; }
 
+        public DateTime Date { get; set; }
+
         public ICollection<string> Images { get; set; }
 
         public ICollection<string> Activities { get; set; }
