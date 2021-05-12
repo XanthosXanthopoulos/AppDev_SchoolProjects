@@ -16,7 +16,7 @@ namespace WebServer.Models.Database
 
         public string Address { get; set; }
 
-        public ICollection<string> Tags { get; set; } 
+        public string Tags { get; set; } 
 
         public Country Country { get; set; }
 

@@ -39,7 +39,6 @@ namespace WebServer.Data
             modelBuilder.Entity<Follow>().HasOne(f => f.Follower).WithMany().HasForeignKey(f => f.FollowerID);
             modelBuilder.Entity<Follow>().HasOne(f => f.Followee).WithMany().HasForeignKey(f => f.FolloweeID).OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Activity>().Property(a => a.Tags).HasConversion(a => string.Join(",", a), a => a.Split(',', StringSplitOptions.RemoveEmptyEntries));
             modelBuilder.Entity<Activity>().Property(e => e.ActivityID).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Post>().Property(e => e.PostID).ValueGeneratedOnAdd();

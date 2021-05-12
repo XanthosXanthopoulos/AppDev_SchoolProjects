@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using WebServer.Models.Enums;
 
 namespace WebServer.Models.Database
 {
@@ -14,7 +14,7 @@ namespace WebServer.Models.Database
 
         public string Description { get; set; }
 
-        public Country Country { get; set; }
+        public DateTime Date { get; set; }
 
         public ICollection<Image> Images { get; set; } 
 

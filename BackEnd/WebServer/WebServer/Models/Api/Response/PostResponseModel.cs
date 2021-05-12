@@ -15,7 +15,11 @@ namespace WebServer.Models.Api.Response
 
         public string Description { get; set; }
 
-        public Country Country { get; set; }
+        public string ProfileImageID { get; set; }
+
+        public string Username { get; set; }
+
+        public DateTime Date { get; set; }
 
         public ICollection<string> Images { get; set; }
 

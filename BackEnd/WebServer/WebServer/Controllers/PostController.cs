@@ -38,7 +38,6 @@ namespace WebServer.Controllers
                                                     orderby p.PostID descending
                                                     select new PostSummaryResponseModel 
                                                     { 
-                                                        ContentType = "POST", 
                                                         Username = f.Followee.Name, 
                                                         ProfileImageID = f.Followee.ProfileImage.ImageID, 
                                                         ThumbnailImageID = p.Images.First().ImageID 
@@ -72,43 +71,68 @@ namespace WebServer.Controllers
             ApiResponse<ICollection<ActivityResponse>> apiResponse = new ApiResponse<ICollection<ActivityResponse>> { Response = new List<ActivityResponse>() };
 
             //ICollection<PostSummaryResponseModel> result = await (from p in _context.Posts
-            //                                               join f in _context.Follows on p.UserID equals f.FolloweeID
-            //                                               where f.FollowerID == userID
-            //                                               where country == null || p.Country == (Country)country
-            //                                               where city == null || p.Activities.Any(a => a.City.Equals(city, StringComparison.OrdinalIgnoreCase))
-            //                                               where p.Description.Split(" ", StringSplitOptions.RemoveEmptyEntries).Concat(p.Title.Split(" ", StringSplitOptions.RemoveEmptyEntries)).Any(d => searchTerms.Contains(d))
-            //                                               where point == null || radius == null || p.Activities.Any(a => a.Coordinates.Distance(point) < radius)
-            //                                               select ).ToListAsync();
+            //                                                      join f in _context.Follows on p.UserID equals f.FolloweeID
+            //                                                      where f.FollowerID == userID
+            //                                                      where country == null || p.Activities.Any(a => a.Country == (Country)country)
+            //                                                      where city == null || p.Activities.Any(a => a.City.Equals(city, StringComparison.OrdinalIgnoreCase))
+            //                                                      where p.Description.Split(" ", StringSplitOptions.RemoveEmptyEntries).Concat(p.Title.Split(" ", StringSplitOptions.RemoveEmptyEntries)).Any(d => searchTerms.Contains(d))
+            //                                                      where point == null || radius == null || p.Activities.Any(a => a.Coordinates.Distance(point) < radius)
+            //                                                      select ).ToListAsync();
 
             return new ApiResponse<ICollection<PostSummaryResponseModel>> { Response = null };
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<ApiResponse<PostResponseModel>> GetPost(int postID)
         {
-            PostResponseModel result = await (from p in _context.Posts
-                                       where p.PostID == postID
-                                       select new PostResponseModel
-                                       {
-                                           PostID = p.PostID,
-                                           Country = p.Country,
-                                           Title = p.Title,
-                                           Description = p.Description,
-                                           Images = p.Images.Select(i => i.ImageID).ToList(),
-                                           Activities = p.Activities.Select(a => new ActivityResponse()
-                                           {
-                                               ID = a.ActivityID,
-                                               Title = a.Title,
-                                               Description = a.Description,
-                                               ContentType = "ACTIVITY",
-                                               Address = a.Address,
-                                               Tags = a.Tags
-                                               //TODO: Add coordinates to response
+            //PostResponseModel result = await (from p in _context.Posts
+            //                                  where p.PostID == postID
+            //                                  select new PostResponseModel
+            //                                  {
+            //                                      PostID = p.PostID,
+            //                                      Title = p.Title,
+            //                                      Description = p.Description,
+            //                                      Date = p.Date,
+            //                                      Username = p.User.Name,
+            //                                      ProfileImageID = p.User.ProfileImage.ImageID,
+            //                                      Images = p.Images.Select(i => i.ImageID).ToList(),
+            //                                      Activities = p.Activities.Select(a => new ActivityResponse()
+            //                                      {
+            //                                          ID = a.ActivityID,
+            //                                          Title = a.Title,
+            //                                          Description = a.Description,
+            //                                          Address = a.Address,
+            //                                          Tags = a.Tags,
+            //                                          Country = a.Country.ToString()
 
-                                           }).ToList()
-                                       })
-                                       .FirstAsync();
+            //                                      }).ToList()
+            //                                  })
+            //                           .FirstAsync();
+
+
+            PostResponseModel result = new PostResponseModel
+            {
+                PostID = postID,
+                Title = "Title",
+                Description = "Description",
+                Date = new DateTime(2021, 7, 24),
+                Username = "Username",
+                ProfileImageID = "pfo_image",
+                Images = new string[] { "im1", "im2" },
+                Activities = new ActivityResponse[]
+                {
+                    new ActivityResponse
+                    {
+                        ID = "ActivityID",
+                        Title = "ActTitle",
+                        Description = "Description",
+                        Address = "Address",
+                        Tags = "a.Tags",
+                        Country = Country.AD.ToString()
+                    }
+                }
+            };
 
             return new ApiResponse<PostResponseModel> { Response = result };
         }
@@ -123,7 +147,7 @@ namespace WebServer.Controllers
             {
                 Title = postSubmit.Title,
                 Description = postSubmit.Description,
-                Country = postSubmit.Country,
+                Date = postSubmit.Date,
                 Images = postSubmit.Images.Select(i => new Image { ImageID = i }).ToList(),
                 Activities = postSubmit.Activities.Select(a => _context.Activities.FirstOrDefault( ac => ac.ActivityID == a)).ToList(),
                 User = _context.Users.Find(userID)

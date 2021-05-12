@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebServer.Models.Enums;
 
 namespace WebServer.Models.Api.Response
 {
     public class ActivityResponse
     {
-        public string ContentType { get; set; }
-
         public string ID { get; set; }
 
         public string Title { get; set; }
@@ -17,8 +16,8 @@ namespace WebServer.Models.Api.Response
 
         public string Address { get; set; }
 
-        public string Type { get; set; }
+        public string Country { get; set; }
 
-        public ICollection<string> Tags { get; set; }
+        public string Tags { get; set; }
     }
 }

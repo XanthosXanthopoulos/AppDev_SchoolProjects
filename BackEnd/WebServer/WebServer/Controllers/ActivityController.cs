@@ -35,7 +35,7 @@ namespace WebServer.Controllers
                 City = activitySubmit.City,
                 Country = activitySubmit.Country,
                 Description = activitySubmit.Description,
-                Tags = activitySubmit.Tags.Split(","),
+                Tags = activitySubmit.Tags,
                 Title = activitySubmit.Title,
                 Coordinates = new Point(activitySubmit.Longtitude, activitySubmit.Latitude) { SRID = 4326 }
             };
@@ -73,7 +73,6 @@ namespace WebServer.Controllers
                                                                   .Where(a => p == null || radius == null || a.Coordinates.Distance(p) < radius)
                                                                   .Select(a => new ActivityResponse 
                                                                   {
-                                                                      ContentType = "ACTIVITY",
                                                                       ID = a.ActivityID,
                                                                       Title = a.Title,
                                                                       Address = a.Address,
