@@ -3,9 +3,11 @@ package com.example.demoapp.data.datasource;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -487,6 +489,7 @@ public class ApiDataSource
         return result;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public LiveData<DataSourceResponse<Boolean>> uploadPost(Post post, String JWToken)
     {
         MutableLiveData<DataSourceResponse<Boolean>> result = new MutableLiveData<>();
