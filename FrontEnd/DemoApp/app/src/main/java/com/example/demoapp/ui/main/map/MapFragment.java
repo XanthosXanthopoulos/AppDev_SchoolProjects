@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +78,7 @@ public class MapFragment<FusedLocationProviderClient> extends Fragment implement
         map = googleMap;
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            map.setMyLocationEnabled(true);
+            map.setMyLocationEnabled(true);
         }
         if(map.isMyLocationEnabled()) {
             LocationUpdates();
@@ -86,9 +87,16 @@ public class MapFragment<FusedLocationProviderClient> extends Fragment implement
 //        System.out.println("edw1 " + CameraUpdateFactory.zoomIn());
 //        System.out.println("edw2 " + CameraUpdateFactory.zoomTo(5));
 
-        if(CameraUpdateFactory.zoomIn().equals(CameraUpdateFactory.zoomTo(5))){
-            System.out.println("Im ur guy " + getMaxRadiusAfterZoom());
-        }
+        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener(){
+            @Override
+            public void onCameraMove() {
+                if(map.getCameraPosition().zoom >= 11.0f){
+                    Log.i("SUCCESS","Im ur guy ");
+                }
+            }
+
+        });
+
         search_bar = (SearchView) requireView().findViewById(R.id.search_bar);
         Drawable temp = search_bar.getBackground();
         List<Place> PlacesList = getListItemData();
