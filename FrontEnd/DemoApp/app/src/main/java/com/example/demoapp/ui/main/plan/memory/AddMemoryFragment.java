@@ -2,11 +2,13 @@ package com.example.demoapp.ui.main.plan.memory;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -55,65 +57,38 @@ public class AddMemoryFragment extends Fragment
         return view;
     }
 
+    @SuppressLint("ResourceType")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        FrameLayout item = requireActivity().findViewById(R.id.pop_up_layout);
-        View child = getLayoutInflater().inflate(R.layout.fragment_create_memory,null);
-        item.addView(child);
+//        FrameLayout item = requireActivity().findViewById(R.id.pop_up_layout);
+//        View child = getLayoutInflater().inflate(R.layout.fragment_create_memory,null);
+//        item.addView(child);
 
-        view.findViewById(R.id.create_memory_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: add activity and dynamically fill the gaps
-                item.setVisibility(View.VISIBLE);
-            }
+        view.findViewById(R.id.create_memory_button).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreateMemory));
 
-        });
-
-        item.findViewById(R.id.add_activity).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityImageAdapter rcAdapter = new ActivityImageAdapter(updateListItemData(getListItemData()));
-                recyclerView.setAdapter(rcAdapter);
-                item.setVisibility(View.GONE);
-
-            }
-        });
-
-        item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                item.setVisibility(View.GONE);
-            }
-        });
+//        item.findViewById(R.id.add_activity).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ActivityImageAdapter rcAdapter = new ActivityImageAdapter(updateListItemData(getListItemData()));
+//                recyclerView.setAdapter(rcAdapter);
+//                item.setVisibility(View.GONE);
+//
+//            }
+//        });
+//
+//        item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                item.setVisibility(View.GONE);
+//            }
+//        });
 
     }
 
     private List<Item> getListItemData()
     {
-        return ActivityList;
-    }
-
-    private List<Item> updateListItemData(List<Item> activities){
-
-        List<Item> ActivityList = activities;
-
-        final EditText t = (EditText)requireActivity().findViewById(R.id.activity_title);
-        final EditText desc = (EditText)requireActivity().findViewById(R.id.activity_description);
-        final EditText tgs = (EditText)requireActivity().findViewById(R.id.activity_tags);
-        final EditText add = (EditText)requireActivity().findViewById(R.id.activity_address);
-        final Spinner tp = (Spinner)requireActivity().findViewById(R.id.activity_type);
-
-        String title = t.getText().toString();
-        String description = desc.getText().toString();
-        String tags = tgs.getText().toString();
-        String address = add.getText().toString();
-//        String type = tp.getSelectedItem().toString();
-
-        ActivityList.add(new Activity(title, description, tags, address, null));
-
         return ActivityList;
     }
 

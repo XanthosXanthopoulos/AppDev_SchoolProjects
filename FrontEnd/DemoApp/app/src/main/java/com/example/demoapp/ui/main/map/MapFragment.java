@@ -1,30 +1,44 @@
 package com.example.demoapp.ui.main.map;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
+import android.os.Looper;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
-import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.*;
-
+import com.google.android.gms.location.*;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,26 +46,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback
-{
+public class MapFragment<FusedLocationProviderClient> extends Fragment implements OnMapReadyCallback,
+        com.google.android.gms.location.LocationListener {
     private static final float MAPS_PATH_WIDTH = 10;
     private MapView mapView;
     private GoogleMap map;
     private SearchView search_bar;
     boolean visible;
     PolylineOptions polylineOptions;
-
+    LocationManager locationManager;
+    private com.google.android.gms.location.FusedLocationProviderClient fusedLocationProviderClient = null;
     private MapViewModel mapViewModel;
 
     private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
         mapViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(MapViewModel.class);
-
         mapView = view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -60,9 +73,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap)
-    {
+    public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            map.setMyLocationEnabled(true);
+        }
+        if(map.isMyLocationEnabled()) {
+            LocationUpdates();
+        }
+//
+//        System.out.println("edw1 " + CameraUpdateFactory.zoomIn());
+//        System.out.println("edw2 " + CameraUpdateFactory.zoomTo(5));
+
+        if(CameraUpdateFactory.zoomIn().equals(CameraUpdateFactory.zoomTo(5))){
+            System.out.println("Im ur guy " + getMaxRadiusAfterZoom());
+        }
         search_bar = (SearchView) requireView().findViewById(R.id.search_bar);
         Drawable temp = search_bar.getBackground();
         List<Place> PlacesList = getListItemData();
@@ -75,7 +101,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         });
 
-        search_bar.setOnCloseListener(new SearchView.OnCloseListener(){
+        search_bar.setOnCloseListener(new SearchView.OnCloseListener() {
 
             @Override
             public boolean onClose() {
@@ -85,22 +111,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         });
 
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @SuppressLint("ShowToast")
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onMapClick(LatLng latLng) {
 
-                if(!search_bar.hasFocus()) {
+                if (!search_bar.hasFocus()) {
 
-                    if(search_bar.isIconified()) {
-                        addMarker(latLng,null);
+                    if (search_bar.isIconified()) {
+                        Toast.makeText(requireContext(),"For adding a marker, you need to long press on the map.",Toast.LENGTH_LONG);
                     }
 
                     search_bar.setIconified(true);
                     search_bar.setBackground(temp);
 
-                }else{
+                } else {
                     search_bar.clearFocus();
                     search_bar.setBackground(temp);
+                }
+            }
+        });
+
+        map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng point) {
+                if (search_bar.isIconified()) {
+                    addMarker(point, null);
                 }
             }
         });
@@ -110,6 +146,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             public boolean onMarkerClick(Marker marker) {
                 CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
                 List<LatLng> route = new ArrayList<>();
+
                 route.add(new LatLng(-35.016, 143.321));
                 route.add(new LatLng(-34.747, 145.592));
                 route.add(new LatLng(-34.364, 147.891));
@@ -227,6 +264,72 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         polylineOptions = new PolylineOptions().width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(location);
         Polyline polyLine = map.addPolyline(polylineOptions);
         polyLine.setPoints(location);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void LocationUpdates(){
+        // Create the location request to start receiving updates
+        com.google.android.gms.location.FusedLocationProviderClient locationProviderClient = getFusedLocationProviderClient();
+        LocationRequest mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        /* 10 secs */
+        long UPDATE_INTERVAL = 10 * 1000;
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        /* 2 sec */
+        long FASTEST_INTERVAL = 2000;
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+
+        // Create LocationSettingsRequest object using location request
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        LocationSettingsRequest locationSettingsRequest = builder.build();
+
+        // Check whether location settings are satisfied
+        SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
+        settingsClient.checkLocationSettings(locationSettingsRequest);
+
+        // new Google API SDK v11 uses getFusedLocationProviderClient(this)
+        locationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
+    }
+
+    private com.google.android.gms.location.FusedLocationProviderClient getFusedLocationProviderClient() {
+        if (fusedLocationProviderClient == null) {
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        }
+        return fusedLocationProviderClient;
+    }
+
+    private final LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(@NotNull LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+            onLocationChanged(locationResult.getLastLocation());
+        }
+    };
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+
+        Location mLastLocation = location;
+        Marker mCurrLocationMarker = null;
+
+        //Place current location marker
+        LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()); // the coordinates of the last location
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        mCurrLocationMarker = map.addMarker(markerOptions);
+
+        //move map camera
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
+
+    }
+
+    private int getMaxRadiusAfterZoom(){
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        requireActivity().getWindow().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        return displayMetrics.heightPixels;
     }
 
 }

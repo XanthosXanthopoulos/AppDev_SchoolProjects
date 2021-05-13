@@ -80,7 +80,7 @@ public class CreatePlanFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        FrameLayout item = requireActivity().findViewById(R.id.pop_up_layout);
+//        FrameLayout item = requireActivity().findViewById(R.id.pop_up_layout);
 
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 

@@ -53,4 +53,10 @@
         android:label="AddMoment"
         tools:layout="@layout/fragment_add_moment" />
 
+    <fragment
+        android:id="@+id/navigation_CreateMemory"
+        android:name="com.example.demoapp.ui.main.plan.memory.create.CreateMemoryFragment"
+        android:label="AddMoment"
+        tools:layout="@layout/fragment_create_memory" />
+
 </navigation>
