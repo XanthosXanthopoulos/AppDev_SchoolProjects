@@ -32,7 +32,6 @@
             android:layout_marginTop="12dp"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Nikolas Vattis"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -47,8 +46,8 @@
             android:id="@+id/post_images"
             android:layout_width="match_parent"
             android:layout_height="275dp"
-            android:paddingStart="80dp"
-            android:paddingEnd="80dp"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
             app:srcCompat="@drawable/ic_launcher_background" />
 
     </androidx.cardview.widget.CardView>

@@ -10,10 +10,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="42dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="6dp"
         android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -28,24 +27,39 @@
             android:id="@+id/account_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="6dp"
             android:layout_marginTop="12dp"
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="Nikolas Vattis"
             android:textStyle="bold" />
 
+        <ImageButton
+            android:id="@+id/show_to_map"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_map"
+            android:scaleType="fitCenter"
+            android:tint="#555"
+            android:background="#00FFFFFF"
+            android:layout_gravity="top"
+            />
+
     </LinearLayout>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        app:cardElevation="0dp">
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#5eee">
 
         <ImageView
             android:id="@+id/plan_image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="350dp"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_launcher_background" />
     </androidx.cardview.widget.CardView>
 

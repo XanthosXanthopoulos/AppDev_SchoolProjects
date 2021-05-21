@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Notification;
@@ -12,6 +13,7 @@ import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HomeViewModel extends ViewModel
@@ -40,6 +42,8 @@ public class HomeViewModel extends ViewModel
                 }
             }
         });
+
+
     }
 
     public void getFeed()
@@ -52,8 +56,13 @@ public class HomeViewModel extends ViewModel
         return feedResult;
     }
 
-    public LiveData<List<Notification>> getNotifications()
+    public LiveData<Event<Notification>> getNotification()
     {
         return hub.getNotificationsLiveData();
+    }
+
+    public LinkedList<Notification> getNotifications()
+    {
+        return hub.getNotifications();
     }
 }

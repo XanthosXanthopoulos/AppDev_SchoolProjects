@@ -89,6 +89,7 @@ public class CreateMemoryFragment extends Fragment
                 });
 
                 cityEditText.setEnabled(index >= 0);
+                viewModel.getCities(Country.values()[index].label);
 
                 return index >= 0;
             }
@@ -97,6 +98,15 @@ public class CreateMemoryFragment extends Fragment
             public CharSequence fixText(CharSequence invalidText)
             {
                 return null;
+            }
+        });
+
+        viewModel.getCitiesResult().observe(getViewLifecycleOwner(), new Observer<List<String>>()
+        {
+            @Override
+            public void onChanged(List<String> strings)
+            {
+                cityEditText.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, strings));
             }
         });
 
@@ -122,7 +132,7 @@ public class CreateMemoryFragment extends Fragment
             public void onClick(View v)
             {
                 String title = titleEditText.getText().toString();
-                Country country = Country.valueOf(countryEditText.getText().toString());
+                Country country = Country.lookupByLabel(countryEditText.getText().toString());
                 String address = addressEditText.getText().toString();
                 String description = descriptionEditText.getText().toString();
                 String tags = tagsEditText.getText().toString();
@@ -147,11 +157,12 @@ public class CreateMemoryFragment extends Fragment
 
                 String title = titleEditText.getText().toString();
                 Country country = Country.lookupByLabel(countryEditText.getText().toString());
+                String city = cityEditText.getText().toString();
                 String address = addressEditText.getText().toString();
                 String description = descriptionEditText.getText().toString();
                 String tags = tagsEditText.getText().toString();
 
-                viewModel.addMemory(title, country, address, description, tags);
+                viewModel.addMemory(title, country, address + ", " + city, description, tags);
 
                 Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
             }

@@ -3,15 +3,13 @@ package com.example.demoapp.data.view;
 import com.example.demoapp.data.model.AccountType;
 import com.example.demoapp.data.model.Country;
 
-import java.util.Date;
-
 /**
  * Class exposing authenticated user details to the UI.
  */
 public class AuthenticatedUserView
 {
-    private final String displayName;
-
+    private final String userID;
+    private String profileImageID;
     private String name;
     private String surname;
     private String email;
@@ -21,9 +19,55 @@ public class AuthenticatedUserView
     private int day;
     private Country country;
 
-    public AuthenticatedUserView(String displayName, String name, String surname, String email, String description, int year, int month, int day, Country country, AccountType accountType)
+    public void setProfileImageID(String profileImageID)
     {
-        this.displayName = displayName;
+        this.profileImageID = profileImageID;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public void setSurname(String surname)
+    {
+        this.surname = surname;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public void setYear(int year)
+    {
+        this.year = year;
+    }
+
+    public void setMonth(int month)
+    {
+        this.month = month;
+    }
+
+    public void setDay(int day)
+    {
+        this.day = day;
+    }
+
+    public void setCountry(Country country)
+    {
+        this.country = country;
+    }
+
+    public void setAccountType(AccountType accountType)
+    {
+        this.accountType = accountType;
+    }
+
+    public AuthenticatedUserView(String userID, String profileImageID, String name, String surname, String email, String description, int year, int month, int day, Country country, AccountType accountType)
+    {
+        this.userID = userID;
+        this.profileImageID = profileImageID;
         this.name = name;
         this.surname = surname;
         this.email = email;
@@ -37,14 +81,14 @@ public class AuthenticatedUserView
 
     private AccountType accountType;
 
-    public AuthenticatedUserView(String displayName)
+    public AuthenticatedUserView(String userID)
     {
-        this.displayName = displayName;
+        this.userID = userID;
     }
 
-    public String getDisplayName()
+    public String getUserID()
     {
-        return displayName;
+        return userID;
     }
 
     public String getName()
@@ -90,5 +134,10 @@ public class AuthenticatedUserView
     public int getDay()
     {
         return day;
+    }
+
+    public String getProfileImageID()
+    {
+        return profileImageID;
     }
 }

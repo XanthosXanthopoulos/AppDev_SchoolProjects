@@ -144,11 +144,8 @@ public class LoginFragment extends Fragment
     {
         SharedPreferences sharedPref = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("JWToken", model.getDisplayName());
+        editor.putString("JWToken", model.getUserID());
         editor.apply();
-
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        startActivity(intent);
     }
 
     private void showLoginFailed(@StringRes Integer errorString)

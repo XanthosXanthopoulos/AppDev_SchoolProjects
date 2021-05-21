@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 using WebServer.Data;
 using WebServer.Hubs;
 using WebServer.Models.Api.Request;
+using WebServer.Models.Api.Response;
 using WebServer.Models.Database;
+using WebServer.Utilities;
 
 namespace WebServer.Controllers
 {
@@ -28,99 +30,71 @@ namespace WebServer.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> FollowRequest([FromBody] string followee)
-        {
-            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userID != null)
-            {
-                if (!_context.Follows.Any(follow => follow.FolloweeID == followee))
-                {
-                    await _context.Follows.AddAsync(new Follow { FollowerID = userID, FolloweeID = followee, RequestTime = DateTime.Now, Accepted = false });
-                    await _context.SaveChangesAsync();
-
-                    //TODO: Implement notification system
-                    //await _notificationsHub.Clients.User(followee).SendAsync("FollowRequest", userID);
-
-                    return Ok();
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status406NotAcceptable);
-                }
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-        }
-
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> FollowResponse([FromBody] FollowResponseModel response)
-        {
-            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userID != null)
-            {
-                Follow followRequest = await _context.Follows.FindAsync(userID, response.UserID);
-
-                if (followRequest != null)
-                {
-                    if (response.Accepted)
-                    {
-                        followRequest.Accepted = true;
-                    }
-                    else
-                    {
-                        _context.Follows.Remove(followRequest);
-                    }
-
-                    await _context.SaveChangesAsync();
-
-                    return Ok();
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status404NotFound);
-                }
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-        }
-
         [HttpGet]
         [Authorize]
-        public async Task<List<FollowResponseModel>> GetFollowers()
+        public async Task<ApiResponse<List<FollowResponseModel>>> GetFollowers()
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             List<FollowResponseModel> result = (from u in _context.Users
-                                                from f in _context.Follows
-                                                where f.FolloweeID == userID
+                                                join f in _context.Follows 
+                                                on u.UserID equals f.FolloweeID
+                                                where userID == f.FolloweeID
                                                 orderby f.Accepted
-                                                select new FollowResponseModel { UserID = f.FollowerID, Accepted = f.Accepted }).ToList();
+                                                select new FollowResponseModel { UserID = f.FollowerID, Username = f.Follower.Name, ProfileImageID = f.Follower.Image.ImageID, Status = f.Accepted ? "FOLLOWED" : "PENDING_INCOMING" }).ToList();
 
-            return result;
+            return new ApiResponse<List<FollowResponseModel>> { Response = result };
         }
 
         [HttpGet]
         [Authorize]
-        public async Task<List<FollowResponseModel>> GetFollowees()
+        public async Task<ApiResponse<List<FollowResponseModel>>> GetFollowees()
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             List<FollowResponseModel> result = (from u in _context.Users
-                                                from f in _context.Follows
+                                                join f in _context.Follows
+                                                on u.UserID equals f.FollowerID
                                                 where f.FollowerID == userID
                                                 orderby f.Accepted
-                                                select new FollowResponseModel { UserID = f.FolloweeID, Accepted = f.Accepted }).ToList();
+                                                select new FollowResponseModel { UserID = f.FolloweeID, Username = f.Followee.Name, ProfileImageID = f.Followee.Image.ImageID, Status = f.Accepted ? "FOLLOWING" : "PENDING_OUTCOMING" }).ToList();
 
-            return result;
+            return new ApiResponse<List<FollowResponseModel>> { Response = result };
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<ApiResponse<List<UserResponse>>> searchUsers(string query)
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            List<UserResponse> result = await _context.Users.Where(u => u.UserID != userID).Where(u => u.Name.Contains(query)).Select(u => new UserResponse 
+            { 
+                Username = u.Name,
+                UserID = u.UserID,
+                ProfileImageID = u.Image.ImageID
+            })
+            .ToListAsync();
+                     
+            foreach (UserResponse user in result)
+            {
+                Follow followee = await _context.Follows.FindAsync(new string[] { user.UserID, userID });
+
+                if (followee == null)
+                {
+                    user.Status = FollowStatus.NONE.ToString();
+                }
+                else if (followee.Accepted)
+                {
+                    user.Status = FollowStatus.FOLLOWING.ToString();
+                }
+                else
+                {
+                    user.Status = FollowStatus.PENDING_OUTCOMING.ToString();
+                }
+            }
+
+            return new ApiResponse<List<UserResponse>> { Response = result };
         }
     }
 }

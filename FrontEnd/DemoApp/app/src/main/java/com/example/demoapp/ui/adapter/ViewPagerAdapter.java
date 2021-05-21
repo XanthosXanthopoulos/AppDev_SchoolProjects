@@ -4,9 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.demoapp.ui.main.dashboard.DashboardFragment;
-import com.example.demoapp.ui.main.follow.FollowFragment;
-import com.example.demoapp.ui.main.map.MapFragment;
 import com.example.demoapp.ui.main.plan.memory.AddMemoryFragment;
 import com.example.demoapp.ui.main.plan.moment.AddMomentFragment;
 

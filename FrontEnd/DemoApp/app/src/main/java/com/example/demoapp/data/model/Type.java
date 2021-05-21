@@ -2,9 +2,9 @@ package com.example.demoapp.data.model;
 
 public enum Type
 {
-    INDOOR("Indoor", 1),
-    OUTDOOR("Outdoor", 2),
-    MUSEUM("Museum", 3);
+    INDOOR("Activity", 0),
+    OUTDOOR("Post", 1),
+    MUSEUM("User", 2);
 
     public final String label;
     public final int code;

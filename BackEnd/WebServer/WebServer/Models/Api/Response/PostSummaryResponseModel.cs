@@ -7,6 +7,8 @@ namespace WebServer.Models.Api.Response
 {
     public class PostSummaryResponseModel
     {
+        public int PostID { get; set; }
+
         public string Username { get; set; }
 
         public string ProfileImageID { get; set; }

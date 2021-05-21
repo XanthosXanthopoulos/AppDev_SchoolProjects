@@ -1,13 +1,12 @@
 package com.example.demoapp.ui.adapter;
 
-
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,49 +17,56 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.example.demoapp.App;
 import com.example.demoapp.R;
+import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.util.ApiRoutes;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.demoapp.App.SHARED_PREFS;
 
-
-public class ImageUrlAdapter extends RecyclerView.Adapter<ImageUrlAdapter.ViewHolder>
+public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder>
 {
-    private List<String> items;
-    private Context context;
-    private SharedPreferences sharedPreferences;
-
-    public ImageUrlAdapter(Context context)
+    public LinkedList<Notification> getItems()
     {
-        this.items = new ArrayList<>();
+        return items;
+    }
+
+    private LinkedList<Notification> items;
+    private final Context context;
+    private final SharedPreferences sharedPreferences;
+
+    public NotificationAdapter(Context context)
+    {
+        this.items = new LinkedList<>();
         this.context = context;
         this.sharedPreferences = App.getInstance().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
     }
 
     @NonNull
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public NotificationAdapter.ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType)
     {
-        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_slide, parent, false);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, null);
 
         return new ViewHolder(layoutView);
     }
 
-
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull @NotNull ViewHolder holder, int position)
     {
         HashMap<String, String> params = new HashMap<>();
-        params.put("id", items.get(position));
+        params.put("id", items.get(position).getUserImageID());
         GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
 
-        Glide.with(this.context).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.image);
-    }
+        Glide.with(this.context).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.profileImage);
 
+        holder.message.setText(items.get(position).toString());
+    }
 
     @Override
     public int getItemCount()
@@ -68,22 +74,29 @@ public class ImageUrlAdapter extends RecyclerView.Adapter<ImageUrlAdapter.ViewHo
         return items.size();
     }
 
-    public void setItems(List<String> items)
+    public void appendNotification(Notification notification)
     {
-        this.items.clear();
-        this.items.addAll(items);
+        items.addFirst(notification);
+        notifyItemInserted(0);
+    }
+
+    public void setItems(LinkedList<Notification> items)
+    {
+        this.items = items;
         notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
     {
-        private ImageView image;
+        private final ImageView profileImage;
+        private final TextView message;
 
         public ViewHolder(View view)
         {
             super(view);
+            profileImage = (ImageView) itemView.findViewById(R.id.profile_image);
+            message = itemView.findViewById(R.id.message);
 
-            image = itemView.findViewById(R.id.image);
         }
     }
 }

@@ -9,8 +9,10 @@ namespace WebServer.Models.Api.Request
     {
         public string UserID { get; set; }
 
+        public string Username { get; set; }
+
         public string ProfileImageID { get; set; }
 
-        public bool Accepted { get; set; }
+        public string Status { get; set; }
     }
 }

@@ -10,7 +10,8 @@ import com.example.demoapp.data.repository.ContentRepository;
 import com.example.demoapp.data.repository.UserRepository;
 import com.example.demoapp.ui.authentication.login.LoginViewModel;
 import com.example.demoapp.ui.main.account.AccountViewModel;
-import com.example.demoapp.ui.main.follow.FollowViewModel;
+import com.example.demoapp.ui.main.followee.FolloweeViewModel;
+import com.example.demoapp.ui.main.follower.FollowerViewModel;
 import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.plan.CreatePlanViewModel;
@@ -44,7 +45,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(MapViewModel.class))
         {
-            return (T) new MapViewModel();
+            return (T) new MapViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else if(modelClass.isAssignableFrom(ProfileViewModel.class))
         {
@@ -56,7 +57,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(DashboardViewModel.class))
         {
-            return (T) new DashboardViewModel(ContentRepository.getInstance(new ApiDataSource()));
+            return (T) new DashboardViewModel(ContentRepository.getInstance(new ApiDataSource()), NotificationHub.getInstance());
         }
         else if(modelClass.isAssignableFrom(HomeViewModel.class))
         {
@@ -66,9 +67,13 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         {
             return (T) new AddMomentViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
-        else if (modelClass.isAssignableFrom(FollowViewModel.class))
+        else if (modelClass.isAssignableFrom(FolloweeViewModel.class))
         {
-            return (T) new FollowViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
+            return (T) new FolloweeViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()), NotificationHub.getInstance());
+        }
+        else if (modelClass.isAssignableFrom(FollowerViewModel.class))
+        {
+            return (T) new FollowerViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()), NotificationHub.getInstance());
         }
         else if (modelClass.isAssignableFrom(CreateMemoryViewModel.class))
         {

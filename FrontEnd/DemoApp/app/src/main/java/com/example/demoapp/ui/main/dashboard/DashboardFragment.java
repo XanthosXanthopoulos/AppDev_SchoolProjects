@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.demoapp.R;
+import com.example.demoapp.actions.FollowActions;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Radius;
@@ -86,6 +87,7 @@ public class DashboardFragment extends Fragment
                 });
 
                 citySpinner.setEnabled(index >= 0);
+                dashboardViewModel.getCities(Country.values()[index].label);
 
                 return index >= 0;
             }
@@ -126,7 +128,7 @@ public class DashboardFragment extends Fragment
                 String type = ((Type)typeSpinner.getSelectedItem()).label;
                 int radius = ((Radius)radiusSpinner.getSelectedItem()).radius;
 
-                dashboardViewModel.search(query, country, type, radius);
+                dashboardViewModel.search(query, country, city, type, radius);
                 return false;
             }
 
@@ -157,6 +159,45 @@ public class DashboardFragment extends Fragment
                 {
                     listMessage.setVisibility(View.GONE);
                 }
+            }
+        });
+
+        dashboardViewModel.getCitiesResult().observe(getViewLifecycleOwner(), new Observer<List<String>>()
+        {
+            @Override
+            public void onChanged(List<String> strings)
+            {
+                citySpinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, strings));
+            }
+        });
+
+        adapter.setActions(new FollowActions()
+        {
+            @Override
+            public void follow(String userID)
+            {
+                dashboardViewModel.sendFollowRequest(userID);
+            }
+
+            @Override
+            public void accept(String userID) { }
+
+            @Override
+            public void decline(String userID) { }
+
+            @Override
+            public void unfollow(String userID)
+            {
+                //viewModel.unfollow(userID);
+            }
+
+            @Override
+            public void remove(String userID) { }
+
+            @Override
+            public void cancel(String userID)
+            {
+                //viewModel.cancelFollowRequest(userID);
             }
         });
 

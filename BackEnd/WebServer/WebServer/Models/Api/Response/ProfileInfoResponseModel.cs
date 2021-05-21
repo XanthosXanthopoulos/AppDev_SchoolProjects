@@ -18,10 +18,12 @@ namespace WebServer.Models.Api.Response
 
         public DateTime Birthday { get; set; }
 
-        public Country Country { get; set; }
+        public string Country { get; set; }
 
         public string Description { get; set; }
 
         public AccountType AccountType { get; set; }
+
+        public string ProfileImageID { get; set; }
     }
 }

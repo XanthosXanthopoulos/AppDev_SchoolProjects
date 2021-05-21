@@ -14,6 +14,7 @@ public class Notification
         this.userID = userID;
         this.username = username;
         this.userImageID = userImageID;
+        this.message = message;
     }
 
 

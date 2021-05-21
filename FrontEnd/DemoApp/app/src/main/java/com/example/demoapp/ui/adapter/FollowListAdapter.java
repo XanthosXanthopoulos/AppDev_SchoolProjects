@@ -20,8 +20,11 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.example.demoapp.R;
 import com.example.demoapp.actions.FollowActions;
 import com.example.demoapp.data.model.Follow;
+import com.example.demoapp.data.model.Status;
+import com.example.demoapp.util.ApiRoutes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -55,10 +58,12 @@ public class FollowListAdapter extends RecyclerView.Adapter<FollowListAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        //GlideUrl url = new GlideUrl(items.get(position).getProfileImageURL(), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
+        HashMap<String, String> params = new HashMap<>();
+        params.put("id", items.get(position).getProfileImageID());
+        GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
 
         holder.username.setText(items.get(position).getUsername());
-        //Glide.with(this.context).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.profileImage);
+        Glide.with(this.context).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.profileImage);
 
         switch (items.get(position).getStatus())
         {
@@ -108,24 +113,28 @@ public class FollowListAdapter extends RecyclerView.Adapter<FollowListAdapter.Vi
                 {
                     case NONE:
                         button.setText("Cancel");
+                        items.get(position).setStatus(Status.PENDING_OUTCOMING);
                         actions.follow(items.get(position).getUserID());
                         break;
                     case FOLLOWED:
-                        button.setText("Follow");
-                        actions.unfollow(items.get(position).getUserID());
-                        break;
-                    case FOLLOWING:
-                        items.remove(position);
                         actions.remove(items.get(position).getUserID());
+                        items.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, getItemCount());
                         break;
+                    case FOLLOWING:
+                        button.setText("Follow");
+                        items.get(position).setStatus(Status.NONE);
+                        actions.unfollow(items.get(position).getUserID());
+                        break;
                     case PENDING_INCOMING:
                         button.setText("Remove");
+                        items.get(position).setStatus(Status.FOLLOWED);
                         actions.accept(items.get(position).getUserID());
                         break;
                     case PENDING_OUTCOMING:
                         button.setText("Follow");
+                        items.get(position).setStatus(Status.NONE);
                         actions.cancel(items.get(position).getUserID());
                         break;
                 }

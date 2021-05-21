@@ -2,17 +2,18 @@ package com.example.demoapp.ui.main.map;
 
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
+import android.hardware.camera2.CameraManager;
+import android.net.sip.SipSession;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
@@ -24,6 +25,7 @@ import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.google.maps.android.SphericalUtil;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -41,20 +43,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     boolean visible;
     PolylineOptions polylineOptions;
 
-    private MapViewModel mapViewModel;
-
-    private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
+    private MapViewModel viewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
-        mapViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(MapViewModel.class);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(MapViewModel.class);
+
+        if (getArguments() != null)
+        {
+            viewModel.getActivities(getArguments().getInt("PostID"));
+        }
 
         mapView = view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
+
 
         return view;
     }
@@ -67,47 +74,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         Drawable temp = search_bar.getBackground();
         List<Place> PlacesList = getListItemData();
 
-        search_bar.setOnSearchClickListener(new View.OnClickListener() {
+        search_bar.setOnSearchClickListener(new View.OnClickListener()
+        {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 search_bar.setBackground(getResources().getDrawable(R.drawable.search_bar));
             }
         });
 
-        search_bar.setOnCloseListener(new SearchView.OnCloseListener(){
+        search_bar.setOnCloseListener(new SearchView.OnCloseListener()
+        {
 
             @Override
-            public boolean onClose() {
+            public boolean onClose()
+            {
                 search_bar.setBackground(temp);
                 return false;
             }
         });
 
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
+        {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
-            public void onMapClick(LatLng latLng) {
+            public void onMapClick(LatLng latLng)
+            {
 
-                if(!search_bar.hasFocus()) {
-
-                    if(search_bar.isIconified()) {
-                        addMarker(latLng,null);
-                    }
-
-                    search_bar.setIconified(true);
-                    search_bar.setBackground(temp);
-
-                }else{
-                    search_bar.clearFocus();
-                    search_bar.setBackground(temp);
-                }
-            }
-        });
-
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
                 CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
                 List<LatLng> route = new ArrayList<>();
                 route.add(new LatLng(-35.016, 143.321));
@@ -116,12 +110,57 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
                 route.add(new LatLng(-33.501, 150.217));
                 route.add(new LatLng(-32.306, 149.248));
                 route.add(new LatLng(-32.491, 147.309));
-                if(!visible){
+                map.moveCamera(CameraUpdateFactory.newLatLng(route.get(0)));
+
+//                if (!search_bar.hasFocus())
+//                {
+//
+//                    if (search_bar.isIconified())
+//                    {
+//                        addMarker(latLng, null);
+//                    }
+//
+//                    search_bar.setIconified(true);
+//                    search_bar.setBackground(temp);
+//
+//                }
+//                else
+//                {
+//                    search_bar.clearFocus();
+//                    search_bar.setBackground(temp);
+//                }
+            }
+        });
+
+        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
+        {
+            @Override
+            public void onCameraMove()
+            {
+                if (map.getCameraPosition().zoom >= 11.0f)
+                {
+                    Log.i("SUCCESS", "Im ur guy ");
+                    double radius = getMaxRadiusAfterZoom();
+                }
+            }
+
+        });
+
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+        {
+            @Override
+            public boolean onMarkerClick(Marker marker)
+            {
+                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
+
+                if (!visible)
+                {
                     visible = true;
                     info.getInfoWindow(marker);
-                    drawRoute(route);
                     return false;
-                }else {
+                }
+                else
+                {
                     visible = false;
                     info.closeInfoWindow(marker);
                     return true;
@@ -129,20 +168,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         });
 
-        search_bar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        search_bar.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+        {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String query)
+            {
                 Place p = getPlaceData(PlacesList, query);
-                addMarker(Objects.requireNonNull(p).getCoordinates(),p.getDescription());
+                addMarker(Objects.requireNonNull(p).getCoordinates(), p.getDescription());
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String newText)
+            {
                 return false;
             }
         });
 
+        viewModel.getActivitiesLiveData().observe(getViewLifecycleOwner(), new Observer<List<Activity>>()
+        {
+            @Override
+            public void onChanged(List<Activity> activities)
+            {
+                addPath(activities);
+            }
+        });
     }
 
     @Override
@@ -180,18 +230,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         mapView.onLowMemory();
     }
 
-    public void addMarker(LatLng lng,String desc){
+    private void addPath(List<Activity> activities)
+    {
+        map.clear();
+        List<LatLng> path = new ArrayList<>(activities.size());
+
+        for (Activity activity : activities)
+        {
+            LatLng point = new LatLng(activity.getLatitude(), activity.getLongtitude());
+
+            Marker marker = map.addMarker(new MarkerOptions().position(point).title(activity.getTitle()));
+            marker.setTag(activity);
+            path.add(point);
+        }
+
+        polylineOptions = new PolylineOptions().jointType(JointType.ROUND).width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(path);
+        Polyline polyLine = map.addPolyline(polylineOptions);
+        polyLine.setPoints(path);
+    }
+
+    public void addMarker(LatLng coordinates, String description)
+    {
         String title;
-        if(desc != null){
-            title = desc;
-        }else{
+        if (description != null)
+        {
+            title = description;
+        }
+        else
+        {
             title = " Marker on the point I clicked ";
         }
         map.clear();
-        map.addMarker(new MarkerOptions()
-                .position(lng)
-                .title(title));
-        map.moveCamera(CameraUpdateFactory.newLatLng(lng));
+        map.addMarker(new MarkerOptions().position(coordinates).title(title));
+        map.moveCamera(CameraUpdateFactory.newLatLng(coordinates));
     }
 
     private List<Place> getListItemData()
@@ -199,11 +270,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         List<Place> listViewItems = new ArrayList<>();
         String description = "The capital of Australia";
 
-        final Place MELBOURNE = new Place("MELBOURNE", description,new LatLng(-37.813628,144.963058));
-        final Place ADELAIDE = new Place("ADELAIDE",new LatLng(-34.928499,138.600746));
-        final Place BRISBANE = new Place("BRISBANE",new LatLng(-27.469771,153.025124));
-        final Place SYDNEY = new Place("SYDNEY",new LatLng(-33.86882,151.209296));
-        final Place PERTH = new Place("PERTH",new LatLng(-31.952312,115.861309));
+        final Place MELBOURNE = new Place("MELBOURNE", description, new LatLng(-37.813628, 144.963058));
+        final Place ADELAIDE = new Place("ADELAIDE", new LatLng(-34.928499, 138.600746));
+        final Place BRISBANE = new Place("BRISBANE", new LatLng(-27.469771, 153.025124));
+        final Place SYDNEY = new Place("SYDNEY", new LatLng(-33.86882, 151.209296));
+        final Place PERTH = new Place("PERTH", new LatLng(-31.952312, 115.861309));
 
         listViewItems.add(MELBOURNE);
         listViewItems.add(ADELAIDE);
@@ -214,19 +285,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         return listViewItems;
     }
 
-    private  Place getPlaceData(List<Place> placeList,String s){
-        for (int i = 0; i < placeList.size();i++){
-            if(placeList.get(i).getPlace().equals(s.toUpperCase())){
+    private Place getPlaceData(List<Place> placeList, String s)
+    {
+        for (int i = 0; i < placeList.size(); i++)
+        {
+            if (placeList.get(i).getPlace().equals(s.toUpperCase()))
+            {
                 return placeList.get(i);
             }
         }
         return null;
     }
 
-    public void drawRoute(List<LatLng> location) {
-        polylineOptions = new PolylineOptions().width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(location);
-        Polyline polyLine = map.addPolyline(polylineOptions);
-        polyLine.setPoints(location);
+    private double getMaxRadiusAfterZoom()
+    {
+        LatLng center = map.getCameraPosition().target;
+        VisibleRegion visibleRegion = map.getProjection().getVisibleRegion();
+        LatLng farLeft = visibleRegion.farLeft;
+
+        return SphericalUtil.computeDistanceBetween(center, farLeft);
     }
 
 }

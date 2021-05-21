@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using WebServer.Converters;
@@ -69,7 +70,8 @@ namespace WebServer
                     Address = "1871  Poplar Lane",
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.73543741130086, 37.9894702164558) { SRID = 4326 },
-                    Title = "Activity 1"
+                    Title = "Activity 1",
+                    Tags = "beach, coffee"
                 });
 
                 dbContext.Activities.Add(new Models.Database.Activity()
@@ -77,7 +79,8 @@ namespace WebServer
                     Address = "187 Lane",
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.720947233378396, 37.982539628169874) { SRID = 4326 },
-                    Title = "Activity 2"
+                    Title = "Activity 2",
+                    Tags = "beach"
                 });
 
                 dbContext.Activities.Add(new Models.Database.Activity()
@@ -85,8 +88,11 @@ namespace WebServer
                     Address = "Poplar Lane",
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 },
-                    Title = "Activity 3"
+                    Title = "Activity 3",
+                    Tags = "coffee"
                 });
+
+                Point p = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 };
 
                 dbContext.SaveChanges();
             }

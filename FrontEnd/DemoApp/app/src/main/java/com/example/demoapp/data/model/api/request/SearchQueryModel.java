@@ -6,15 +6,25 @@ public class SearchQueryModel
 
     String country;
 
-    String type;
+    public String getCity()
+    {
+        return city;
+    }
+
+    public void setCity(String city)
+    {
+        this.city = city;
+    }
+
+    String city;
 
     int radius;
 
-    public SearchQueryModel(String query, String country, String type, int radius)
+    public SearchQueryModel(String query, String country, String city, int radius)
     {
         this.query = query;
         this.country = country;
-        this.type = type;
+        this.city = city;
         this.radius = radius;
     }
 
@@ -36,16 +46,6 @@ public class SearchQueryModel
     public void setCountry(String country)
     {
         this.country = country;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType(String type)
-    {
-        this.type = type;
     }
 
     public int getRadius()

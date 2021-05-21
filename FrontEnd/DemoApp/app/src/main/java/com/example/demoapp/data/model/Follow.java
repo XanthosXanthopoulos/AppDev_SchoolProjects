@@ -1,16 +1,20 @@
 package com.example.demoapp.data.model;
 
-public class Follow
+public class Follow extends Item
 {
     private String profileImageID;
     private String userID;
     private String username;
     private Status status;
 
-    public Follow() { }
+    public Follow()
+    {
+        super(ContentType.USER);
+    }
 
     public Follow(String profileImageID, String userID, String username, Status status)
     {
+        super(ContentType.USER);
         this.profileImageID = profileImageID;
         this.userID = userID;
         this.username = username;

@@ -34,4 +34,6 @@
     <string name="city">City</string>
     <string name="country">Country</string>
     <string name="add_moment">Add moment</string>
+    <string name="name_error">Name cannot be empty</string>
+    <string name="notifications">Notifications</string>
 </resources>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using WebServer.Models.Api.Request;
 using WebServer.Models.Api.Response;
 using WebServer.Models.Database;
 using WebServer.Models.Enums;
+using WebServer.Utilities;
 
 namespace WebServer.Controllers
 {
@@ -27,7 +29,7 @@ namespace WebServer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadActivity([FromBody] ActivitySubmitModel activitySubmit)
+        public async Task<ApiResponse<string>> UploadActivity([FromBody] ActivitySubmitModel activitySubmit)
         {
             Activity activity = new Activity
             {
@@ -43,45 +45,56 @@ namespace WebServer.Controllers
             await _context.Activities.AddAsync(activity);
             await _context.SaveChangesAsync();
 
-            return Ok(activity.ActivityID);
+            return new ApiResponse<string> { Response = activity.ActivityID };
         }
 
         [HttpGet]
         [Authorize]
         public async Task<ApiResponse<ICollection<ActivityResponse>>> SearchActivities(string? query, int? country, string? city, double? latitude, double? longtitude, double? radius)
         {
-            HashSet<string> removable = new HashSet<string>{ "a", "an", "the", "to", "from", "by", "then" };
-            HashSet<string> searchTerms = null;
             Point p = null;
-
-            if (query != null)
-            {
-                searchTerms = query.Split(" ").Where(t => !removable.Contains(t)).ToHashSet();
-            }
 
             if (longtitude != null && latitude != null)
             {
                 p = new Point(longtitude.GetValueOrDefault(), latitude.GetValueOrDefault()) { SRID = 4326 };
             }
 
+            List<ActivityResponse> result = await _context.Activities.Where(a => country == null || a.Country == (Country)country)
+                                                                      .Where(a => city == null || a.City == city)
+                                                                      .Where(a => p == null || radius == null || a.Coordinates.Distance(p) < radius)
+                                                                      .Where(a => query == null || EF.Functions.FreeText(a.Description, query) || EF.Functions.FreeText(a.Tags, query))
+                                                                      .Select(a => new ActivityResponse
+                                                                      {
+                                                                          ID = a.ActivityID,
+                                                                          Title = a.Title,
+                                                                          Address = a.Address,
+                                                                          Description = a.Description,
+                                                                          Tags = a.Tags,
+                                                                          Country = a.Country.ToString()
+                                                                      }).ToListAsync();
 
-            ApiResponse<ICollection<ActivityResponse>> apiResponse = new ApiResponse<ICollection<ActivityResponse>> { Response = new List<ActivityResponse>()};
+            return new ApiResponse<ICollection<ActivityResponse>> { Response = result };
+        }
 
-            ICollection<ActivityResponse> activities = _context.Activities.Where(a => country == null || a.Country == (Country)country)
-                                                                  .Where(a => city == null || a.City.Equals(city, StringComparison.OrdinalIgnoreCase))
-                                                                  .Where(a => searchTerms == null || searchTerms.Any(s => a.Tags.Contains(s)))
-                                                                  .Where(a => p == null || radius == null || a.Coordinates.Distance(p) < radius)
-                                                                  .Select(a => new ActivityResponse 
-                                                                  {
-                                                                      ID = a.ActivityID,
-                                                                      Title = a.Title,
-                                                                      Address = a.Address,
-                                                                      Description = a.Description,
-                                                                      Tags = a.Tags
-                                                                  })
-                                                                  .ToList();
+        [HttpGet]
+        [Authorize]
+        public async Task<ApiResponse<ICollection<ActivityResponse>>> GetActivities(int? postID)
+        {
+            ICollection<Activity> result = await _context.Posts.Include(p => p.Activities).Where(p => p.PostID == postID).Select(p => p.Activities).FirstAsync();
 
-            return new ApiResponse<ICollection<ActivityResponse>> { Response = activities };
+            return new ApiResponse<ICollection<ActivityResponse>>
+            {
+                Response = result.Select(a => new ActivityResponse
+                {
+                    ID = a.ActivityID,
+                    Address = a.Address,
+                    Country = a.Country.ToString(),
+                    Description = a.Description,
+                    Tags = a.Tags,
+                    Title = a.Title
+                })
+                .ToList()
+            };
         }
     }
 }

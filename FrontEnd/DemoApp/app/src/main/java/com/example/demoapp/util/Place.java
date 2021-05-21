@@ -6,7 +6,8 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class Place {
+public class
+Place {
 
     String place = null,description = null;
     LatLng coordinates = null;

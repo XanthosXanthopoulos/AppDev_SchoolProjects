@@ -1,47 +1,51 @@
 package com.example.demoapp;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.demoapp.data.model.Activity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
-public class CustomMarkerInfoWindowView implements GoogleMap.InfoWindowAdapter {
-    private View markerItemView;
-    LayoutInflater inflater;
+public class CustomMarkerInfoWindowView implements GoogleMap.InfoWindowAdapter
+{
+    private final View view;
 
     @SuppressLint("ResourceType")
-    public CustomMarkerInfoWindowView(Context context) {
-        inflater = LayoutInflater.from(context);
-        markerItemView = inflater.inflate(R.layout.marker_info_window, null);
-
+    public CustomMarkerInfoWindowView(Context context)
+    {
+        view = LayoutInflater.from(context).inflate(R.layout.marker_info_window, null);
     }
+
     @Override
-    public View getInfoWindow(Marker marker) {
+    public View getInfoWindow(Marker marker)
+    {
+        TextView titleTextView = view.findViewById(R.id.title);
+        TextView descriptionTextView = view.findViewById(R.id.description);
+        TextView tagsTextView = view.findViewById(R.id.tags);
 
-        TextView itemNameTextView = (TextView) markerItemView.findViewById(R.id.Text1);
-        TextView itemAddressTextView = (TextView) markerItemView.findViewById(R.id.Text2);
+        Activity activity = (Activity) marker.getTag();
 
-        itemNameTextView.setText(marker.getTitle());
-//        itemAddressTextView.setText(user.getAddress());
+        titleTextView.setText(activity.getTitle());
+        descriptionTextView.setText(activity.getDescription());
+        tagsTextView.setText(activity.getTags());
 
-        return markerItemView;
+        return view;
 
     }
 
-    public void closeInfoWindow(Marker marker){
+    public void closeInfoWindow(Marker marker)
+    {
         marker.hideInfoWindow();
     }
 
 
     @Override
-    public View getInfoContents(Marker marker) {
+    public View getInfoContents(Marker marker)
+    {
         return null;
     }
 }

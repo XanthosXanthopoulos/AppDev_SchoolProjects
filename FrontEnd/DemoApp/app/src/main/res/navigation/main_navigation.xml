@@ -60,9 +60,21 @@
         tools:layout="@layout/fragment_create_memory"/>
 
     <fragment
-        android:id="@+id/navigation_follows"
-        android:name="com.example.demoapp.ui.main.follow.FollowFragment"
-        android:label="Follows"
+        android:id="@+id/navigation_followee"
+        android:name="com.example.demoapp.ui.main.followee.FolloweeFragment"
+        android:label="Followee"
         tools:layout="@layout/fragment_follow" />
+
+    <fragment
+        android:id="@+id/navigation_follower"
+        android:name="com.example.demoapp.ui.main.follower.FollowerFragment"
+        android:label="Follower"
+        tools:layout="@layout/fragment_follow" />
+
+    <fragment
+        android:id="@+id/navigation_account"
+        android:name="com.example.demoapp.ui.main.account.AccountFragment"
+        android:label="Account"
+        tools:layout="@layout/fragment_account" />
 
 </navigation>

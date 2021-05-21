@@ -1,7 +1,6 @@
 package com.example.demoapp.ui.authentication.register;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -27,7 +26,6 @@ import android.widget.Toast;
 import com.example.demoapp.R;
 import com.example.demoapp.data.view.AuthenticatedUserView;
 import com.example.demoapp.data.viewmodel.AuthenticationResult;
-import com.example.demoapp.ui.main.MainActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 import static com.example.demoapp.App.SHARED_PREFS;
@@ -96,6 +94,7 @@ public class RegisterFragment extends Fragment
                 if (registerResult.getSuccess() != null)
                 {
                     updateUiWithUser(registerResult.getSuccess());
+                    Navigation.findNavController(view).navigate(R.id.navigation_account);
                 }
             }
         });
@@ -153,11 +152,8 @@ public class RegisterFragment extends Fragment
     {
         SharedPreferences sharedPref = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("JWToken", model.getDisplayName());
+        editor.putString("JWToken", model.getUserID());
         editor.apply();
-
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        startActivity(intent);
     }
 
     private void showRegisterFailed(@StringRes Integer errorString)
