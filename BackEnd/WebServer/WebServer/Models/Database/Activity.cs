@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using WebServer.Models.Api.Response;
 using WebServer.Models.Enums;
 
 namespace WebServer.Models.Database
@@ -23,5 +24,18 @@ namespace WebServer.Models.Database
         public string City { get; set; }
 
         public Point Coordinates { get; set; }
+
+        public static implicit operator ActivityResponse(Activity activity)
+        {
+            return new ActivityResponse
+            {
+                ID = activity.ActivityID,
+                Address = activity.Address,
+                Country = activity.Country.ToString(),
+                Description = activity.Description,
+                Tags = activity.Tags,
+                Title = activity.Title
+            };
+        }
     }
 }
