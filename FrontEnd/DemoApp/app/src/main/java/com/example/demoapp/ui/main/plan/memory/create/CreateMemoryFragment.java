@@ -3,6 +3,7 @@ package com.example.demoapp.ui.main.plan.memory.create;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.ui.location_picker.LocationActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.io.Serializable;
@@ -131,16 +133,18 @@ public class CreateMemoryFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                String title = titleEditText.getText().toString();
-                Country country = Country.lookupByLabel(countryEditText.getText().toString());
-                String address = addressEditText.getText().toString();
-                String description = descriptionEditText.getText().toString();
-                String tags = tagsEditText.getText().toString();
+//                String title = titleEditText.getText().toString();
+//                Country country = Country.lookupByLabel(countryEditText.getText().toString());
+//                String address = addressEditText.getText().toString();
+//                String description = descriptionEditText.getText().toString();
+//                String tags = tagsEditText.getText().toString();
+//
+//                viewModel.storeActivity(title, country, address, description, tags);
+//
+//                //TODO: Create location getter
+//                Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
 
-                viewModel.storeActivity(title, country, address, description, tags);
-
-                //TODO: Create location getter
-                Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
+                startActivity(new Intent(getActivity(), LocationActivity.class));
             }
         });
 

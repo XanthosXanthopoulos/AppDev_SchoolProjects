@@ -35,9 +35,7 @@ public class NotificationHub
 
     public static void init(String JWToken)
     {
-        hubConnection = HubConnectionBuilder.create("http://192.168.1.109:5000/notifications").withAccessTokenProvider(Single.defer(() -> {
-            return Single.just(JWToken);
-        })).build();
+        hubConnection = HubConnectionBuilder.create("http://192.168.1.109:5000/notifications").withAccessTokenProvider(Single.defer(() -> Single.just(JWToken))).build();
 
         hubConnection.on("followRequest", (followerID, username, followerImageID) ->
         {
