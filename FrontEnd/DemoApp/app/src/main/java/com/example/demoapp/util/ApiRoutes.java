@@ -5,7 +5,7 @@ import java.util.Map;
 
 public final class ApiRoutes
 {
-    private static final String BASE = "http://192.168.1.109:5000/api";
+    private static final String BASE = "http://192.168.2.8:5000/api";
     private static final String GEO_BASE = "https://api.opencagedata.com/geocode/v1/json";
 
     public static final String LOGIN = "/account/login";
