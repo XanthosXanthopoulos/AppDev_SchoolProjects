@@ -70,7 +70,9 @@ namespace WebServer.Controllers
                                                                           Address = a.Address,
                                                                           Description = a.Description,
                                                                           Tags = a.Tags,
-                                                                          Country = a.Country.ToString()
+                                                                          Country = a.Country.ToString(),
+                                                                          Latitude = a.Coordinates.Y,
+                                                                          Longtitude = a.Coordinates.X
                                                                       }).ToListAsync();
 
             return new ApiResponse<ICollection<ActivityResponse>> { Response = result };
@@ -91,7 +93,9 @@ namespace WebServer.Controllers
                     Country = a.Country.ToString(),
                     Description = a.Description,
                     Tags = a.Tags,
-                    Title = a.Title
+                    Title = a.Title,
+                    Latitude = a.Coordinates.Y,
+                    Longtitude = a.Coordinates.X
                 })
                 .ToList()
             };

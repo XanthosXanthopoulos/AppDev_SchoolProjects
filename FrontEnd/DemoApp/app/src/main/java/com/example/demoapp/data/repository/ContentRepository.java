@@ -16,6 +16,7 @@ import com.example.demoapp.data.model.api.request.SearchQueryModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,13 @@ public class ContentRepository extends Repository
     private final MediatorLiveData<RepositoryResponse<List<String>>> citiesData;
     private final MediatorLiveData<RepositoryResponse<List<Activity>>> activitiesResult;
 
+    public MediatorLiveData<RepositoryResponse<List<Activity>>> getNearActivitiesResult()
+    {
+        return nearActivitiesResult;
+    }
+
+    private final MediatorLiveData<RepositoryResponse<List<Activity>>> nearActivitiesResult;
+
     private final MutableLiveData<Activity> currentActivity;
     private final MutableLiveData<Post> currentPost;
 
@@ -44,6 +52,7 @@ public class ContentRepository extends Repository
         postResult = new MediatorLiveData<>();
         citiesData = new MediatorLiveData<>();
         activitiesResult = new MediatorLiveData<>();
+        nearActivitiesResult = new MediatorLiveData<>();
 
         currentActivity = new MutableLiveData<>();
         currentPost = new MutableLiveData<>();
@@ -56,6 +65,28 @@ public class ContentRepository extends Repository
             instance = new ContentRepository(dataSource);
         }
         return instance;
+    }
+
+    public void searchNearActivities(double latitude, double longtitude, double radius)
+    {
+        LiveData<DataSourceResponse<List<Activity>>> result = dataSource.searchNearActivities(latitude, longtitude, radius, loadFromPrefs("JWToken"));
+        nearActivitiesResult.addSource(result, new Observer<DataSourceResponse<List<Activity>>>()
+        {
+            @Override
+            public void onChanged(DataSourceResponse<List<Activity>> response)
+            {
+                if (response.isSuccessful())
+                {
+                    nearActivitiesResult.setValue(new RepositoryResponse<>(response.getResponse()));
+                }
+                else
+                {
+                    nearActivitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+                }
+
+                nearActivitiesResult.removeSource(result);
+            }
+        });
     }
 
     public void search(String query, String country, String city, String type, int radius)

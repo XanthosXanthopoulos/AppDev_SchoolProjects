@@ -7,8 +7,10 @@ import android.net.sip.SipSession;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -42,6 +44,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     private SearchView search_bar;
     boolean visible;
     PolylineOptions polylineOptions;
+    private ArrayList<Marker> nearMarkers;
 
     private MapViewModel viewModel;
 
@@ -51,6 +54,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
         viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(MapViewModel.class);
+
+        nearMarkers = new ArrayList<>();
 
         if (getArguments() != null)
         {
@@ -74,6 +79,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         Drawable temp = search_bar.getBackground();
         List<Place> PlacesList = getListItemData();
 
+        map.clear();
+        map.setInfoWindowAdapter(new CustomMarkerInfoWindowView(getContext()));
+
         search_bar.setOnSearchClickListener(new View.OnClickListener()
         {
             @SuppressLint("UseCompatLoadingForDrawables")
@@ -95,75 +103,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         });
 
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
-        {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onMapClick(LatLng latLng)
-            {
-
-                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
-                List<LatLng> route = new ArrayList<>();
-                route.add(new LatLng(-35.016, 143.321));
-                route.add(new LatLng(-34.747, 145.592));
-                route.add(new LatLng(-34.364, 147.891));
-                route.add(new LatLng(-33.501, 150.217));
-                route.add(new LatLng(-32.306, 149.248));
-                route.add(new LatLng(-32.491, 147.309));
-                map.moveCamera(CameraUpdateFactory.newLatLng(route.get(0)));
-
-//                if (!search_bar.hasFocus())
-//                {
-//
-//                    if (search_bar.isIconified())
-//                    {
-//                        addMarker(latLng, null);
-//                    }
-//
-//                    search_bar.setIconified(true);
-//                    search_bar.setBackground(temp);
-//
-//                }
-//                else
-//                {
-//                    search_bar.clearFocus();
-//                    search_bar.setBackground(temp);
-//                }
-            }
-        });
-
-        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
-        {
-            @Override
-            public void onCameraMove()
-            {
-                if (map.getCameraPosition().zoom >= 11.0f)
-                {
-                    Log.i("SUCCESS", "Im ur guy ");
-                    double radius = getMaxRadiusAfterZoom();
-                }
-            }
-
-        });
-
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
         {
             @Override
-            public boolean onMarkerClick(Marker marker)
+            public boolean onMarkerClick(@NonNull @NotNull Marker marker)
             {
-                CustomMarkerInfoWindowView info = new CustomMarkerInfoWindowView(getContext());
+                return false;
+            }
+        });
 
-                if (!visible)
+        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener()
+        {
+            @Override
+            public void onCameraIdle()
+            {
+                if (map.getCameraPosition().zoom >= 8.0f)
                 {
-                    visible = true;
-                    info.getInfoWindow(marker);
-                    return false;
-                }
-                else
-                {
-                    visible = false;
-                    info.closeInfoWindow(marker);
-                    return true;
+                    LatLng center = map.getCameraPosition().target;
+                    viewModel.getActivities(center.latitude, center.longitude, getMaxRadiusAfterZoom());
                 }
             }
         });
@@ -174,7 +131,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             public boolean onQueryTextSubmit(String query)
             {
                 Place p = getPlaceData(PlacesList, query);
-                addMarker(Objects.requireNonNull(p).getCoordinates(), p.getDescription());
                 return false;
             }
 
@@ -187,10 +143,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
 
         viewModel.getActivitiesLiveData().observe(getViewLifecycleOwner(), new Observer<List<Activity>>()
         {
-            @Override
+                @Override
             public void onChanged(List<Activity> activities)
             {
                 addPath(activities);
+            }
+        });
+
+        viewModel.getNearActivitiesLiveData().observe(getViewLifecycleOwner(), new Observer<List<Activity>>()
+        {
+            @Override
+            public void onChanged(List<Activity> activities)
+            {
+                for (Marker marker : nearMarkers)
+                {
+                    marker.remove();
+                }
+
+                nearMarkers.clear();
+
+                for (Activity activity : activities)
+                {
+                    nearMarkers.add(addMarker(activity));
+                }
             }
         });
     }
@@ -249,20 +224,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         polyLine.setPoints(path);
     }
 
-    public void addMarker(LatLng coordinates, String description)
+    public Marker addMarker(Activity activity)
     {
-        String title;
-        if (description != null)
-        {
-            title = description;
-        }
-        else
-        {
-            title = " Marker on the point I clicked ";
-        }
-        map.clear();
-        map.addMarker(new MarkerOptions().position(coordinates).title(title));
-        map.moveCamera(CameraUpdateFactory.newLatLng(coordinates));
+        LatLng point = new LatLng(activity.getLatitude(), activity.getLongtitude());
+
+        Marker marker = map.addMarker(new MarkerOptions().position(point).title(activity.getTitle()));
+        marker.setTag(activity);
+
+        return marker;
     }
 
     private List<Place> getListItemData()

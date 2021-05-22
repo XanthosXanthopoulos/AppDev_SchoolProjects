@@ -449,6 +449,55 @@ public class ApiDataSource
         return result;
     }
 
+    public LiveData<DataSourceResponse<List<Activity>>> searchNearActivities(double latitude, double longtitude, double radius, String JWToken)
+    {
+        MutableLiveData<DataSourceResponse<List<Activity>>> result = new MutableLiveData<>();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("latitude", String.valueOf(latitude));
+        params.put("longtitude", String.valueOf(longtitude));
+        params.put("radius", String.valueOf(radius));
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, new Response.Listener<JSONObject>()
+        {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
+
+                if (apiResponse.isSuccessful())
+                {
+                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
+                }
+                else
+                {
+                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+                }
+            }
+        }, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                result.setValue(new DataSourceResponse<>(error.getMessage()));
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError
+            {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + JWToken);
+                return headers;
+            }
+        };
+
+        apiHandler.addToRequestQueue(request);
+
+        return result;
+    }
+
     public LiveData<DataSourceResponse<List<Item>>> searchPosts(SearchQueryModel query, String JWToken)
     {
         MutableLiveData<DataSourceResponse<List<Item>>> result = new MutableLiveData<>();
