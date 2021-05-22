@@ -96,11 +96,23 @@ public class AccountViewModel extends ViewModel
         return accountFormState;
     }
 
-    public void userDataChanged(String name, String surname)
+    public void accountDataChanged(String name, String surname, Country country)
     {
         if (!isNameValid(name))
         {
-            accountFormState.setValue(new AccountFormState(R.string.name_error, null));
+            accountFormState.setValue(new AccountFormState(R.string.name_error, null, null));
+        }
+        else if (!isNameValid(surname))
+        {
+            accountFormState.setValue(new AccountFormState(null, R.string.surname_error, null));
+        }
+        else if (!isCountryValid(country))
+        {
+            accountFormState.setValue(new AccountFormState(null, null, R.string.country_error));
+        }
+        else
+        {
+            accountFormState.setValue(new AccountFormState(true));
         }
     }
 
@@ -112,6 +124,13 @@ public class AccountViewModel extends ViewModel
         }
 
         return !name.isEmpty();
+    }
+
+    private boolean isCountryValid(Country country)
+    {
+        if (country == null) return false;
+
+        return country.code != 0;
     }
 
     public LiveData<Event<Boolean>> getSaveResult()

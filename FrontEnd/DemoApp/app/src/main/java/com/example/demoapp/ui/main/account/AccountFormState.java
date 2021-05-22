@@ -8,13 +8,16 @@ public class AccountFormState
     private final Integer nameError;
     @Nullable
     private final Integer surnameError;
+    @Nullable
+    private final Integer countryError;
 
     private final boolean isDataValid;
 
-    AccountFormState(@Nullable Integer usernameError, @Nullable Integer passwordError)
+    AccountFormState(@Nullable Integer nameError, @Nullable Integer surnameError, @Nullable Integer countryError)
     {
-        this.nameError = usernameError;
-        this.surnameError = passwordError;
+        this.nameError = nameError;
+        this.surnameError = surnameError;
+        this.countryError = countryError;
         this.isDataValid = false;
     }
 
@@ -22,6 +25,7 @@ public class AccountFormState
     {
         this.nameError = null;
         this.surnameError = null;
+        this.countryError = null;
         this.isDataValid = isDataValid;
     }
 
@@ -29,5 +33,22 @@ public class AccountFormState
     public Integer getNameError()
     {
         return nameError;
+    }
+
+    @Nullable
+    public Integer getSurnameError()
+    {
+        return surnameError;
+    }
+
+    @Nullable
+    public Integer getCountryError()
+    {
+        return countryError;
+    }
+
+    public boolean isDataValid()
+    {
+        return isDataValid;
     }
 }

@@ -60,7 +60,14 @@ namespace WebServer.Controllers
                         await _context.Users.AddAsync(new UserModel { UserID = user.Id, Name = user.UserName });
                         await _context.SaveChangesAsync();
 
-                        return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = user.UserName, JWToken = jwt.GenerateSecurityToken(user.Email, user.Id) } };
+                        return new ApiResponse<AuthenticationResponseModel> 
+                        { 
+                            Response = new AuthenticationResponseModel 
+                            { 
+                                Username = user.UserName, 
+                                JWToken = jwt.GenerateSecurityToken(user.Email, user.Id)
+                            } 
+                        };
                     }
                     else
                     {
@@ -209,6 +216,11 @@ namespace WebServer.Controllers
                 if (profileInfo.ProfileImageID != null)
                 {
                     Image im = await _context.Images.FindAsync(profileInfo.ProfileImageID);
+                    userInfo.Image = im;
+                }
+                else if (profileInfo.ProfileImageID == null && userInfo.Image == null)
+                {
+                    Image im = await _context.Images.FindAsync(Guid.Empty.ToString());
                     userInfo.Image = im;
                 }
 

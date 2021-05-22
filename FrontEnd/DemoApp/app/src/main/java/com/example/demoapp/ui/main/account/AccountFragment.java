@@ -46,9 +46,12 @@ import com.example.demoapp.ui.main.MainActivity;
 import com.example.demoapp.util.ApiRoutes;
 import com.example.demoapp.util.ViewModelFactory;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -91,6 +94,37 @@ public class AccountFragment extends Fragment
         countryTextView.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, Country.values()));
         accountTypeSpinner.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, AccountType.values()));
 
+        countryTextView.setValidator(new AutoCompleteTextView.Validator()
+        {
+            @Override
+            public boolean isValid(CharSequence text)
+            {
+                int index = Arrays.binarySearch(Country.values(), text.toString(), new Comparator<Serializable>()
+                {
+                    @Override
+                    public int compare(Serializable o1, Serializable o2)
+                    {
+                        if (o1 instanceof Country && o2 instanceof String)
+                        {
+                            return  ((Country) o1).label.compareTo((String)o2);
+                        }
+                        else
+                        {
+                            return 1;
+                        }
+                    }
+                });
+
+                return index >= 0;
+            }
+
+            @Override
+            public CharSequence fixText(CharSequence invalidText)
+            {
+                return Country.ANY.label;
+            }
+        });
+
         viewModel.getProfileData().observe(getViewLifecycleOwner(), new Observer<AuthenticationResult>()
         {
             @Override
@@ -105,10 +139,33 @@ public class AccountFragment extends Fragment
             @Override
             public void onChanged(AccountFormState accountFormState)
             {
+                if (accountFormState.isDataValid())
+                {
+                    nameEditText.setError(null);
+                    surnameEditText.setError(null);
+                    countryTextView.setError(null);
+
+                    saveButton.setEnabled(true);
+
+                    return;
+                }
+
                 if (accountFormState.getNameError() != null)
                 {
                     nameEditText.setError(getString(accountFormState.getNameError()));
                 }
+
+                if (accountFormState.getSurnameError() != null)
+                {
+                    surnameEditText.setError(getString(accountFormState.getSurnameError()));
+                }
+
+                if (accountFormState.getCountryError() != null)
+                {
+                    countryTextView.setError(getString(accountFormState.getCountryError()));
+                }
+
+                saveButton.setEnabled(false);
             }
         });
 
@@ -185,11 +242,13 @@ public class AccountFragment extends Fragment
             @Override
             public void afterTextChanged(Editable s)
             {
-                viewModel.userDataChanged(nameEditText.getText().toString(), surnameEditText.getText().toString());
+                viewModel.accountDataChanged(nameEditText.getText().toString(), surnameEditText.getText().toString(), Country.lookupByLabel(countryTextView.getText().toString()));
             }
         };
 
         nameEditText.addTextChangedListener(afterTextChangedListener);
+        surnameEditText.addTextChangedListener(afterTextChangedListener);
+        countryTextView.addTextChangedListener(afterTextChangedListener);
 
         if (getActivity() instanceof MainActivity)
         {

@@ -273,7 +273,8 @@ public enum Country
     private static final Function<String, Country> func =
             EnumUtils.lookupMap(Country.class, e -> e.label);
 
-    public static Country lookupByLabel(String label) {
+    public static Country lookupByLabel(String label)
+    {
         return func.apply(label);
     }
 

@@ -1,13 +1,13 @@
 package com.example.demoapp.ui.main.plan.memory.create;
 
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
@@ -15,26 +15,25 @@ import java.util.List;
 
 public class CreateMemoryViewModel extends ViewModel
 {
-    private ContentRepository repository;
+    private final ContentRepository repository;
     private final LiveData<List<String>> citiesResult;
+    private final MutableLiveData<CreateMemoryFormState> memoryFormState;
 
     public CreateMemoryViewModel(ContentRepository repository)
     {
         this.repository = repository;
 
-        citiesResult = Transformations.map(repository.getCitiesResult(), new Function<RepositoryResponse<List<String>>, List<String>>()
+        memoryFormState = new MutableLiveData<>();
+
+        citiesResult = Transformations.map(repository.getCitiesResult(), input ->
         {
-            @Override
-            public List<String> apply(RepositoryResponse<List<String>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                return new ArrayList<>();
             }
         });
     }
@@ -67,5 +66,43 @@ public class CreateMemoryViewModel extends ViewModel
     public void getCities(String country)
     {
         repository.getCities(country);
+    }
+
+    public LiveData<CreateMemoryFormState> getMemoryFormStateFormState()
+    {
+        return memoryFormState;
+    }
+
+    public void memoryDataChanged(String title, Country country)
+    {
+        if (!isTitleValid(title))
+        {
+            memoryFormState.setValue(new CreateMemoryFormState(R.string.name_error, null));
+        }
+        else if (!isCountryValid(country))
+        {
+            memoryFormState.setValue(new CreateMemoryFormState(null, R.string.country_error));
+        }
+        else
+        {
+            memoryFormState.setValue(new CreateMemoryFormState(true));
+        }
+    }
+
+    private boolean isTitleValid(String name)
+    {
+        if (name == null)
+        {
+            return false;
+        }
+
+        return !name.isEmpty();
+    }
+
+    private boolean isCountryValid(Country country)
+    {
+        if (country == null) return false;
+
+        return country.code != 0;
     }
 }

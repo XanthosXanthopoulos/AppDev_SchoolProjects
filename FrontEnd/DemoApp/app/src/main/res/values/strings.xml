@@ -35,6 +35,8 @@
     <string name="country">Country</string>
     <string name="add_moment">Add moment</string>
     <string name="name_error">Name cannot be empty</string>
+    <string name="surname_error">Surname cannot be empty</string>
+    <string name="country_error">Please select a country</string>
     <string name="notifications">Notifications</string>
     <string name="title_activity_location">LocationActivity</string>
     <!--

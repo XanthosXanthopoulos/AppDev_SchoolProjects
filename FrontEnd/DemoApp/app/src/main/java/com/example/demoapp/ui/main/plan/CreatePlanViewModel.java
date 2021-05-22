@@ -1,36 +1,30 @@
 package com.example.demoapp.ui.main.plan;
 
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.example.demoapp.data.model.Post;
+import com.example.demoapp.R;
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
-import com.example.demoapp.data.repository.UserRepository;
 
 import java.util.Date;
 
 public class CreatePlanViewModel extends ViewModel
 {
-    private ContentRepository repository;
-    private final LiveData<Boolean> uploadResultLiveData;
+    private final ContentRepository repository;
+    private final LiveData<Event<Boolean>> uploadResultLiveData;
+    private final MutableLiveData<CreatePlanFormState> planFormState;
 
     public CreatePlanViewModel(ContentRepository repository)
     {
         this.repository = repository;
-
+        this.planFormState = new MutableLiveData<>();
         repository.initializePostData();
 
-        uploadResultLiveData = Transformations.map(repository.getUploadResult(), new Function<RepositoryResponse<Boolean>, Boolean>()
-        {
-            @Override
-            public Boolean apply(RepositoryResponse<Boolean> input)
-            {
-                return input.getResponse();
-            }
-        });
+        uploadResultLiveData = Transformations.map(repository.getUploadResult(), RepositoryResponse::getResponse);
     }
 
     public void uploadPost(String title, String description, Date date)
@@ -38,8 +32,35 @@ public class CreatePlanViewModel extends ViewModel
         repository.uploadPost(title, description, date);
     }
 
-    public LiveData<Boolean> getUploadResultLiveData()
+    public LiveData<Event<Boolean>> getUploadResultLiveData()
     {
         return uploadResultLiveData;
+    }
+
+    public LiveData<CreatePlanFormState> getPlanFormState()
+    {
+        return planFormState;
+    }
+
+    public void memoryDataChanged(String title)
+    {
+        if (!isTitleValid(title))
+        {
+            planFormState.setValue(new CreatePlanFormState(R.string.name_error));
+        }
+        else
+        {
+            planFormState.setValue(new CreatePlanFormState(true));
+        }
+    }
+
+    private boolean isTitleValid(String name)
+    {
+        if (name == null)
+        {
+            return false;
+        }
+
+        return !name.isEmpty();
     }
 }

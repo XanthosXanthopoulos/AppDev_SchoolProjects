@@ -92,6 +92,11 @@ namespace WebServer
                     Tags = "coffee"
                 });
 
+                dbContext.Images.Add(new Models.Database.Image()
+                {
+                    ImageID = Guid.Empty.ToString()
+                });
+
                 Point p = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 };
 
                 dbContext.SaveChanges();

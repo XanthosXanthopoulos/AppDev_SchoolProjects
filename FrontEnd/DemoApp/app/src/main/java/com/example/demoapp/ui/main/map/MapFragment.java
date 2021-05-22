@@ -33,8 +33,13 @@ import com.google.maps.android.SphericalUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback
 {
@@ -44,7 +49,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     private SearchView search_bar;
     boolean visible;
     PolylineOptions polylineOptions;
-    private ArrayList<Marker> nearMarkers;
+    private HashMap<String, Marker> nearMarkers;
 
     private MapViewModel viewModel;
 
@@ -55,7 +60,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
 
         viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(MapViewModel.class);
 
-        nearMarkers = new ArrayList<>();
+        nearMarkers = new HashMap<>();
 
         if (getArguments() != null)
         {
@@ -108,7 +113,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(@NonNull @NotNull Marker marker)
             {
-                return false;
+                map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+                marker.showInfoWindow();
+
+                return true;
             }
         });
 
@@ -155,16 +163,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             @Override
             public void onChanged(List<Activity> activities)
             {
-                for (Marker marker : nearMarkers)
-                {
-                    marker.remove();
-                }
+                Map<String, Activity> newActivities = activities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
 
-                nearMarkers.clear();
+                Iterator<Map.Entry<String, Marker>> iterator = nearMarkers.entrySet().iterator();
+                while (iterator.hasNext())
+                {
+                    Map.Entry<String, Marker> entry = iterator.next();
+
+                    if (!newActivities.containsKey(entry.getKey()))
+                    {
+                        entry.getValue().remove();
+                        iterator.remove();
+                    }
+                }
 
                 for (Activity activity : activities)
                 {
-                    nearMarkers.add(addMarker(activity));
+                    if (!nearMarkers.containsKey(activity.getId())) nearMarkers.put(activity.getId(), addMarker(activity));
                 }
             }
         });

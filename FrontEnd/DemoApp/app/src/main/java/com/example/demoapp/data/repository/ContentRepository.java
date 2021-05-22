@@ -8,6 +8,7 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Item;
@@ -27,7 +28,7 @@ public class ContentRepository extends Repository
 
     private final MediatorLiveData<RepositoryResponse<List<Item>>> searchResult;
     private final MediatorLiveData<RepositoryResponse<List<Item>>> feedResult;
-    private final MediatorLiveData<RepositoryResponse<Boolean>> uploadResult;
+    private final MediatorLiveData<RepositoryResponse<Event<Boolean>>> uploadResult;
     private final MediatorLiveData<RepositoryResponse<Post>> postResult;
     private final MediatorLiveData<RepositoryResponse<List<String>>> citiesData;
     private final MediatorLiveData<RepositoryResponse<List<Activity>>> activitiesResult;
@@ -157,7 +158,7 @@ public class ContentRepository extends Repository
         return feedResult;
     }
 
-    public LiveData<RepositoryResponse<Boolean>> getUploadResult()
+    public LiveData<RepositoryResponse<Event<Boolean>>> getUploadResult()
     {
         return uploadResult;
     }
@@ -175,7 +176,7 @@ public class ContentRepository extends Repository
             @Override
             public void onChanged(DataSourceResponse<Boolean> booleanDataSourceResponse)
             {
-                uploadResult.setValue(new RepositoryResponse<>(booleanDataSourceResponse.getResponse()));
+                uploadResult.setValue(new RepositoryResponse<>(new Event<>(booleanDataSourceResponse.getResponse())));
                 uploadResult.removeSource(result);
             }
         });

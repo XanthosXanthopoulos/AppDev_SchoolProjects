@@ -3,21 +3,20 @@ package com.example.demoapp.ui.main.plan;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-import androidx.viewpager2.widget.ViewPager2;
-
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.demoapp.R;
 import com.example.demoapp.ui.adapter.ViewPagerAdapter;
@@ -68,85 +67,110 @@ public class CreatePlanFragment extends Fragment
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memories", "Moments"}[position])).attach();
 
-        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener()
+        DatePickerDialog.OnDateSetListener dateSetListener = (view1, year, month, dayOfMonth) ->
         {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth)
-            {
-                // TODO Auto-generated method stub
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, month);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateLabel();
-            }
-
+            // TODO Auto-generated method stub
+            myCalendar.set(Calendar.YEAR, year);
+            myCalendar.set(Calendar.MONTH, month);
+            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateLabel();
         };
 
-        calendarButton.setOnClickListener(new View.OnClickListener()
+        calendarButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
+            // TODO Auto-generated method stub
+            new DatePickerDialog(requireActivity(), dateSetListener, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        dateSpinner.setOnFocusChangeListener((v, hasFocus) ->
+        {
+            if (dateSpinner.getHint().toString().equals("Date"))
             {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(requireActivity(), date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                dateSpinner.setHint("dd/mm/yyyy");
+            }
+            else
+            {
+                dateSpinner.setHint("Date");
             }
         });
 
-        dateSpinner.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        uploadButton.setOnClickListener(v ->
         {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus)
+            String title = titleEditText.getText().toString();
+            String description = descriptionEditText.getText().toString();
+            Date date = null;
+            try
             {
-                if (dateSpinner.getHint().toString().equals("Date"))
+                if (dateSpinner.getText().toString().isEmpty())
                 {
-                    dateSpinner.setHint("dd/mm/yyyy");
+                    date = new Date(0);
                 }
                 else
-                {
-                    dateSpinner.setHint("Date");
-                }
-            }
-        });
-
-        uploadButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                String title = titleEditText.getText().toString();
-                String description = descriptionEditText.getText().toString();
-                Date date;
-                try
                 {
                     date = new SimpleDateFormat("dd/MM/yyyy").parse(dateSpinner.getText().toString());
                 }
-                catch (ParseException e)
-                {
-                    date = null;
-                }
-                loadingProgressBar.setVisibility(View.VISIBLE);
-                viewModel.uploadPost(title, description, date);
+            }
+            catch (ParseException e)
+            {
+                date = new Date(0);
+            }
+
+            loadingProgressBar.setVisibility(View.VISIBLE);
+            viewModel.uploadPost(title, description, date);
+        });
+
+        viewModel.getUploadResultLiveData().observe(getViewLifecycleOwner(), result ->
+        {
+            if (result.isHandled()) return;
+
+            result.setHandled(true);
+            loadingProgressBar.setVisibility(View.GONE);
+
+            if (result.getData())
+            {
+                Navigation.findNavController(view).navigate(R.id.navigation_profile);
+            }
+            else
+            {
+                Toast.makeText(getContext(), "Something went wrong!! Please try uploading again.", Toast.LENGTH_LONG).show();
             }
         });
 
-        viewModel.getUploadResultLiveData().observe(getViewLifecycleOwner(), new Observer<Boolean>()
+        TextWatcher afterTextChangedListener = new TextWatcher()
         {
             @Override
-            public void onChanged(Boolean aBoolean)
-            {
-                loadingProgressBar.setVisibility(View.GONE);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
-                if (aBoolean)
-                {
-                    Navigation.findNavController(view).navigate(R.id.navigation_profile);
-                }
-                else
-                {
-                    Toast.makeText(getContext(), "Something went wrong!! Please try uploading again.", Toast.LENGTH_LONG).show();
-                }
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                viewModel.memoryDataChanged(titleEditText.getText().toString());
             }
+        };
+
+        titleEditText.addTextChangedListener(afterTextChangedListener);
+
+        viewModel.getPlanFormState().observe(getViewLifecycleOwner(), createPlanFormState ->
+        {
+            if (createPlanFormState.isDataValid())
+            {
+                titleEditText.setError(null);
+
+                uploadButton.setEnabled(true);
+
+                return;
+            }
+
+            if (createPlanFormState.getTitleError() != null)
+            {
+                titleEditText.setError(getString(createPlanFormState.getTitleError()));
+            }
+
+            uploadButton.setEnabled(false);
         });
 
         return view;

@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +30,6 @@ import com.example.demoapp.ui.location_picker.LocationActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -90,16 +91,16 @@ public class CreateMemoryFragment extends Fragment
                     }
                 });
 
-                cityEditText.setEnabled(index >= 0);
-                viewModel.getCities(Country.values()[index].label);
+                if (index > 0)viewModel.getCities(Country.values()[index].label);
+                cityEditText.setEnabled(index > 0);
 
-                return index >= 0;
+                return index > 0;
             }
 
             @Override
             public CharSequence fixText(CharSequence invalidText)
             {
-                return null;
+                return Country.ANY.label;
             }
         });
 
@@ -112,21 +113,59 @@ public class CreateMemoryFragment extends Fragment
             }
         });
 
-        viewModel.getStoredActivity().observe(getViewLifecycleOwner(), new Observer<Activity>()
+        viewModel.getStoredActivity().observe(getViewLifecycleOwner(), activity ->
         {
-            @Override
-            public void onChanged(Activity activity)
+            if (activity != null)
             {
-                if (activity != null)
-                {
-                    titleEditText.setText(activity.getTitle());
-                    countryEditText.setText(activity.getCountry().toString());
-                    addressEditText.setText(activity.getAddress());
-                    descriptionEditText.setText(activity.getDescription());
-                    tagsEditText.setText(activity.getTags());
-                }
+                titleEditText.setText(activity.getTitle());
+                countryEditText.setText(activity.getCountry().toString());
+                addressEditText.setText(activity.getAddress());
+                descriptionEditText.setText(activity.getDescription());
+                tagsEditText.setText(activity.getTags());
             }
         });
+
+        viewModel.getMemoryFormStateFormState().observe(getViewLifecycleOwner(), createMemoryFormState ->
+        {
+            if (createMemoryFormState.isDataValid())
+            {
+                titleEditText.setError(null);
+                countryEditText.setError(null);
+
+                submitButton.setEnabled(true);
+
+                return;
+            }
+
+            if (createMemoryFormState.getTitleError() != null)
+            {
+                titleEditText.setError(getString(createMemoryFormState.getTitleError()));
+            }
+
+            if (createMemoryFormState.getCountryError() != null)
+            {
+                countryEditText.setError(getString(createMemoryFormState.getCountryError()));
+            }
+
+            submitButton.setEnabled(false);
+        });
+
+        TextWatcher afterTextChangedListener = new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                viewModel.memoryDataChanged(titleEditText.getText().toString(), Country.lookupByLabel(countryEditText.getText().toString()));
+            }
+        };
+
+        titleEditText.addTextChangedListener(afterTextChangedListener);
+        countryEditText.addTextChangedListener(afterTextChangedListener);
 
         locateButton.setOnClickListener(new View.OnClickListener()
         {
