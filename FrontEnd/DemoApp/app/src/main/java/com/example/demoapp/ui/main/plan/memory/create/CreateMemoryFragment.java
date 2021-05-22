@@ -3,6 +3,8 @@ package com.example.demoapp.ui.main.plan.memory.create;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,7 +25,10 @@ import android.widget.Toast;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.ui.main.LocationActivity;
+import com.example.demoapp.ui.main.map.LocationFragment;
 import com.example.demoapp.util.ViewModelFactory;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -112,14 +117,19 @@ public class CreateMemoryFragment extends Fragment
 
         viewModel.getStoredActivity().observe(getViewLifecycleOwner(), new Observer<Activity>()
         {
+            @SuppressLint("Assert")
             @Override
             public void onChanged(Activity activity)
             {
                 if (activity != null)
                 {
+                    assert activity.getTitle() != null: "Null input";
                     titleEditText.setText(activity.getTitle());
+                    assert activity.getCountry().toString() != null: "Null input";
                     countryEditText.setText(activity.getCountry().toString());
+                    assert activity.getAddress() != null: "Null input";
                     addressEditText.setText(activity.getAddress());
+                    assert activity.getDescription() != null: "Null input";
                     descriptionEditText.setText(activity.getDescription());
                     tagsEditText.setText(activity.getTags());
                 }
@@ -140,7 +150,12 @@ public class CreateMemoryFragment extends Fragment
                 viewModel.storeActivity(title, country, address, description, tags);
 
                 //TODO: Create location getter
-                Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
+//                Navigation.findNavController(view).navigate(R.id.navigation_location);
+
+                startActivity(new Intent(getActivity(), LocationActivity.class));
+
+                LatLng location = LocationFragment.getLocation();
+                System.out.println(location);
             }
         });
 

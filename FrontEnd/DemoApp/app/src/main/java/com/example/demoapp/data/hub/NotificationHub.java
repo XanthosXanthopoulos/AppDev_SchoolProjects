@@ -35,7 +35,7 @@ public class NotificationHub
 
     public static void init(String JWToken)
     {
-        hubConnection = HubConnectionBuilder.create("http://192.168.1.109:5000/notifications").withAccessTokenProvider(Single.defer(() -> {
+        hubConnection = HubConnectionBuilder.create("http://192.168.2.8:5000/notifications").withAccessTokenProvider(Single.defer(() -> {
             return Single.just(JWToken);
         })).build();
 

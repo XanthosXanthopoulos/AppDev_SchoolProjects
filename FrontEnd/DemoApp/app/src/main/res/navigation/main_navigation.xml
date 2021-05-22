@@ -77,4 +77,10 @@
         android:label="Account"
         tools:layout="@layout/fragment_account" />
 
+<!--    <fragment-->
+<!--        android:id="@+id/navigation_location"-->
+<!--        android:name="com.example.demoapp.ui.main.map.LocationFragment"-->
+<!--        android:label="Location"-->
+<!--        tools:layout="@layout/fragment_location" />-->
+
 </navigation>
