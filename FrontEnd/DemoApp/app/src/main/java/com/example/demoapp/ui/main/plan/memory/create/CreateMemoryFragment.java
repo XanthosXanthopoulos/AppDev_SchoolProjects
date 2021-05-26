@@ -96,4 +96,13 @@ public class CreateMemoryFragment extends Fragment
         return ActivityList;
     }
 
+<<<<<<< Updated upstream
+=======
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        System.out.println(LocationActivity.getLocation());
+    }
+>>>>>>> Stashed changes
 }

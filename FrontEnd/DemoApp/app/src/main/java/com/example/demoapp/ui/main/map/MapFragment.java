@@ -28,6 +28,7 @@ import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
+<<<<<<< Updated upstream
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,6 +41,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+=======
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
+import com.google.maps.android.SphericalUtil;
+import com.thecodecity.mapsdirection.directionhelpers.FetchURL;
+import com.thecodecity.mapsdirection.directionhelpers.TaskLoadedCallback;
+>>>>>>> Stashed changes
 
 import org.jetbrains.annotations.NotNull;
 
@@ -47,13 +55,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+<<<<<<< Updated upstream
 public class MapFragment<FusedLocationProviderClient> extends Fragment implements OnMapReadyCallback,
         com.google.android.gms.location.LocationListener {
+=======
+public class MapFragment extends Fragment implements OnMapReadyCallback, TaskLoadedCallback
+{
+>>>>>>> Stashed changes
     private static final float MAPS_PATH_WIDTH = 10;
     private MapView mapView;
     private GoogleMap map;
     private SearchView search_bar;
     boolean visible;
+    Polyline currentPolyline;
     PolylineOptions polylineOptions;
     LocationManager locationManager;
     private com.google.android.gms.location.FusedLocationProviderClient fusedLocationProviderClient = null;
@@ -190,6 +204,13 @@ public class MapFragment<FusedLocationProviderClient> extends Fragment implement
 
     }
 
+    public void onTaskDone(Object... values){
+        if(currentPolyline != null){
+            currentPolyline.remove();
+        }
+        currentPolyline = map.addPolyline((PolylineOptions) values[0]);
+    }
+
     @Override
     public void onResume()
     {
@@ -232,11 +253,55 @@ public class MapFragment<FusedLocationProviderClient> extends Fragment implement
         }else{
             title = " Marker on the point I clicked ";
         }
+<<<<<<< Updated upstream
         map.clear();
         map.addMarker(new MarkerOptions()
                 .position(lng)
                 .title(title));
         map.moveCamera(CameraUpdateFactory.newLatLng(lng));
+=======
+
+        for (int i = 0; i < path.size(); i += 2){
+            MarkerOptions point1 = new MarkerOptions().position(path.get(i)).title("Location" + i);
+            MarkerOptions point2 = new MarkerOptions().position(path.get(i+1)).title("Location" + i+1);
+
+            String url = createUrl(point1.getPosition(), point2.getPosition(),"walking");
+            new FetchURL();
+
+        }
+
+//        polylineOptions = new PolylineOptions().jointType(JointType.ROUND).width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(path);
+//        Polyline polyLine = map.addPolyline(polylineOptions);
+//        polyLine.setPoints(path);
+    }
+
+    private String createUrl(LatLng origin , LatLng destination , String pathMode){
+        //Origin coordinates
+        String str_origin = "origin" + origin.latitude + "," + origin.longitude;
+        //Destination coordinates
+        String str_destination = "origin" + origin.latitude + "," + origin.longitude;
+        //Mode declaration
+        String mode = "mode=" + pathMode;
+        //Add all these
+        String parameters = str_origin + "&" + str_destination + "&" + mode;
+        //Output file type
+        String outputType = "json";
+
+        String url = "Https://googleapis.com/maps/api/directions/" + outputType + "?" + parameters + "&key" + "${MAPS_API_KEY}";
+
+        return url;
+
+    }
+
+    public Marker addMarker(Activity activity)
+    {
+        LatLng point = new LatLng(activity.getLatitude(), activity.getLongtitude());
+
+        Marker marker = map.addMarker(new MarkerOptions().position(point).title(activity.getTitle()));
+        marker.setTag(activity);
+
+        return marker;
+>>>>>>> Stashed changes
     }
 
     private List<Place> getListItemData()

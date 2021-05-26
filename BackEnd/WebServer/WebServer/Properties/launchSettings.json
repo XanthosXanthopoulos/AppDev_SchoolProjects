@@ -3,8 +3,13 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
+<<<<<<< Updated upstream
       "applicationUrl": "http://localhost:59150",
       "sslPort": 44389
+=======
+      "applicationUrl": "http://192.168.2.6:5000",
+      "sslPort": 5001
+>>>>>>> Stashed changes
     }
   },
   "profiles": {
@@ -21,7 +26,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5000;https://localhost:5001;https://192.168.1.109:5002"
+      "applicationUrl": "http://localhost:5000;https://localhost:5001;https://192.168.2.6:5002"
     }
   }
 }
