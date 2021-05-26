@@ -2,7 +2,6 @@ package com.example.demoapp.ui.main.map;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -26,9 +25,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
+import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
-<<<<<<< Updated upstream
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,13 +40,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-=======
-import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.*;
+
 import com.google.maps.android.SphericalUtil;
-import com.thecodecity.mapsdirection.directionhelpers.FetchURL;
-import com.thecodecity.mapsdirection.directionhelpers.TaskLoadedCallback;
->>>>>>> Stashed changes
 
 import org.jetbrains.annotations.NotNull;
 
@@ -55,13 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-<<<<<<< Updated upstream
-public class MapFragment<FusedLocationProviderClient> extends Fragment implements OnMapReadyCallback,
-        com.google.android.gms.location.LocationListener {
-=======
 public class MapFragment extends Fragment implements OnMapReadyCallback, TaskLoadedCallback
 {
->>>>>>> Stashed changes
     private static final float MAPS_PATH_WIDTH = 10;
     private MapView mapView;
     private GoogleMap map;
@@ -253,13 +242,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, TaskLoa
         }else{
             title = " Marker on the point I clicked ";
         }
-<<<<<<< Updated upstream
+
         map.clear();
         map.addMarker(new MarkerOptions()
                 .position(lng)
                 .title(title));
         map.moveCamera(CameraUpdateFactory.newLatLng(lng));
-=======
 
         for (int i = 0; i < path.size(); i += 2){
             MarkerOptions point1 = new MarkerOptions().position(path.get(i)).title("Location" + i);
@@ -301,7 +289,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, TaskLoa
         marker.setTag(activity);
 
         return marker;
->>>>>>> Stashed changes
     }
 
     private List<Place> getListItemData()
