@@ -1,56 +1,31 @@
 package com.example.demoapp.data.model.api.response;
 
+import android.net.Uri;
+
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.AccountType;
 
+import java.util.Date;
+
 public class ProfileInfoResponseModel
 {
-    private String username;
-
-    private String email;
-
+    private Uri profileImage;
     private String name;
-
     private String surname;
-
-    private String birthday;
-
+    private Date birthday;
     private Country country;
-
     private String description;
-
     private AccountType accountType;
 
-    public ProfileInfoResponseModel(String username, String email, String name, String surname, String description, String birthday, Country country, AccountType accountType)
+    public ProfileInfoResponseModel(Uri profileImage, String name, String surname, String description, Date birthday, Country country, AccountType accountType)
     {
-        this.username = username;
-        this.email = email;
+        this.profileImage = profileImage;
         this.name = name;
         this.surname = surname;
         this.birthday = birthday;
         this.country = country;
         this.description = description;
         this.accountType = accountType;
-    }
-
-    public String getUsername()
-    {
-        return username;
-    }
-
-    public void setUsername(String username)
-    {
-        this.username = username;
-    }
-
-    public String getEmail()
-    {
-        return email;
-    }
-
-    public void setEmail(String email)
-    {
-        this.email = email;
     }
 
     public String getName()
@@ -73,12 +48,12 @@ public class ProfileInfoResponseModel
         this.surname = surname;
     }
 
-    public String getBirthday()
+    public Date getBirthday()
     {
         return birthday;
     }
 
-    public void setBirthday(String birthday)
+    public void setBirthday(Date birthday)
     {
         this.birthday = birthday;
     }
@@ -111,5 +86,15 @@ public class ProfileInfoResponseModel
     public void setAccountType(AccountType accountType)
     {
         this.accountType = accountType;
+    }
+
+    public Uri getProfileImage()
+    {
+        return profileImage;
+    }
+
+    public void setProfileImage(Uri profileImage)
+    {
+        this.profileImage = profileImage;
     }
 }

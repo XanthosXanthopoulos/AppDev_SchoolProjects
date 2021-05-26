@@ -17,6 +17,12 @@
         android:label="Register"
         tools:layout="@layout/fragment_register" />
 
-    <include app:graph="@navigation/mobile_navigation" />
+    <fragment
+        android:id="@+id/navigation_account"
+        android:name="com.example.demoapp.ui.main.account.AccountFragment"
+        android:label="Account"
+        tools:layout="@layout/fragment_account" />
+
+    <include app:graph="@navigation/main_navigation" />
 
 </navigation>

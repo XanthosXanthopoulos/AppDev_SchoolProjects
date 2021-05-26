@@ -41,6 +41,7 @@
                 android:id="@+id/Register_ProfileImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:scaleType="centerCrop"
                 android:background="@drawable/ic_launcher_background" />
         </androidx.cardview.widget.CardView>
 
@@ -148,7 +149,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/Register_Birthday" />
 
-        <Spinner
+        <AutoCompleteTextView
             android:id="@+id/Register_Country"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

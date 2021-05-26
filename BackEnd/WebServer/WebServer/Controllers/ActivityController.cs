@@ -1,13 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebServer.Data;
+using WebServer.Models.Api.Request;
 using WebServer.Models.Api.Response;
 using WebServer.Models.Database;
+using WebServer.Models.Enums;
+using WebServer.Utilities;
 
 namespace WebServer.Controllers
 {
@@ -22,72 +27,78 @@ namespace WebServer.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
-        public async Task<ApiResponse<ICollection<ActivityRespone>>> getActivities(double? latitude, double? longtitude, double? radius)
+        public async Task<ApiResponse<string>> UploadActivity([FromBody] ActivitySubmitModel activitySubmit)
         {
-            ApiResponse<ICollection<ActivityRespone>> apiResponse = new ApiResponse<ICollection<ActivityRespone>> { Response = new List<ActivityRespone>()};
-
-            Point p = new Point(longtitude.GetValueOrDefault(), latitude.GetValueOrDefault()) { SRID = 4326 };
-
-            ICollection<Activity> activities = _context.Activities.Where(a => a.Coordinates.Distance(p) < radius).ToList();
-
-            foreach(Activity activity in activities)
+            Activity activity = new Activity
             {
-                apiResponse.Response.Add(new ActivityRespone
-                {
-                    ID = activity.ID,
-                    Title = activity.Title,
-                    Address = activity.Address,
-                    Description = activity.Description
-                });
-            }
+                Address = activitySubmit.Address,
+                City = activitySubmit.City,
+                Country = activitySubmit.Country,
+                Description = activitySubmit.Description,
+                Tags = activitySubmit.Tags,
+                Title = activitySubmit.Title,
+                Coordinates = new Point(activitySubmit.Longtitude, activitySubmit.Latitude) { SRID = 4326 }
+            };
 
-            return apiResponse;
+            await _context.Activities.AddAsync(activity);
+            await _context.SaveChangesAsync();
+
+            return new ApiResponse<string> { Response = activity.ActivityID };
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ApiResponse<ICollection<ActivityRespone>>> Activities()
+        [Authorize]
+        public async Task<ApiResponse<ICollection<ActivityResponse>>> SearchActivities(string? query, int? country, string? city, double? latitude, double? longtitude, double? radius)
         {
-            ApiResponse<ICollection<ActivityRespone>> apiResponse = new ApiResponse<ICollection<ActivityRespone>> { Response = new List<ActivityRespone>() };
+            Point p = null;
 
-            ICollection<Activity> activities = _context.Activities.Where(a => true).ToList();
-
-            foreach (Activity activity in activities)
+            if (longtitude != null && latitude != null)
             {
-                apiResponse.Response.Add(new ActivityRespone
-                {
-                    ContentType = "ACTIVITY",
-                    ID = activity.ID,
-                    Title = activity.Title,
-                    Address = activity.Address,
-                    Description = activity.Description
-                });
+                p = new Point(longtitude.GetValueOrDefault(), latitude.GetValueOrDefault()) { SRID = 4326 };
             }
 
-            return apiResponse;
+            List<ActivityResponse> result = await _context.Activities.Where(a => country == null || a.Country == (Country)country)
+                                                                      .Where(a => city == null || a.City == city)
+                                                                      .Where(a => p == null || radius == null || a.Coordinates.Distance(p) < radius)
+                                                                      .Where(a => query == null || EF.Functions.FreeText(a.Description, query) || EF.Functions.FreeText(a.Tags, query))
+                                                                      .Select(a => new ActivityResponse
+                                                                      {
+                                                                          ID = a.ActivityID,
+                                                                          Title = a.Title,
+                                                                          Address = a.Address,
+                                                                          Description = a.Description,
+                                                                          Tags = a.Tags,
+                                                                          Country = a.Country.ToString(),
+                                                                          Latitude = a.Coordinates.Y,
+                                                                          Longtitude = a.Coordinates.X
+                                                                      }).ToListAsync();
+
+            return new ApiResponse<ICollection<ActivityResponse>> { Response = result };
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ApiResponse<ICollection<PostResponseModel>>> Feed()
+        [Authorize]
+        public async Task<ApiResponse<ICollection<ActivityResponse>>> GetActivities(int? postID)
         {
-            ApiResponse<ICollection<PostResponseModel>> apiResponse = new ApiResponse<ICollection<PostResponseModel>> { Response = new List<PostResponseModel>() };
+            ICollection<Activity> result = await _context.Posts.Include(p => p.Activities).Where(p => p.PostID == postID).Select(p => p.Activities).FirstAsync();
 
-            for (int i = 0; i < 3; ++i)
+            return new ApiResponse<ICollection<ActivityResponse>>
             {
-                apiResponse.Response.Add(new PostResponseModel
+                Response = result.Select(a => new ActivityResponse
                 {
-                    ContentType = "POST",
-                    Username = "User " + i,
-                    ProfileImageID = "p" + i,
-                    ThumbnailImageID = "t" + i,
-                    Description = "Post number " + i + " descritpion."
-                });
-            }
-
-            return apiResponse;
+                    ID = a.ActivityID,
+                    Address = a.Address,
+                    Country = a.Country.ToString(),
+                    Description = a.Description,
+                    Tags = a.Tags,
+                    Title = a.Title,
+                    Latitude = a.Coordinates.Y,
+                    Longtitude = a.Coordinates.X
+                })
+                .ToList()
+            };
         }
     }
 }

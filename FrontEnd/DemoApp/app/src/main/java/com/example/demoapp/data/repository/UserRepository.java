@@ -1,14 +1,18 @@
 package com.example.demoapp.data.repository;
 
+import android.net.Uri;
+
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 
-import com.android.volley.toolbox.StringRequest;
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.datasource.ApiDataSource;
+import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.model.AccountType;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Follow;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.api.request.RegisterCredentialsModel;
 import com.example.demoapp.data.model.api.request.SingInCredentialsModel;
@@ -17,32 +21,45 @@ import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Class that requests authentication and user information from the remote data source and
  * maintains an in-memory cache of login status and user credentials information.
  */
-public class UserRepository
+public class UserRepository extends Repository
 {
     private static volatile UserRepository instance;
     private final ApiDataSource dataSource;
+    private final NotificationHub hub;
 
     private User user = null;
 
     private final MediatorLiveData<RepositoryResponse<User>> result;
 
-    private UserRepository(ApiDataSource dataSource)
+    public MediatorLiveData<RepositoryResponse<Event<Boolean>>> getActionResult()
     {
-        this.dataSource = dataSource;
-
-        result = new MediatorLiveData<>();
+        return actionResult;
     }
 
-    public static UserRepository getInstance(ApiDataSource dataSource)
+    private final MediatorLiveData<RepositoryResponse<Event<Boolean>>> actionResult;
+    private final MediatorLiveData<RepositoryResponse<List<Follow>>> followResult;
+
+    private UserRepository(ApiDataSource dataSource, NotificationHub hub)
+    {
+        this.dataSource = dataSource;
+        this.hub = hub;
+
+        result = new MediatorLiveData<>();
+        followResult = new MediatorLiveData<>();
+        actionResult = new MediatorLiveData<>();
+    }
+
+    public static UserRepository getInstance(ApiDataSource dataSource, NotificationHub hub)
     {
         if (instance == null)
         {
-            instance = new UserRepository(dataSource);
+            instance = new UserRepository(dataSource, hub);
         }
         return instance;
     }
@@ -63,8 +80,6 @@ public class UserRepository
         this.user = user;
     }
 
-    private User getUser() { return user; }
-
     public void login(String username, String password)
     {
         LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.login(new SingInCredentialsModel(username, password));
@@ -76,6 +91,8 @@ public class UserRepository
                 if (user.isSuccessful())
                 {
                     setUser(user.getResponse());
+                    saveToPrefs("JWToken" ,user.getResponse().getJwToken());
+                    NotificationHub.init(user.getResponse().getJwToken());
                     result.setValue(new RepositoryResponse<>(user.getResponse()));
                 }
                 else
@@ -99,6 +116,8 @@ public class UserRepository
                 if (user.isSuccessful())
                 {
                     setUser(user.getResponse());
+                    saveToPrefs("JWToken" ,user.getResponse().getJwToken());
+                    NotificationHub.init(user.getResponse().getJwToken());
                     result.setValue(new RepositoryResponse<>(user.getResponse()));
                 }
                 else
@@ -113,7 +132,7 @@ public class UserRepository
 
     public void getProfileInfo()
     {
-        LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.getProfileInfo(user.getJwToken());
+        LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.getProfileInfo(loadFromPrefs("JWToken"));
         result.addSource(dataSourceResult, new Observer<DataSourceResponse<User>>()
         {
             @Override
@@ -121,11 +140,7 @@ public class UserRepository
             {
                 if (user.isSuccessful())
                 {
-                    getUser().setName(user.getResponse().getName());
-                    getUser().setSurname(user.getResponse().getSurname());
-                    getUser().setDescription(user.getResponse().getDescription());
-
-                    result.setValue(new RepositoryResponse<>(getUser()));
+                    result.setValue(new RepositoryResponse<>(user.getResponse()));
                 }
                 else
                 {
@@ -137,61 +152,84 @@ public class UserRepository
         });
     }
 
-    public void updateProfile(String username, String email, String name, String surname, String description, Date birthday, Country country, AccountType accountType)
+    public void updateProfile(Uri profileImage, String name, String surname, String description, Date birthday, Country country, AccountType accountType)
     {
-        String birthdayString = birthday.toString();
-
-        LiveData<DataSourceResponse<Boolean>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(username, email, name, surname, description, birthdayString, country, accountType), user.getJwToken());
-        result.addSource(dataSourceResult, new Observer<DataSourceResponse<Boolean>>()
+        LiveData<DataSourceResponse<Boolean>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(profileImage, name, surname, description, birthday, country, accountType), loadFromPrefs("JWToken"));
+        actionResult.addSource(dataSourceResult, new Observer<DataSourceResponse<Boolean>>()
         {
             @Override
             public void onChanged(@Nullable DataSourceResponse<Boolean> user)
             {
                 if (user.isSuccessful())
                 {
-                    getUser().setName(name);
-                    getUser().setSurname(surname);
-                    getUser().setDescription(description);
-
-                    result.setValue(new RepositoryResponse<>(getUser()));
+                    actionResult.setValue(new RepositoryResponse<>(new Event<Boolean>(true)));
                 }
                 else
                 {
-                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
+                    actionResult.setValue(new RepositoryResponse<>(new Event<Boolean>(false)));
                 }
 
-                result.removeSource(dataSourceResult);
+                actionResult.removeSource(dataSourceResult);
             }
         });
     }
 
-//    public void updateActivityList(String title, String type, String place, String description){
-//        LiveData<DataSourceResponse<Boolean>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(title, type, place, description), user.getJwToken());
-//        result.addSource(dataSourceResult, new Observer<DataSourceResponse<Boolean>>()
-//        {
-//            @Override
-//            public void onChanged(@Nullable DataSourceResponse<Boolean> user)
-//            {
-//                if (user.isSuccessful())
-//                {
-//                    getUser().setName(name);
-//                    getUser().setSurname(surname);
-//                    getUser().setDescription(description);
-//
-//                    result.setValue(new RepositoryResponse<>(getUser()));
-//                }
-//                else
-//                {
-//                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
-//                }
-//
-//                result.removeSource(dataSourceResult);
-//            }
-//        });
-//    }
+    public void getFollows()
+    {
+        LiveData<DataSourceResponse<List<Follow>>> result = dataSource.getFollowees(loadFromPrefs("JWToken"));
+        followResult.addSource(result, new Observer<DataSourceResponse<List<Follow>>>()
+        {
+            @Override
+            public void onChanged(DataSourceResponse<List<Follow>> response)
+            {
+                if (response.isSuccessful())
+                {
+                    followResult.setValue(new RepositoryResponse<>(response.getResponse()));
+                }
+                else
+                {
+                    followResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+                }
+
+                followResult.removeSource(result);
+            }
+        });
+    }
+
+    public void getFollowers()
+    {
+        LiveData<DataSourceResponse<List<Follow>>> result = dataSource.getFollowers(loadFromPrefs("JWToken"));
+        followResult.addSource(result, new Observer<DataSourceResponse<List<Follow>>>()
+        {
+            @Override
+            public void onChanged(DataSourceResponse<List<Follow>> response)
+            {
+                if (response.isSuccessful())
+                {
+                    followResult.setValue(new RepositoryResponse<>(response.getResponse()));
+                }
+                else
+                {
+                    followResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+                }
+
+                followResult.removeSource(result);
+            }
+        });
+    }
+
+    public User getUser()
+    {
+        return user;
+    }
 
     public LiveData<RepositoryResponse<User>> getResult()
     {
         return result;
+    }
+
+    public MediatorLiveData<RepositoryResponse<List<Follow>>> getFollowResult()
+    {
+        return followResult;
     }
 }

@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using WebServer.Converters;
 using WebServer.Data;
 using WebServer.Hubs;
 using WebServer.Services;
@@ -30,7 +32,10 @@ namespace WebServer
 
             services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+            });
 
             services.AddTokenAuthentication(Configuration);
 
@@ -46,14 +51,13 @@ namespace WebServer
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
                 endpoints.MapHub<NotificationsHub>("/notifications");
+                endpoints.MapControllers();
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
@@ -67,7 +71,7 @@ namespace WebServer
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.73543741130086, 37.9894702164558) { SRID = 4326 },
                     Title = "Activity 1",
-                    Type = "Indor"
+                    Tags = "beach, coffee"
                 });
 
                 dbContext.Activities.Add(new Models.Database.Activity()
@@ -76,7 +80,7 @@ namespace WebServer
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.720947233378396, 37.982539628169874) { SRID = 4326 },
                     Title = "Activity 2",
-                    Type = "Indor"
+                    Tags = "beach"
                 });
 
                 dbContext.Activities.Add(new Models.Database.Activity()
@@ -85,8 +89,15 @@ namespace WebServer
                     Description = "A fake activity",
                     Coordinates = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 },
                     Title = "Activity 3",
-                    Type = "Indor"
+                    Tags = "coffee"
                 });
+
+                dbContext.Images.Add(new Models.Database.Image()
+                {
+                    ImageID = Guid.Empty.ToString()
+                });
+
+                Point p = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 };
 
                 dbContext.SaveChanges();
             }

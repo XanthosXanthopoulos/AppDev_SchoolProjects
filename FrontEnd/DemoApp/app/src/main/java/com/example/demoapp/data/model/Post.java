@@ -1,55 +1,44 @@
 package com.example.demoapp.data.model;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 
+import java.util.ArrayDeque;
 import java.util.Date;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Post extends Item
 {
-    private Bitmap accountImage;
+    private int postID;
     private String profileImageID;
     private String thumbnailImageID;
     private String username;
-    private Bitmap planImage;
+    private String title;
     private String description;
-    private Country country;
     private Date date;
+
+    private Deque<Activity> activities;
+    private Deque<String> images;
 
     public Post()
     {
         super(ContentType.POST);
+
+        this.activities = new LinkedList<>();
+        this.images = new LinkedList<>();
     }
 
-    public Post(Bitmap accountImage, String username, Bitmap planImage, String description, Country country, Date date)
+    public Post(String username, String description, Date date)
     {
         super(ContentType.POST);
 
-        this.accountImage = accountImage;
         this.username = username;
-        this.planImage = planImage;
         this.description = description;
-        this.country = country;
         this.date = date;
-    }
-
-    public Bitmap getAccountImage()
-    {
-        return accountImage;
-    }
-
-    public void setAccountImage(Bitmap accountImage)
-    {
-        this.accountImage = accountImage;
-    }
-
-    public Bitmap getPlanImage()
-    {
-        return planImage;
-    }
-
-    public void setPlanImage(Bitmap planImage)
-    {
-        this.planImage = planImage;
+        this.activities = new LinkedList<>();
+        this.images = new LinkedList<>();
     }
 
     public String getDescription()
@@ -60,16 +49,6 @@ public class Post extends Item
     public void setDescription(String description)
     {
         this.description = description;
-    }
-
-    public Country getCountry()
-    {
-        return country;
-    }
-
-    public void setCountry(Country country)
-    {
-        this.country = country;
     }
 
     public Date getDate()
@@ -110,5 +89,45 @@ public class Post extends Item
     public void setThumbnailImageID(String thumbnailImageID)
     {
         this.thumbnailImageID = thumbnailImageID;
+    }
+
+    public Deque<Activity> getActivities()
+    {
+        return activities;
+    }
+
+    public void setActivities(Deque<Activity> activities)
+    {
+        this.activities = activities;
+    }
+
+    public Deque<String> getImages()
+    {
+        return images;
+    }
+
+    public void setImages(Deque<String> images)
+    {
+        this.images = images;
+    }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    public int getPostID()
+    {
+        return postID;
+    }
+
+    public void setPostID(int postID)
+    {
+        this.postID = postID;
     }
 }

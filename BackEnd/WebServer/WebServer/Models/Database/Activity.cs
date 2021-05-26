@@ -1,16 +1,15 @@
 ﻿using NetTopologySuite.Geometries;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using WebServer.Models.Api.Response;
+using WebServer.Models.Enums;
 
 namespace WebServer.Models.Database
 {
     public class Activity
     {
         [Key]
-        public string ID { get; set; }
+        public string ActivityID { get; set; }
 
         public string Title { get; set; }
 
@@ -18,10 +17,25 @@ namespace WebServer.Models.Database
 
         public string Address { get; set; }
 
-        public string Type { get; set; }
+        public string Tags { get; set; } 
 
-        public ICollection<string> Tags { get; set; } 
+        public Country Country { get; set; }
+
+        public string City { get; set; }
 
         public Point Coordinates { get; set; }
+
+        public static implicit operator ActivityResponse(Activity activity)
+        {
+            return new ActivityResponse
+            {
+                ID = activity.ActivityID,
+                Address = activity.Address,
+                Country = activity.Country.ToString(),
+                Description = activity.Description,
+                Tags = activity.Tags,
+                Title = activity.Title
+            };
+        }
     }
 }

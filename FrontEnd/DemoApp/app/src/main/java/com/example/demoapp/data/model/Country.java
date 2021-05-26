@@ -1,5 +1,13 @@
 package com.example.demoapp.data.model;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import com.example.demoapp.util.EnumUtils;
+
+import java.util.function.Function;
+
 public enum Country
 {
     ANY("Select country", 0),
@@ -9,9 +17,9 @@ public enum Country
     DZ("Algeria", 4),
     AS("American Samoa", 5),
     AD("Andorra", 6),
-    AO("Angola", 7);
-//        Anguilla")] AI = 8,
-//        Antarctica")] AQ = 9,
+    AO("Angola", 7),
+    AI("Anguilla", 8),
+    AQ("Antarctica", 9),
 //        Antigua and Barbuda")] AG = 10,
 //        Argentina")] AR = 11,
 //        Armenia")] AM = 12,
@@ -88,7 +96,7 @@ public enum Country
 //        Germany")] DE = 83,
 //        Ghana")] GH = 84,
 //        Gibraltar")] GI = 85,
-//        Greece")] GR = 86,
+    GR("Greece", 86);
 //        Greenland")] GL = 87,
 //        Grenada")] GD = 88,
 //        Guadeloupe")] GP = 89,
@@ -260,6 +268,14 @@ public enum Country
     {
         this.label = label;
         this.code = code;
+    }
+
+    private static final Function<String, Country> func =
+            EnumUtils.lookupMap(Country.class, e -> e.label);
+
+    public static Country lookupByLabel(String label)
+    {
+        return func.apply(label);
     }
 
     @Override

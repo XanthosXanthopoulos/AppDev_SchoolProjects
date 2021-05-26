@@ -53,13 +53,13 @@ public class TripFragment extends Fragment
         String type = "Indoor";
         String tags = "Curabitur, Tortor, Libero";
 
-        listViewItems.add(new Activity(title, desc, tags, address, type));
-        listViewItems.add(new Activity(title, desc, tags, address, type));
-        listViewItems.add(new Activity(title, desc, tags, address, type));
-        listViewItems.add(new Activity(title, desc, tags, address, type));
-        listViewItems.add(new Activity(title, desc, tags, address, type));
-        listViewItems.add(new Activity(title, desc, tags, address, type));
-        listViewItems.add(new Activity(title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
+//        listViewItems.add(new Activity("", title, desc, tags, address, type));
 
         return listViewItems;
     }

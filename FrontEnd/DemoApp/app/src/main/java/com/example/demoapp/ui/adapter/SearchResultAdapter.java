@@ -1,5 +1,7 @@
 package com.example.demoapp.ui.adapter;
 
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +15,29 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.example.demoapp.App;
 import com.example.demoapp.R;
+import com.example.demoapp.actions.FollowActions;
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.Follow;
 import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.model.Trip;
+import com.example.demoapp.util.ApiRoutes;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.view.View.GONE;
+import static com.example.demoapp.App.SHARED_PREFS;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -33,13 +46,16 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return items;
     }
 
-    private List<Item> items;
-    private SimpleDateFormat formatter;
+    private final List<Item> items;
+    private final SimpleDateFormat formatter;
+    private final SharedPreferences sharedPreferences;
+    private FollowActions actions;
 
     public SearchResultAdapter()
     {
         this.items = new ArrayList<>();
         formatter = new SimpleDateFormat("yyyy-MM-dd");
+        this.sharedPreferences = App.getInstance().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
     }
 
     @NonNull
@@ -56,6 +72,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 return new TripViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_travel, null));
             case 3:
                 return new PostViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, null));
+            case  4:
+                return new UserViewHolder((LayoutInflater.from(parent.getContext()).inflate(R.layout.item_profile, null)));
             default:
                 return null;
         }
@@ -65,6 +83,9 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
         StaggeredGridLayoutManager.LayoutParams layoutParams = new StaggeredGridLayoutManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        HashMap<String, String> params = new HashMap<>();
+        GlideUrl url;
+
         switch (holder.getItemViewType())
         {
             case 0:
@@ -74,7 +95,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 activityViewHolder.title.setText(activity.getTitle());
                 activityViewHolder.description.setText(activity.getDescription());
                 activityViewHolder.address.setText(activity.getAddress());
-                activityViewHolder.type.setText(activity.getType());
                 activityViewHolder.tags.setText("Tags: " + activity.getTags());
 
                 layoutParams.setFullSpan(true);
@@ -96,15 +116,72 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 tripViewHolder.country.setText(trip.getCountry().toString());
                 tripViewHolder.date.setText(formatter.format(trip.getDate()));
 
-                if (trip.getUsername() == null) tripViewHolder.getUsername().setVisibility(GONE);
+                if (trip.getUsername() == null) tripViewHolder.username.setVisibility(GONE);
                 break;
             case 3:
                 PostViewHolder postViewHolder = (PostViewHolder)holder;
                 Post post = (Post) items.get(position);
 
-                postViewHolder.getUsername().setText(post.getUsername());
-                postViewHolder.getAccountImage().setImageBitmap(post.getAccountImage());
+                postViewHolder.username.setText(post.getUsername());
 
+
+                params.put("id", post.getProfileImageID());
+                url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
+                Glide.with(App.getInstance()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(postViewHolder.accountImage);
+
+                params.put("id", post.getThumbnailImageID());
+                url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
+                Glide.with(App.getInstance()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(postViewHolder.planImage);
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("PostID", post.getPostID());
+                postViewHolder.planImage.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_ViewPlan, bundle));
+
+                postViewHolder.showOnMapButton.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_map, bundle));
+                layoutParams.setFullSpan(true);
+                break;
+
+            case 4:
+                UserViewHolder userViewHolder = (UserViewHolder)holder;
+                Follow follow = (Follow) items.get(position);
+
+                userViewHolder.username.setText(follow.getUsername());
+
+                params.put("id", follow.getProfileImageID());
+                url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
+
+                Glide.with(App.getInstance()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(userViewHolder.profileImage);
+
+                switch (follow.getStatus())
+                {
+                    case NONE:
+                        userViewHolder.actionButton.setText("Follow");
+                        userViewHolder.deleteButton.setVisibility(View.GONE);
+                        userViewHolder.actionButton.setOnClickListener(v -> actions.follow(follow.getUserID()));
+                        break;
+                    case FOLLOWED:
+                        userViewHolder.actionButton.setText("Unfollow");
+                        userViewHolder.deleteButton.setVisibility(View.GONE);
+                        userViewHolder.actionButton.setOnClickListener(v -> actions.unfollow(follow.getUserID()));
+                    case FOLLOWING:
+                        userViewHolder.actionButton.setText("Remove");
+                        userViewHolder.deleteButton.setVisibility(View.GONE);
+                        userViewHolder.actionButton.setOnClickListener(v -> actions.remove(follow.getUserID()));
+                        break;
+                    case PENDING_INCOMING:
+                        userViewHolder.actionButton.setText("Accept");
+                        userViewHolder.deleteButton.setVisibility(View.VISIBLE);
+                        userViewHolder.actionButton.setOnClickListener(v -> actions.accept(follow.getUserID()));
+                        userViewHolder.deleteButton.setOnClickListener(v -> actions.decline(follow.getUserID()));
+                        break;
+                    case PENDING_OUTCOMING:
+                        userViewHolder.actionButton.setText("Cancel");
+                        userViewHolder.deleteButton.setVisibility(View.GONE);
+                        userViewHolder.actionButton.setOnClickListener(v -> actions.cancel(follow.getUserID()));
+                        break;
+                }
+
+                layoutParams.setFullSpan(true);
                 break;
         }
 
@@ -130,13 +207,18 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         notifyDataSetChanged();
     }
 
+    public void setActions(FollowActions actions)
+    {
+        this.actions = actions;
+    }
+
     public static class ActivityViewHolder extends RecyclerView.ViewHolder
     {
-        private TextView title;
-        private TextView description;
-        private TextView tags;
-        private TextView address;
-        private TextView type;
+        private final TextView title;
+        private final TextView description;
+        private final TextView tags;
+        private final TextView address;
+        private final TextView type;
 
         public ActivityViewHolder(@NonNull View itemView)
         {
@@ -151,39 +233,31 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             Button showMore = itemView.findViewById(R.id.Activity_ShowMore);
             Button showLess = itemView.findViewById(R.id.Activity_ShowLess);
 
-            showMore.setOnClickListener(new View.OnClickListener()
+            showMore.setOnClickListener(v ->
             {
-                @Override
-                public void onClick(View v)
-                {
-                    showMore.setVisibility(View.GONE);
+                showMore.setVisibility(View.GONE);
 
-                    address.setVisibility(View.VISIBLE);
-                    type.setVisibility(View.VISIBLE);
-                    tags.setVisibility(View.VISIBLE);
-                    showLess.setVisibility(View.VISIBLE);
-                }
+                address.setVisibility(View.VISIBLE);
+                type.setVisibility(View.VISIBLE);
+                tags.setVisibility(View.VISIBLE);
+                showLess.setVisibility(View.VISIBLE);
             });
 
-            showLess.setOnClickListener(new View.OnClickListener()
+            showLess.setOnClickListener(v ->
             {
-                @Override
-                public void onClick(View v)
-                {
-                    showLess.setVisibility(View.GONE);
-                    address.setVisibility(View.GONE);
-                    type.setVisibility(View.GONE);
-                    tags.setVisibility(View.GONE);
+                showLess.setVisibility(View.GONE);
+                address.setVisibility(View.GONE);
+                type.setVisibility(View.GONE);
+                tags.setVisibility(View.GONE);
 
-                    showMore.setVisibility(View.VISIBLE);
-                }
+                showMore.setVisibility(View.VISIBLE);
             });
         }
     }
 
     public static class ImageViewHolder extends RecyclerView.ViewHolder
     {
-        private ImageView image;
+        private final ImageView image;
 
         public ImageViewHolder(@NonNull View itemView)
         {
@@ -195,10 +269,10 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public static class TripViewHolder extends RecyclerView.ViewHolder
     {
-        private TextView username;
-        private TextView description;
-        private TextView country;
-        private TextView date;
+        private final TextView username;
+        private final TextView description;
+        private final TextView country;
+        private final TextView date;
 
         public TripViewHolder(View view)
         {
@@ -211,70 +285,45 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             country = (TextView) itemView.findViewById(R.id.Country_Description);
             date = (TextView) itemView.findViewById(R.id.Date_Description);
         }
-
-        public TextView getDescription()
-        {
-            return description;
-        }
-
-        public TextView getCountry()
-        {
-            return country;
-        }
-
-        public TextView getDate()
-        {
-            return date;
-        }
-
-        public TextView getUsername()
-        {
-            return username;
-        }
     }
 
     public static class PostViewHolder extends RecyclerView.ViewHolder
     {
-        private ImageView accountImage;
-        private TextView username;
-        private ImageView planImage;
-        private ImageButton approveButton;
-        private ImageButton commentButton;
+        private final ImageView accountImage;
+        private final TextView username;
+        private final ImageView planImage;
+        private final ImageButton approveButton;
+        private final ImageButton commentButton;
+        private final ImageButton showOnMapButton;
 
         public PostViewHolder(View view)
         {
             super(view);
 
-            accountImage = (ImageView) view.findViewById(R.id.account_image);
+            accountImage = view.findViewById(R.id.account_image);
             username =  view.findViewById(R.id.account_name);
-            planImage = (ImageView) view.findViewById(R.id.plan_image);
-            approveButton = (ImageButton) view.findViewById(R.id.approve_button);
-            commentButton = (ImageButton) view.findViewById(R.id.comment_button);
+            planImage = view.findViewById(R.id.plan_image);
+            approveButton = view.findViewById(R.id.approve_button);
+            commentButton = view.findViewById(R.id.comment_button);
+            showOnMapButton = view.findViewById(R.id.show_to_map);
         }
+    }
 
-        public ImageView getAccountImage()
-        {
-            return accountImage;
-        }
+    public static class UserViewHolder extends RecyclerView.ViewHolder
+    {
+        private final ImageView profileImage;
+        private final TextView username;
+        private final Button actionButton;
+        private final ImageButton deleteButton;
 
-        public TextView getUsername()
+        public UserViewHolder(@NonNull View itemView)
         {
-            return username;
-        }
+            super(itemView);
 
-        public ImageView getPlanImage()
-        {
-            return planImage;
-        }
-
-        public ImageButton getApproveButton()
-        {
-            return approveButton;
-        }
-
-        public ImageButton getCommentButton()
-        {
-            return commentButton;
+            profileImage = itemView.findViewById(R.id.account_image);
+            username = itemView.findViewById(R.id.username);
+            actionButton = itemView.findViewById(R.id.action_button);
+            deleteButton = itemView.findViewById(R.id.delete_button);
         }
     }
 }

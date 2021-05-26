@@ -13,6 +13,7 @@ using WebServer.Models.Api.Response;
 using WebServer.Models.Database;
 using WebServer.Services;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebServer.Controllers
 {
@@ -59,7 +60,14 @@ namespace WebServer.Controllers
                         await _context.Users.AddAsync(new UserModel { UserID = user.Id, Name = user.UserName });
                         await _context.SaveChangesAsync();
 
-                        return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = user.UserName, JWToken = jwt.GenerateSecurityToken(user.Email, user.Id) } };
+                        return new ApiResponse<AuthenticationResponseModel> 
+                        { 
+                            Response = new AuthenticationResponseModel 
+                            { 
+                                Username = user.UserName, 
+                                JWToken = jwt.GenerateSecurityToken(user.Email, user.Id)
+                            } 
+                        };
                     }
                     else
                     {
@@ -102,7 +110,15 @@ namespace WebServer.Controllers
                 
                 if (result.Succeeded)
                 {
-                    return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = user.UserName, JWToken = jwt.GenerateSecurityToken(user.Email, user.Id) } };
+                    return new ApiResponse<AuthenticationResponseModel>
+                    {
+                        Response = new AuthenticationResponseModel
+                        {
+                            Username = user.UserName,
+                            JWToken = jwt.GenerateSecurityToken(user.Email, user.Id),
+                            ProfileImageID = _context.Users.Include(u => u.Image).Where(u => u.UserID == user.Id).First().Image.ImageID
+                        } 
+                    };
                 }
                 else if (result.IsLockedOut)
                 {
@@ -158,20 +174,19 @@ namespace WebServer.Controllers
 
             if (userID != null)
             {
-                IdentityUser user = await userManager.FindByIdAsync(userID);
-                UserModel userInfo = await _context.Users.FindAsync(userID);
+                UserModel userInfo = await _context.Users.Where(u => u.UserID == userID).Include(i => i.Image).FirstAsync();
 
                 return new ApiResponse<ProfileInfoResponseModel>
                 {
                     Response = new ProfileInfoResponseModel
                     {
-                        Username = user.UserName,
-                        Email = user.Email,
                         Name = userInfo.Name,
                         Surname = userInfo.Surname,
                         Birthday = userInfo.Birthday,
                         Description = userInfo.Description,
-                        AccountType = userInfo.AccountType
+                        AccountType = userInfo.AccountType,
+                        ProfileImageID = userInfo.Image.ImageID,
+                        Country = userInfo.Country.ToString()
                     } 
                 };
             }
@@ -183,22 +198,13 @@ namespace WebServer.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ApiResponse<AuthenticationResponseModel>> UpdateProfile([FromBody] ProfileInfoResponseModel profileInfo)
+        public async Task<ApiResponse<bool>> UpdateProfile([FromBody] ProfileInfoRequestModel profileInfo)
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userID != null)
             {
-                IdentityUser user = await userManager.FindByIdAsync(userID);
                 UserModel userInfo = await _context.Users.FindAsync(userID);
-
-                if (!user.Email.Equals(profileInfo.Email, StringComparison.OrdinalIgnoreCase) && await userManager.FindByEmailAsync(profileInfo.Email) != null)
-                {
-                    return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "Email already exists" };
-                }
-
-                user.UserName = profileInfo.Username;
-                user.Email = profileInfo.Email;
 
                 userInfo.Name = profileInfo.Name;
                 userInfo.Surname = profileInfo.Surname;
@@ -207,14 +213,25 @@ namespace WebServer.Controllers
                 userInfo.Country = profileInfo.Country;
                 userInfo.AccountType = profileInfo.AccountType;
 
-                await userManager.UpdateAsync(user);
+                if (profileInfo.ProfileImageID != null)
+                {
+                    Image im = await _context.Images.FindAsync(profileInfo.ProfileImageID);
+                    userInfo.Image = im;
+                }
+                else if (profileInfo.ProfileImageID == null && userInfo.Image == null)
+                {
+                    Image im = await _context.Images.FindAsync(Guid.Empty.ToString());
+                    userInfo.Image = im;
+                }
+
+                _context.Update(userInfo);
                 await _context.SaveChangesAsync();
 
-                return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { Username = profileInfo.Username } };
+                return new ApiResponse<bool> { Response = true };
             }
             else
             {
-                return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "User info not found" };
+                return new ApiResponse<bool> { Response = false };
             }
         }
     }

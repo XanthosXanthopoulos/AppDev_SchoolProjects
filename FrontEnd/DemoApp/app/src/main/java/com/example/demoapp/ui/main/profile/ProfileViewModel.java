@@ -21,4 +21,9 @@ public class ProfileViewModel extends ViewModel
     {
         this.userRepository = userRepository;
     }
+
+    public String getProfileImage()
+    {
+        return userRepository.getUser().getProfileImageID();
+    }
 }

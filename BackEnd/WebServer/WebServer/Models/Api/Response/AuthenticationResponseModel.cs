@@ -10,5 +10,7 @@ namespace WebServer.Models.Api.Response
         public string Username { get; set; }
 
         public string JWToken { get; set; }
+
+        public string ProfileImageID { get; set; }
     }
 }

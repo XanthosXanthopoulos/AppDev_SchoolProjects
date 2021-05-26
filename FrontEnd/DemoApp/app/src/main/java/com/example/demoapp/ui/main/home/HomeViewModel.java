@@ -1,34 +1,31 @@
 package com.example.demoapp.ui.main.home;
 
-import android.graphics.Bitmap;
-
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.example.demoapp.data.Event;
+import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.model.Item;
-import com.example.demoapp.data.model.Post;
+import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
-import com.example.demoapp.data.viewmodel.ItemUpdate;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HomeViewModel extends ViewModel
 {
     private ContentRepository repository;
-    private List<Item> feed;
+    private NotificationHub hub;
     private final LiveData<List<Item>> feedResult;
-    private final LiveData<ItemUpdate> profileImageUpdate;
-    private final LiveData<ItemUpdate> planImageUpdate;
-    private int profilePosition = 0;
 
-    public HomeViewModel(ContentRepository repository)
+    public HomeViewModel(ContentRepository repository, NotificationHub hub)
     {
         this.repository = repository;
+        this.hub = hub;
 
         feedResult = Transformations.map(repository.getFeedResult(), new Function<RepositoryResponse<List<Item>>, List<Item>>()
         {
@@ -37,10 +34,6 @@ public class HomeViewModel extends ViewModel
             {
                 if (input.isSuccessful())
                 {
-                    feed = input.getResponse();
-                    profilePosition = 0;
-                    loadProfileImage();
-                    //loadPlanImage();
                     return input.getResponse();
                 }
                 else
@@ -50,39 +43,7 @@ public class HomeViewModel extends ViewModel
             }
         });
 
-        profileImageUpdate = Transformations.map(repository.getProfileResult(), new Function<RepositoryResponse<ItemUpdate>, ItemUpdate>()
-        {
-            @Override
-            public ItemUpdate apply(RepositoryResponse<ItemUpdate> input)
-            {
-                if (input.isSuccessful())
-                {
-                    loadProfileImage();
-                    return input.getResponse();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        });
 
-        planImageUpdate = Transformations.map(repository.getPlanResult(), new Function<RepositoryResponse<Bitmap>, ItemUpdate>()
-        {
-            @Override
-            public ItemUpdate apply(RepositoryResponse<Bitmap> input)
-            {
-                if (input.isSuccessful())
-                {
-                    loadPlanImage();
-                    return new ItemUpdate(0, input.getResponse());
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        });
     }
 
     public void getFeed()
@@ -90,32 +51,18 @@ public class HomeViewModel extends ViewModel
         repository.updateFeed();
     }
 
-    private void loadProfileImage()
-    {
-        if (profilePosition < feed.size())
-        {
-            repository.getProfileImage(((Post)feed.get(profilePosition)).getProfileImageID(), profilePosition);
-            ++profilePosition;
-        }
-    }
-
-    private void loadPlanImage()
-    {
-
-    }
-
     public LiveData<List<Item>> getFeedResult()
     {
         return feedResult;
     }
 
-    public LiveData<ItemUpdate> getProfileImageUpdate()
+    public LiveData<Event<Notification>> getNotification()
     {
-        return profileImageUpdate;
+        return hub.getNotificationsLiveData();
     }
 
-    public LiveData<ItemUpdate> getPlanImageUpdate()
+    public LinkedList<Notification> getNotifications()
     {
-        return planImageUpdate;
+        return hub.getNotifications();
     }
 }

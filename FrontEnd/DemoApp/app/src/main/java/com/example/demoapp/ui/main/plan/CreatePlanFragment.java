@@ -3,54 +3,45 @@ package com.example.demoapp.ui.main.plan;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import androidx.viewpager2.widget.ViewPager2;
-
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Activity;
-import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.Item;
-import com.example.demoapp.ui.adapter.ActivityImageAdapter;
 import com.example.demoapp.ui.adapter.ViewPagerAdapter;
+import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class CreatePlanFragment extends Fragment
 {
-    List<Item> ActivityList = new ArrayList<>();
-    RecyclerView recyclerView;
-    AutoCompleteTextView countrySpinner;
-    EditText dateSpinner;
-    ImageButton calendarIcon;
-    final Calendar myCalendar = Calendar.getInstance();
+    private CreatePlanViewModel viewModel;
+
+    private final Calendar myCalendar = Calendar.getInstance();
+
+    private EditText titleEditText;
+    private EditText descriptionEditText;
+    private EditText dateSpinner;
+    private ImageButton calendarButton;
+    private ImageButton uploadButton;
+    private ProgressBar loadingProgressBar;
 
 
     private TabLayout tabLayout;
@@ -62,74 +53,132 @@ public class CreatePlanFragment extends Fragment
     {
         View view = inflater.inflate(R.layout.fragment_create_plan, container, false);
 
-        countrySpinner = view.findViewById(R.id.country_plan);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(CreatePlanViewModel.class);
+
+        titleEditText = view.findViewById(R.id.post_title);
+        descriptionEditText = view.findViewById(R.id.post_description);
         dateSpinner = view.findViewById(R.id.Date_Plan);
-        calendarIcon = view.findViewById(R.id.calendar_button);
+        calendarButton = view.findViewById(R.id.calendar_button);
+        uploadButton = view.findViewById(R.id.upload_button);
+        loadingProgressBar = view.findViewById(R.id.loading);
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setAdapter(new ViewPagerAdapter(this));
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memories", "Moments"}[position])).attach();
 
-        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, Country.values()));
+        DatePickerDialog.OnDateSetListener dateSetListener = (view1, year, month, dayOfMonth) ->
+        {
+            // TODO Auto-generated method stub
+            myCalendar.set(Calendar.YEAR, year);
+            myCalendar.set(Calendar.MONTH, month);
+            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateLabel();
+        };
+
+        calendarButton.setOnClickListener(v ->
+        {
+            // TODO Auto-generated method stub
+            new DatePickerDialog(requireActivity(), dateSetListener, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        dateSpinner.setOnFocusChangeListener((v, hasFocus) ->
+        {
+            if (dateSpinner.getHint().toString().equals("Date"))
+            {
+                dateSpinner.setHint("dd/mm/yyyy");
+            }
+            else
+            {
+                dateSpinner.setHint("Date");
+            }
+        });
+
+        uploadButton.setOnClickListener(v ->
+        {
+            String title = titleEditText.getText().toString();
+            String description = descriptionEditText.getText().toString();
+            Date date = null;
+            try
+            {
+                if (dateSpinner.getText().toString().isEmpty())
+                {
+                    date = new Date(0);
+                }
+                else
+                {
+                    date = new SimpleDateFormat("dd/MM/yyyy").parse(dateSpinner.getText().toString());
+                }
+            }
+            catch (ParseException e)
+            {
+                date = new Date(0);
+            }
+
+            loadingProgressBar.setVisibility(View.VISIBLE);
+            viewModel.uploadPost(title, description, date);
+        });
+
+        viewModel.getUploadResultLiveData().observe(getViewLifecycleOwner(), result ->
+        {
+            if (result.isHandled()) return;
+
+            result.setHandled(true);
+            loadingProgressBar.setVisibility(View.GONE);
+
+            if (result.getData())
+            {
+                Navigation.findNavController(view).navigate(R.id.navigation_profile);
+            }
+            else
+            {
+                Toast.makeText(getContext(), "Something went wrong!! Please try uploading again.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        TextWatcher afterTextChangedListener = new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                viewModel.memoryDataChanged(titleEditText.getText().toString());
+            }
+        };
+
+        titleEditText.addTextChangedListener(afterTextChangedListener);
+
+        viewModel.getPlanFormState().observe(getViewLifecycleOwner(), createPlanFormState ->
+        {
+            if (createPlanFormState.isDataValid())
+            {
+                titleEditText.setError(null);
+
+                uploadButton.setEnabled(true);
+
+                return;
+            }
+
+            if (createPlanFormState.getTitleError() != null)
+            {
+                titleEditText.setError(getString(createPlanFormState.getTitleError()));
+            }
+
+            uploadButton.setEnabled(false);
+        });
 
         return view;
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-//        FrameLayout item = requireActivity().findViewById(R.id.pop_up_layout);
-
-        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                // TODO Auto-generated method stub
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, month);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateLabel();
-            }
-
-        };
-
-        calendarIcon.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(requireActivity(), date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
-
-        dateSpinner.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(dateSpinner.getHint().toString().equals("Date")){
-                    dateSpinner.setHint("dd/mm/yyyy");
-                }else{
-                    dateSpinner.setHint("Date");
-                }
-            }
-        });
-
-        view.findViewById(R.id.upload_button).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-
-            }
-        });
-
-    }
-
-    private void updateLabel() {
-        String myFormat = "dd/MM/yy"; //In which you need put here
+    private void updateLabel()
+    {
+        String myFormat = "dd/MM/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.UK);
         dateSpinner.setText(sdf.format(myCalendar.getTime()));
     }

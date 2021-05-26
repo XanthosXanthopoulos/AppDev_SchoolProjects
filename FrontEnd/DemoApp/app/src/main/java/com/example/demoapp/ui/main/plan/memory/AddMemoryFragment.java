@@ -1,8 +1,8 @@
 package com.example.demoapp.ui.main.plan.memory;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,24 +15,27 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.Button;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
+import com.example.demoapp.ui.adapter.SearchResultAdapter;
+import com.example.demoapp.ui.main.plan.memory.create.CreateMemoryViewModel;
+import com.example.demoapp.util.ViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddMemoryFragment extends Fragment
 {
-    List<Item> ActivityList = new ArrayList<>() ;
-    RecyclerView recyclerView;
-    private AddMemoryViewModel mViewModel;
+    private AddMemoryViewModel viewModel;
+
+    private RecyclerView activityList;
+    private SearchResultAdapter adapter;
+
+    private Button createMemory;
 
     public static AddMemoryFragment newInstance()
     {
@@ -42,58 +45,35 @@ public class AddMemoryFragment extends Fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-
         View view = inflater.inflate(R.layout.fragment_add_memory, container, false);
 
-        recyclerView = view.findViewById(R.id.memory_list);
-        recyclerView.setHasFixedSize(true);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(AddMemoryViewModel.class);
 
-        StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(_sGridLayoutManager);
+        createMemory = view.findViewById(R.id.create_memory_button);
+        activityList = view.findViewById(R.id.memory_list);
 
-        ActivityImageAdapter rcAdapter = new ActivityImageAdapter(getListItemData());
-        recyclerView.setAdapter(rcAdapter);
+        StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        activityList.setLayoutManager(_sGridLayoutManager);
+
+        adapter = new SearchResultAdapter();
+        activityList.setAdapter(adapter);
+
+
+        viewModel.getActivitiesLiveData().observe(getViewLifecycleOwner(), new Observer<Iterable<Activity>>()
+        {
+            @Override
+            public void onChanged(Iterable<Activity> activities)
+            {
+                //if (activities == null) return;
+
+                List<Item> items = new ArrayList<>();
+                activities.forEach(items::add);
+                adapter.setItems(items);
+            }
+        });
+
+        createMemory.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_createMemory));
 
         return view;
-    }
-
-    @SuppressLint("ResourceType")
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-//        FrameLayout item = requireActivity().findViewById(R.id.pop_up_layout);
-//        View child = getLayoutInflater().inflate(R.layout.fragment_create_memory,null);
-//        item.addView(child);
-
-        view.findViewById(R.id.create_memory_button).setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_CreateMemory));
-
-//        item.findViewById(R.id.add_activity).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ActivityImageAdapter rcAdapter = new ActivityImageAdapter(updateListItemData(getListItemData()));
-//                recyclerView.setAdapter(rcAdapter);
-//                item.setVisibility(View.GONE);
-//
-//            }
-//        });
-//
-//        item.findViewById(R.id.cross_btn).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                item.setVisibility(View.GONE);
-//            }
-//        });
-
-    }
-
-    private List<Item> getListItemData()
-    {
-        return ActivityList;
-    }
-
-    public static AddMemoryFragment getInstance(){
-        AddMemoryFragment addMemoryFragment = new AddMemoryFragment();
-        return addMemoryFragment;
     }
 }

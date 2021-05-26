@@ -6,6 +6,8 @@ public class AuthenticationResponseModel
 
     private String jwToken;
 
+    private String profileImageID;
+
     public AuthenticationResponseModel() {}
 
     public AuthenticationResponseModel(String username, String jwToken)
@@ -32,5 +34,15 @@ public class AuthenticationResponseModel
     public void setJwToken(String jwToken)
     {
         this.jwToken = jwToken;
+    }
+
+    public String getProfileImageID()
+    {
+        return profileImageID;
+    }
+
+    public void setProfileImageID(String profileImageID)
+    {
+        this.profileImageID = profileImageID;
     }
 }

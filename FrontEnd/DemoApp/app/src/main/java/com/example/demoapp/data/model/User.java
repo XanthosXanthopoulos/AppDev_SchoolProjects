@@ -9,10 +9,10 @@ public class User
     private String surname;
     private String email;
     private String description;
-    private Date Birthday;
+    private Date birthday;
     private Country country;
     private AccountType accountType;
-    private String profileImage;
+    private String profileImageID;
 
     private String jwToken;
 
@@ -73,12 +73,12 @@ public class User
 
     public Date getBirthday()
     {
-        return Birthday;
+        return birthday;
     }
 
     public void setBirthday(Date birthday)
     {
-        Birthday = birthday;
+        this.birthday = birthday;
     }
 
     public Country getCountry()
@@ -101,14 +101,14 @@ public class User
         this.accountType = accountType;
     }
 
-    public String getProfileImage()
+    public String getProfileImageID()
     {
-        return profileImage;
+        return profileImageID;
     }
 
-    public void setProfileImage(String profileImage)
+    public void setProfileImageID(String profileImageID)
     {
-        this.profileImage = profileImage;
+        this.profileImageID = profileImageID;
     }
 
     public String getDescription()

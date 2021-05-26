@@ -34,4 +34,14 @@
     <string name="city">City</string>
     <string name="country">Country</string>
     <string name="add_moment">Add moment</string>
+    <string name="name_error">Name cannot be empty</string>
+    <string name="surname_error">Surname cannot be empty</string>
+    <string name="country_error">Please select a country</string>
+    <string name="notifications">Notifications</string>
+    <string name="title_activity_location">LocationActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 </resources>
