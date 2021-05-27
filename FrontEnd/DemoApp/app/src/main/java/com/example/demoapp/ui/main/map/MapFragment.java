@@ -18,11 +18,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.SearchView;
 
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.directionhelper.FetchURL;
+import com.example.demoapp.data.model.directionhelper.TaskLoadedCallback;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.gms.maps.*;
@@ -41,14 +44,16 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback
+public class MapFragment extends Fragment implements OnMapReadyCallback, TaskLoadedCallback
 {
     private static final float MAPS_PATH_WIDTH = 10;
     private MapView mapView;
     private GoogleMap map;
     private SearchView search_bar;
+    private ImageButton route;
     boolean visible;
-    PolylineOptions polylineOptions;
+    private Polyline currentPolyline;
+    private PolylineOptions polylineOptions;
     private HashMap<String, Marker> nearMarkers;
 
     private MapViewModel viewModel;
@@ -71,8 +76,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-
-
         return view;
     }
 
@@ -86,6 +89,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
 
         map.clear();
         map.setInfoWindowAdapter(new CustomMarkerInfoWindowView(getContext()));
+
+        route = requireActivity().findViewById(R.id.RouteBtn);
+        route.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                new FetchURL(MapActivity.this).execute(getUrl(place1.getPosition(), place2.getPosition(), "driving"), "driving");
+                new FetchURL(MapFragment.this,requireContext()).execute(returnURL());
+
+            }
+        });
 
         search_bar.setOnSearchClickListener(new View.OnClickListener()
         {
@@ -186,6 +199,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     }
 
     @Override
+    public void onTaskDone(Object... values){
+        if(currentPolyline != null){
+            currentPolyline.remove();
+        }
+        currentPolyline = map.addPolyline((PolylineOptions) values[0]);
+    }
+
+    @Override
     public void onResume()
     {
         super.onResume();
@@ -220,8 +241,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
         mapView.onLowMemory();
     }
 
+    private String returnURL(){
+        String url = null;
+
+        MarkerOptions point1 = new MarkerOptions().position(new LatLng(27.658143, 85.3199503)).title("Location 1");
+        MarkerOptions point2 = new MarkerOptions().position(new LatLng(27.667491, 85.3208583)).title("Location 2");
+        url = createUrl(point1.getPosition(), point2.getPosition(),"driving");
+
+        return url;
+    }
+
     private void addPath(List<Activity> activities)
     {
+        String url = null;
         map.clear();
         List<LatLng> path = new ArrayList<>(activities.size());
 
@@ -234,9 +266,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             path.add(point);
         }
 
-        polylineOptions = new PolylineOptions().jointType(JointType.ROUND).width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(path);
-        Polyline polyLine = map.addPolyline(polylineOptions);
-        polyLine.setPoints(path);
+//        for (int i = 0; i < path.size(); i += 2){
+//            MarkerOptions point1 = new MarkerOptions().position(path.get(i)).title("Location" + i);
+//            MarkerOptions point2 = new MarkerOptions().position(path.get(i+1)).title("Location" + i+1);
+//
+//            url = createUrl(point1.getPosition(), point2.getPosition(),"walking");
+//
+//        }
+
+//        polylineOptions = new PolylineOptions().jointType(JointType.ROUND).width(MAPS_PATH_WIDTH).color(getResources().getColor(R.color.purple_500)).addAll(path);
+//        Polyline polyLine = map.addPolyline(polylineOptions);
+//        polyLine.setPoints(path);
+    }
+
+    private String createUrl(LatLng origin , LatLng destination , String pathMode){
+        //Origin's coordinates
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+        //Destination's coordinates
+        String str_destination = "destination=" + destination.latitude + "," + destination.longitude;
+        //Mode declaration
+        String mode = "mode=" + pathMode;
+        //Add all these
+        String parameters = str_origin + "&" + str_destination + "&" + mode;
+        //Output file type
+        String outputType = "json";
+
+        String url = "Https://googleapis.com/maps/api/directions/" + outputType + "?" + parameters + "&key=" + getString(R.string.api_key);
+
+        return url;
+
     }
 
     public Marker addMarker(Activity activity)

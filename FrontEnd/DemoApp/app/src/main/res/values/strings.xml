@@ -1,4 +1,5 @@
 <resources>
+    <string name="api_key">AIzaSyAxbRRMDly4v6n4hJj2aukMW0WHrIfuSjs</string>
     <string name="app_name">DemoApp</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
