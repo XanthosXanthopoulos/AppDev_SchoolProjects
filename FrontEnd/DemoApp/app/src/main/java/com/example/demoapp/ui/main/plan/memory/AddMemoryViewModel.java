@@ -6,6 +6,7 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.repository.ContentRepository;
 
@@ -43,5 +44,10 @@ public class AddMemoryViewModel extends ViewModel
     public LiveData<Iterable<Activity>> getActivitiesLiveData()
     {
         return activitiesLiveData;
+    }
+
+    public void addMemory(String id, String title, Country country, String city, String address, String description, String tags)
+    {
+        repository.addActivity(new Activity(id, title, description, tags, country, address));
     }
 }

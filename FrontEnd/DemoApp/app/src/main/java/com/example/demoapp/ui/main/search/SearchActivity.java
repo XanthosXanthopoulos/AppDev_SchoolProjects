@@ -1,12 +1,15 @@
-package com.example.demoapp.ui.main.dashboard;
+package com.example.demoapp.ui.main.search;
 
-import android.content.ClipData;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -15,17 +18,10 @@ import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
 import com.example.demoapp.R;
-import com.example.demoapp.actions.FollowActions;
+import com.example.demoapp.data.ActivityItemClickListener;
 import com.example.demoapp.data.Event;
+import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Place;
@@ -36,19 +32,14 @@ import com.example.demoapp.ui.location_picker.LocationActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static android.app.Activity.RESULT_OK;
-
-
-public class DashboardFragment extends Fragment
+public class SearchActivity extends AppCompatActivity
 {
     private static final int LOCATION_SELECT = 0;
-
-    private DashboardViewModel dashboardViewModel;
+    private SearchViewModel viewModel;
 
     private AutoCompleteTextView countrySpinner;
     private AutoCompleteTextView citySpinner;
@@ -63,23 +54,26 @@ public class DashboardFragment extends Fragment
     private RecyclerView searchResultList;
     private SearchResultAdapter adapter;
 
-
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_dashboard);
 
-        dashboardViewModel = new ViewModelProvider(this, new ViewModelFactory()).get(DashboardViewModel.class);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(SearchViewModel.class);
 
-        countrySpinner = view.findViewById(R.id.country_select);
-        citySpinner = view.findViewById(R.id.city_select);
-        typeSpinner = view.findViewById(R.id.type_select);
-        radiusSpinner = view.findViewById(R.id.radius_select);
-        listMessage = view.findViewById(R.id.list_message);
-        searchBar = view.findViewById(R.id.search_bar);
-        searchResultList = view.findViewById(R.id.search_result_list);
-        locationButton = view.findViewById(R.id.locate_button);
+        countrySpinner = findViewById(R.id.country_select);
+        citySpinner = findViewById(R.id.city_select);
+        typeSpinner = findViewById(R.id.type_select);
+        radiusSpinner = findViewById(R.id.radius_select);
+        listMessage = findViewById(R.id.list_message);
+        searchBar = findViewById(R.id.search_bar);
+        searchResultList = findViewById(R.id.search_result_list);
+        locationButton = findViewById(R.id.locate_button);
 
-        countrySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, Country.values()));
+        typeSpinner.setVisibility(View.GONE);
+
+        countrySpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Country.values()));
         countrySpinner.setValidator(new AutoCompleteTextView.Validator()
         {
             @Override
@@ -102,7 +96,7 @@ public class DashboardFragment extends Fragment
                 });
 
                 citySpinner.setEnabled(index >= 0);
-                dashboardViewModel.getCities(Country.values()[index].label);
+                viewModel.getCities(Country.values()[index].label);
 
                 return index >= 0;
             }
@@ -114,7 +108,7 @@ public class DashboardFragment extends Fragment
             }
         });
 
-        citySpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, Country.values()));
+        citySpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Country.values()));
         citySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -130,8 +124,7 @@ public class DashboardFragment extends Fragment
             }
         });
 
-        typeSpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, Type.values()));
-        radiusSpinner.setAdapter(new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, Radius.values()));
+        radiusSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Radius.values()));
 
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
@@ -140,10 +133,9 @@ public class DashboardFragment extends Fragment
             {
                 String country = countrySpinner.getEditableText().toString();
                 String city = citySpinner.getEditableText().toString();
-                String type = ((Type)typeSpinner.getSelectedItem()).label;
                 int radius = ((Radius)radiusSpinner.getSelectedItem()).radius;
 
-                dashboardViewModel.search(query, country, city, type, radius);
+                viewModel.search(query, country, city, Type.ACTIVITY.label, radius);
                 return false;
             }
 
@@ -157,9 +149,27 @@ public class DashboardFragment extends Fragment
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         searchResultList.setLayoutManager(_sGridLayoutManager);
         adapter = new SearchResultAdapter();
+        adapter.setItemClickListener(new ActivityItemClickListener()
+        {
+            @Override
+            public void onItemClickListener(Activity activity)
+            {
+                Intent data = new Intent();
+                data.putExtra("id", activity.getId());
+                data.putExtra("title", activity.getTitle());
+                data.putExtra("country", activity.getCountry());
+                //data.putExtra("city", activity.getCity());
+                data.putExtra("address", activity.getAddress());
+                data.putExtra("description", activity.getDescription());
+                data.putExtra("tags", activity.getTags());
+                setResult(RESULT_OK, data);
+                finish();
+            }
+        });
+
         searchResultList.setAdapter(adapter);
 
-        dashboardViewModel.getSearchResult().observe(getViewLifecycleOwner(), new Observer<List<Item>>()
+        viewModel.getSearchResult().observe(this, new Observer<List<Item>>()
         {
             @Override
             public void onChanged(List<Item> items)
@@ -177,42 +187,12 @@ public class DashboardFragment extends Fragment
             }
         });
 
-        dashboardViewModel.getCitiesResult().observe(getViewLifecycleOwner(), new Observer<List<String>>()
+        viewModel.getCitiesResult().observe(this, new Observer<List<String>>()
         {
             @Override
             public void onChanged(List<String> strings)
             {
-                citySpinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, strings));
-            }
-        });
-
-        adapter.setActions(new FollowActions()
-        {
-            @Override
-            public void follow(String userID)
-            {
-                dashboardViewModel.sendFollowRequest(userID);
-            }
-
-            @Override
-            public void accept(String userID) { }
-
-            @Override
-            public void decline(String userID) { }
-
-            @Override
-            public void unfollow(String userID)
-            {
-                //viewModel.unfollow(userID);
-            }
-
-            @Override
-            public void remove(String userID) { }
-
-            @Override
-            public void cancel(String userID)
-            {
-                //viewModel.cancelFollowRequest(userID);
+                citySpinner.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, strings));
             }
         });
 
@@ -221,11 +201,11 @@ public class DashboardFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                startActivityForResult(new Intent(getActivity(), LocationActivity.class), 0);
+                startActivityForResult(new Intent(v.getContext(), LocationActivity.class), 0);
             }
         });
 
-        dashboardViewModel.getLocationInfo().observe(getViewLifecycleOwner(), new Observer<Event<Place>>()
+        viewModel.getLocationInfo().observe(this, new Observer<Event<Place>>()
         {
             @Override
             public void onChanged(Event<Place> event)
@@ -238,8 +218,6 @@ public class DashboardFragment extends Fragment
                 citySpinner.setText(event.getData().getCity());
             }
         });
-
-        return view;
     }
 
     @Override
@@ -252,7 +230,7 @@ public class DashboardFragment extends Fragment
             double latitude = data.getDoubleExtra("latitude", 0);
             double longitude = data.getDoubleExtra("longitude", 0);
 
-            dashboardViewModel.getLocationInfo(latitude, longitude);
+            viewModel.getLocationInfo(latitude, longitude);
         }
     }
 }

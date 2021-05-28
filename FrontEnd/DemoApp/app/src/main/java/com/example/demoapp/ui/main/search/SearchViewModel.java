@@ -1,4 +1,4 @@
-package com.example.demoapp.ui.main.dashboard;
+package com.example.demoapp.ui.main.search;
 
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
@@ -6,10 +6,8 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.example.demoapp.data.Event;
-import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.model.Item;
-import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.data.model.Place;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
@@ -17,18 +15,16 @@ import com.example.demoapp.data.repository.ContentRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardViewModel extends ViewModel
+public class SearchViewModel extends ViewModel
 {
     private final LiveData<List<Item>> searchResult;
     private final LiveData<List<String>> citiesResult;
     private final LiveData<Event<Place>> locationInfo;
     private final ContentRepository repository;
-    private final NotificationHub hub;
 
-    public DashboardViewModel(ContentRepository repository, NotificationHub hub)
+    public SearchViewModel(ContentRepository repository)
     {
         this.repository = repository;
-        this.hub = hub;
 
         searchResult = Transformations.map(repository.getSearchResult(), new Function<RepositoryResponse<List<Item>>, List<Item>>()
         {
@@ -89,21 +85,6 @@ public class DashboardViewModel extends ViewModel
     public LiveData<List<Item>> getSearchResult()
     {
         return searchResult;
-    }
-
-    public void sendFollowRequest(String userID)
-    {
-        hub.sendFollowRequest(userID);
-    }
-
-    public void cancelFollowRequest(String userID)
-    {
-
-    }
-
-    public void unfollow(String userID)
-    {
-
     }
 
     public LiveData<List<String>> getCitiesResult()

@@ -22,6 +22,7 @@ import com.example.demoapp.ui.main.plan.moment.AddMomentViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.authentication.register.RegisterViewModel;
 import com.example.demoapp.ui.main.dashboard.DashboardViewModel;
+import com.example.demoapp.ui.main.search.SearchViewModel;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -90,6 +91,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if (modelClass.isAssignableFrom(ViewPlanViewModel.class))
         {
             return (T) new ViewPlanViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if (modelClass.isAssignableFrom(SearchViewModel.class))
+        {
+            return (T) new SearchViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else
         {

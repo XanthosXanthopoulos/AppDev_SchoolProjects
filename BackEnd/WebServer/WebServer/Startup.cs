@@ -6,12 +6,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetTopologySuite.Geometries;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Net.Http;
 using WebServer.Converters;
 using WebServer.Data;
 using WebServer.Hubs;
+using WebServer.Models.Enums;
 using WebServer.Services;
+using WebServer.Utilities;
 
 namespace WebServer
 {
@@ -64,40 +71,114 @@ namespace WebServer
             if (serviceProvider.GetService<ApplicationDataDbContext>().Database.EnsureCreated())
             {
                 ApplicationDataDbContext dbContext = serviceProvider.GetService<ApplicationDataDbContext>();
+                Random random = new Random();
 
-                dbContext.Activities.Add(new Models.Database.Activity()
-                {
-                    Address = "1871  Poplar Lane",
-                    Description = "A fake activity",
-                    Coordinates = new NetTopologySuite.Geometries.Point(23.73543741130086, 37.9894702164558) { SRID = 4326 },
-                    Title = "Activity 1",
-                    Tags = "beach, coffee"
-                });
+                string[] descriptions = 
+                { 
+                    "A lovely beer house.", 
+                    "The Acropolis Museum, one of the most important museums in the world, houses the findings of only one archaeological site, the Athenian Acropolis.", 
+                    "The Peace and Friendship Stadium, commonly known by its acronym SEF",
+                    "The Ancient Agora of Athens is the best-known example of an ancient Greek agora and is situated to the northwest of Acropolis.",
+                    "The top of Lycabettus Hill is the highest point of central Athens.",
+                    "Just under the Acropolis, the neighborhood of Plaka gives visitors a taste of ‘old Athens’. It is the ideal place to take a walk or enjoy the local cafes and restaurants.",
+                    "These are the 3 neoclassical buildings on Panepistimiou street, designed and built in the 19th century by Danish architect Theophil Hansen.",
+                    "In Athens, all roads lead to Syntagma square.",
+                    "The Temple of Olympian Zeus, right in the center of Athens, used to be the largest temple in Greece during the Roman times but today only a few columns remain standing."
+                };
 
-                dbContext.Activities.Add(new Models.Database.Activity()
+                string[] titles =
                 {
-                    Address = "187 Lane",
-                    Description = "A fake activity",
-                    Coordinates = new NetTopologySuite.Geometries.Point(23.720947233378396, 37.982539628169874) { SRID = 4326 },
-                    Title = "Activity 2",
-                    Tags = "beach"
-                });
+                    "Arch beer house",
+                    "Acropolis Museum",
+                    "Peace and Friendship Stadium",
+                    "The Ancient Agora of Athens is the best-known example of an ancient Greek agora and is situated to the northwest of Acropolis.",
+                    "Lycabettus Hill",
+                    "Plaka",
+                    "Panepistimiou street",
+                    "Syntagma square",
+                    "Temple of Olympian Zeus"
+                };
 
-                dbContext.Activities.Add(new Models.Database.Activity()
+                string[] tags =
                 {
-                    Address = "Poplar Lane",
-                    Description = "A fake activity",
-                    Coordinates = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 },
-                    Title = "Activity 3",
-                    Tags = "coffee"
-                });
+                    "walking, nature, coffee",
+                    "architecture, local food",
+                    "beach, fine dining"
+                };
+
+                using (var httpClient = new HttpClient())
+                {
+                    for (int i = 0; i < 50; ++i)
+                    {
+                        Point point = new Point(23.727881 + (2 * random.NextDouble() - 1) * 0.029503, 37.983772 + (2 * random.NextDouble() - 1) * 0.04402) { SRID = 4326 };
+
+                        using (var response = httpClient.GetAsync("https://api.opencagedata.com/geocode/v1/json?q=" + point.Y + "+" + point.X + "&key=255230665c9249b28259b49dacc2c198").Result)
+                        {
+                            string apiResponse = response.Content.ReadAsStringAsync().Result;
+                            dynamic receivedReservation = JObject.Parse(apiResponse);
+
+                            dynamic items = receivedReservation.results;
+                            foreach (dynamic item in items)
+                            {
+                                Country country = EnumUtilities.GetValueFromDescription<Country>(Convert.ToString(item.components.country));
+
+                                string city = "";
+                                string address = "";
+
+                                try
+                                {
+                                    city = Convert.ToString(item.components.city);
+                                }
+                                catch (Exception ignored) { }
+
+                                if (city == null || city.Length == 0)
+                                {
+                                    try
+                                    {
+                                        city = Convert.ToString(item.components.neighbourhood);
+                                    }
+                                    catch (Exception ignored) { }
+                                }
+
+                                if (city == null || city.Length == 0)
+                                {
+                                    try
+                                    {
+                                        city = Convert.ToString(item.components.municipality);
+                                    }
+                                    catch (Exception ignored) { }
+                                }
+
+                                try
+                                {
+                                    address = Convert.ToString(item.components.road) + Convert.ToString(item.components.house_number);
+                                }
+                                catch (Exception ignored) { }
+
+                                if (city == null) city = "";
+                                if (address == null) address = "";
+
+                                dbContext.Activities.Add(new Models.Database.Activity()
+                                {
+                                    Country = country,
+                                    City = city,
+                                    Address = address,
+                                    Description = descriptions[random.Next(0, descriptions.Length)],
+                                    Coordinates = point,
+                                    Title = titles[random.Next(0, titles.Length)],
+                                    Tags = tags[random.Next(0, tags.Length)]
+                                });
+
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 dbContext.Images.Add(new Models.Database.Image()
                 {
                     ImageID = Guid.Empty.ToString()
                 });
-
-                Point p = new NetTopologySuite.Geometries.Point(23.590729071505763, 38.083373506423285) { SRID = 4326 };
 
                 dbContext.SaveChanges();
             }

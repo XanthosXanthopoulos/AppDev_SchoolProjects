@@ -22,6 +22,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.example.demoapp.App;
 import com.example.demoapp.R;
 import com.example.demoapp.actions.FollowActions;
+import com.example.demoapp.data.ActivityItemClickListener;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Follow;
 import com.example.demoapp.data.model.Image;
@@ -50,6 +51,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final SimpleDateFormat formatter;
     private final SharedPreferences sharedPreferences;
     private FollowActions actions;
+    private ActivityItemClickListener itemClickListener;
 
     public SearchResultAdapter()
     {
@@ -96,6 +98,18 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 activityViewHolder.description.setText(activity.getDescription());
                 activityViewHolder.address.setText(activity.getAddress());
                 activityViewHolder.tags.setText("Tags: " + activity.getTags());
+
+                if (itemClickListener != null)
+                {
+                    activityViewHolder.itemView.setOnClickListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View v)
+                        {
+                            itemClickListener.onItemClickListener(activity);
+                        }
+                    });
+                }
 
                 layoutParams.setFullSpan(true);
                 break;
@@ -210,6 +224,11 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void setActions(FollowActions actions)
     {
         this.actions = actions;
+    }
+
+    public void setItemClickListener(ActivityItemClickListener itemClickListener)
+    {
+        this.itemClickListener = itemClickListener;
     }
 
     public static class ActivityViewHolder extends RecyclerView.ViewHolder

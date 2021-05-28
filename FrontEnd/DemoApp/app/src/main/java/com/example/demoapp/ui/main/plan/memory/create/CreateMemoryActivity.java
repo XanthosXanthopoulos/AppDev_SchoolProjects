@@ -1,21 +1,16 @@
 package com.example.demoapp.ui.main.plan.memory.create;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -24,8 +19,9 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Place;
 import com.example.demoapp.ui.location_picker.LocationActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
@@ -34,9 +30,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class CreateMemoryFragment extends Fragment
-{
+import static java.security.AccessController.getContext;
 
+public class CreateMemoryActivity extends AppCompatActivity
+{
+    private static final int LOCATION_SELECT = 0;
     private CreateMemoryViewModel viewModel;
 
     private EditText titleEditText;
@@ -52,24 +50,24 @@ public class CreateMemoryFragment extends Fragment
     private Button cancelButton;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState)
+    protected void onCreate(Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.fragment_create_memory, container, false);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_create_memory);
 
         viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(CreateMemoryViewModel.class);
 
-        titleEditText = view.findViewById(R.id.activity_title);
-        countryEditText = view.findViewById(R.id.country_select);
-        cityEditText = view.findViewById(R.id.city_select);
-        addressEditText = view.findViewById(R.id.activity_address);
-        descriptionEditText = view.findViewById(R.id.activity_description);
-        tagsEditText = view.findViewById(R.id.activity_tags);
-        locateButton = view.findViewById(R.id.locate_button);
-        submitButton = view.findViewById(R.id.add_activity);
-        cancelButton = view.findViewById(R.id.cancel_activity);
+        titleEditText = findViewById(R.id.activity_title);
+        countryEditText = findViewById(R.id.country_select);
+        cityEditText = findViewById(R.id.city_select);
+        addressEditText = findViewById(R.id.activity_address);
+        descriptionEditText = findViewById(R.id.activity_description);
+        tagsEditText = findViewById(R.id.activity_tags);
+        locateButton = findViewById(R.id.locate_button);
+        submitButton = findViewById(R.id.add_activity);
+        cancelButton = findViewById(R.id.cancel_activity);
 
-        countryEditText.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, Country.values()));
+        countryEditText.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Country.values()));
         countryEditText.setValidator(new AutoCompleteTextView.Validator()
         {
             @Override
@@ -104,16 +102,16 @@ public class CreateMemoryFragment extends Fragment
             }
         });
 
-        viewModel.getCitiesResult().observe(getViewLifecycleOwner(), new Observer<List<String>>()
+        viewModel.getCitiesResult().observe(this, new Observer<List<String>>()
         {
             @Override
             public void onChanged(List<String> strings)
             {
-                cityEditText.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, strings));
+                cityEditText.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, strings));
             }
         });
 
-        viewModel.getStoredActivity().observe(getViewLifecycleOwner(), activity ->
+        viewModel.getStoredActivity().observe(this, activity ->
         {
             if (activity != null)
             {
@@ -125,7 +123,7 @@ public class CreateMemoryFragment extends Fragment
             }
         });
 
-        viewModel.getMemoryFormStateFormState().observe(getViewLifecycleOwner(), createMemoryFormState ->
+        viewModel.getMemoryFormStateFormState().observe(this, createMemoryFormState ->
         {
             if (createMemoryFormState.isDataValid())
             {
@@ -172,18 +170,7 @@ public class CreateMemoryFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-//                String title = titleEditText.getText().toString();
-//                Country country = Country.lookupByLabel(countryEditText.getText().toString());
-//                String address = addressEditText.getText().toString();
-//                String description = descriptionEditText.getText().toString();
-//                String tags = tagsEditText.getText().toString();
-//
-//                viewModel.storeActivity(title, country, address, description, tags);
-//
-//                //TODO: Create location getter
-//                Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
-
-                startActivity(new Intent(getActivity(), LocationActivity.class));
+                startActivityForResult(new Intent(getApplicationContext(), LocationActivity.class), LOCATION_SELECT);
             }
         });
 
@@ -194,7 +181,7 @@ public class CreateMemoryFragment extends Fragment
             {
                 if (countryEditText.getText().toString().trim().isEmpty())
                 {
-                    Toast.makeText(getContext(), "Please select a country", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Please select a country", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -205,9 +192,15 @@ public class CreateMemoryFragment extends Fragment
                 String description = descriptionEditText.getText().toString();
                 String tags = tagsEditText.getText().toString();
 
-                viewModel.addMemory(title, country, address + ", " + city, description, tags);
-
-                Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
+                Intent data = new Intent();
+                data.putExtra("title", title);
+                data.putExtra("country", country);
+                data.putExtra("city", city);
+                data.putExtra("address", address);
+                data.putExtra("description", description);
+                data.putExtra("tags", tags);
+                setResult(RESULT_OK, data);
+                finish();
             }
         });
 
@@ -216,12 +209,39 @@ public class CreateMemoryFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                viewModel.clear();
-
-                Navigation.findNavController(view).navigate(R.id.navigation_CreatePlan);
+                Intent data = new Intent();
+                setResult(RESULT_CANCELED, data);
+                finish();
             }
         });
 
-        return view;
+        viewModel.getLocationInfo().observe(this, new Observer<Event<Place>>()
+        {
+            @Override
+            public void onChanged(Event<Place> event)
+            {
+                if (event.isHandled()) return;
+
+                event.setHandled(true);
+
+                countryEditText.setText(event.getData().getCountry());
+                cityEditText.setText(event.getData().getCity());
+                addressEditText.setText(event.getData().getAddress());
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LOCATION_SELECT && resultCode == RESULT_OK && data != null)
+        {
+            double latitude = data.getDoubleExtra("latitude", 0);
+            double longitude = data.getDoubleExtra("longitude", 0);
+
+            viewModel.getLocationInfo(latitude, longitude);
+        }
     }
 }

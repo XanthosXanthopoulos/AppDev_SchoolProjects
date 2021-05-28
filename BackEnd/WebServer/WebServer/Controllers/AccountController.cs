@@ -110,12 +110,14 @@ namespace WebServer.Controllers
                 
                 if (result.Succeeded)
                 {
+                    string JWToken = jwt.GenerateSecurityToken(user.Email, user.Id);
+
                     return new ApiResponse<AuthenticationResponseModel>
                     {
                         Response = new AuthenticationResponseModel
                         {
                             Username = user.UserName,
-                            JWToken = jwt.GenerateSecurityToken(user.Email, user.Id),
+                            JWToken = JWToken,
                             ProfileImageID = _context.Users.Include(u => u.Image).Where(u => u.UserID == user.Id).First().Image.ImageID
                         } 
                     };

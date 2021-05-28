@@ -1,6 +1,7 @@
 package com.example.demoapp.ui.main.plan;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -21,6 +23,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.demoapp.R;
 import com.example.demoapp.ui.adapter.ViewPagerAdapter;
 import com.example.demoapp.util.ViewModelFactory;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -42,6 +45,7 @@ public class CreatePlanFragment extends Fragment
     private ImageButton calendarButton;
     private ImageButton uploadButton;
     private ProgressBar loadingProgressBar;
+    private BottomNavigationView navBar;
 
 
     private TabLayout tabLayout;
@@ -52,6 +56,9 @@ public class CreatePlanFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_create_plan, container, false);
+
+        navBar = getActivity().findViewById(R.id.nav_view);
+        navBar.setVisibility(View.GONE);
 
         viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(CreatePlanViewModel.class);
 
@@ -100,7 +107,7 @@ public class CreatePlanFragment extends Fragment
         {
             String title = titleEditText.getText().toString();
             String description = descriptionEditText.getText().toString();
-            Date date = null;
+            Date date;
             try
             {
                 if (dateSpinner.getText().toString().isEmpty())
@@ -131,6 +138,7 @@ public class CreatePlanFragment extends Fragment
             if (result.getData())
             {
                 Navigation.findNavController(view).navigate(R.id.navigation_profile);
+                navBar.setVisibility(View.VISIBLE);
             }
             else
             {
@@ -141,9 +149,14 @@ public class CreatePlanFragment extends Fragment
         TextWatcher afterTextChangedListener = new TextWatcher()
         {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+            }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+            }
 
             @Override
             public void afterTextChanged(Editable s)
@@ -172,6 +185,26 @@ public class CreatePlanFragment extends Fragment
 
             uploadButton.setEnabled(false);
         });
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */)
+        {
+            @Override
+            public void handleOnBackPressed()
+            {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Create plan")
+                        .setMessage("Your plan template will be discarded.")
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .setPositiveButton(android.R.string.yes, (dialog, whichButton) ->
+                        {
+                            Navigation.findNavController(view).navigate(R.id.navigation_profile);
+                            navBar.setVisibility(View.VISIBLE);
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
+            }
+        };
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), callback);
 
         return view;
     }

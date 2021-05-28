@@ -12,6 +12,7 @@ import com.example.demoapp.data.Event;
 import com.example.demoapp.data.datasource.ApiDataSource;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.Place;
 import com.example.demoapp.data.model.Post;
 import com.example.demoapp.data.model.api.request.SearchQueryModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
@@ -32,6 +33,7 @@ public class ContentRepository extends Repository
     private final MediatorLiveData<RepositoryResponse<Post>> postResult;
     private final MediatorLiveData<RepositoryResponse<List<String>>> citiesData;
     private final MediatorLiveData<RepositoryResponse<List<Activity>>> activitiesResult;
+    private final MediatorLiveData<RepositoryResponse<Event<Place>>> placeResult;
 
     public MediatorLiveData<RepositoryResponse<List<Activity>>> getNearActivitiesResult()
     {
@@ -54,6 +56,7 @@ public class ContentRepository extends Repository
         citiesData = new MediatorLiveData<>();
         activitiesResult = new MediatorLiveData<>();
         nearActivitiesResult = new MediatorLiveData<>();
+        placeResult = new MediatorLiveData<>();
 
         currentActivity = new MutableLiveData<>();
         currentPost = new MutableLiveData<>();
@@ -197,6 +200,8 @@ public class ContentRepository extends Repository
     public void addActivity(Activity activity)
     {
         currentPost.getValue().getActivities().addLast(activity);
+
+        currentPost.setValue(currentPost.getValue());
     }
 
     public void initializePostData()
@@ -273,6 +278,28 @@ public class ContentRepository extends Repository
         });
     }
 
+    public void getLocationInfo(double latitude, double longitude)
+    {
+        LiveData<DataSourceResponse<Place>> result = dataSource.getLocationInfo(latitude, longitude);
+        placeResult.addSource(result, new Observer<DataSourceResponse<Place>>()
+        {
+            @Override
+            public void onChanged(DataSourceResponse<Place> response)
+            {
+                if (response.isSuccessful())
+                {
+                    placeResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
+                }
+                else
+                {
+                    activitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+                }
+
+                placeResult.removeSource(result);
+            }
+        });
+    }
+
     public void resetPostData()
     {
         currentPost.setValue(null);
@@ -301,5 +328,10 @@ public class ContentRepository extends Repository
     public MediatorLiveData<RepositoryResponse<List<Activity>>> getActivitiesResult()
     {
         return activitiesResult;
+    }
+
+    public MediatorLiveData<RepositoryResponse<Event<Place>>> getPlaceResult()
+    {
+        return placeResult;
     }
 }

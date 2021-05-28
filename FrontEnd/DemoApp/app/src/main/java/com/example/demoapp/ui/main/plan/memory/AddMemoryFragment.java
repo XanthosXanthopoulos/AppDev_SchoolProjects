@@ -3,6 +3,7 @@ package com.example.demoapp.ui.main.plan.memory;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,23 +20,33 @@ import android.widget.Button;
 
 import com.example.demoapp.R;
 import com.example.demoapp.data.model.Activity;
+import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.ui.adapter.ActivityImageAdapter;
 import com.example.demoapp.ui.adapter.SearchResultAdapter;
+import com.example.demoapp.ui.location_picker.LocationActivity;
+import com.example.demoapp.ui.main.plan.memory.create.CreateMemoryActivity;
 import com.example.demoapp.ui.main.plan.memory.create.CreateMemoryViewModel;
+import com.example.demoapp.ui.main.search.SearchActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
+
 public class AddMemoryFragment extends Fragment
 {
+    private static final int ACTIVITY_ADD = 0;
+    private static final int ACTIVITY_SELECT = 1;
+
     private AddMemoryViewModel viewModel;
 
     private RecyclerView activityList;
     private SearchResultAdapter adapter;
 
     private Button createMemory;
+    private Button findMemory;
 
     public static AddMemoryFragment newInstance()
     {
@@ -50,6 +61,7 @@ public class AddMemoryFragment extends Fragment
         viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(AddMemoryViewModel.class);
 
         createMemory = view.findViewById(R.id.create_memory_button);
+        findMemory = view.findViewById(R.id.find_memory_button);
         activityList = view.findViewById(R.id.memory_list);
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -72,8 +84,40 @@ public class AddMemoryFragment extends Fragment
             }
         });
 
-        createMemory.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_createMemory));
+        createMemory.setOnClickListener(v -> startActivityForResult(new Intent(getActivity(),  CreateMemoryActivity.class), ACTIVITY_ADD));
+
+        findMemory.setOnClickListener(v -> startActivityForResult(new Intent(getActivity(),  SearchActivity.class), ACTIVITY_SELECT));
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ACTIVITY_ADD && resultCode == RESULT_OK && data != null)
+        {
+            String title = data.getStringExtra("title");
+            Country country = (Country) data.getSerializableExtra("country");
+            String city = data.getStringExtra("city");
+            String address = data.getStringExtra("address");
+            String description = data.getStringExtra("description");
+            String tags = data.getStringExtra("tags");
+
+            viewModel.addMemory("", title, country, city, address, description, tags);
+        }
+        else if (requestCode == ACTIVITY_SELECT && resultCode == RESULT_OK && data != null)
+        {
+            String id = data.getStringExtra("id");
+            String title = data.getStringExtra("title");
+            Country country = (Country) data.getSerializableExtra("country");
+            String city = data.getStringExtra("city");
+            String address = data.getStringExtra("address");
+            String description = data.getStringExtra("description");
+            String tags = data.getStringExtra("tags");
+
+            viewModel.addMemory(id, title, country, city, address, description, tags);
+        }
     }
 }

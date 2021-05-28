@@ -1,13 +1,17 @@
 package com.example.demoapp.ui.main.plan.memory.create;
 
+import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.example.demoapp.R;
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
+import com.example.demoapp.data.model.Place;
+import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
@@ -17,6 +21,7 @@ public class CreateMemoryViewModel extends ViewModel
 {
     private final ContentRepository repository;
     private final LiveData<List<String>> citiesResult;
+    private final LiveData<Event<Place>> locationInfo;
     private final MutableLiveData<CreateMemoryFormState> memoryFormState;
 
     public CreateMemoryViewModel(ContentRepository repository)
@@ -34,6 +39,24 @@ public class CreateMemoryViewModel extends ViewModel
             else
             {
                 return new ArrayList<>();
+            }
+        });
+
+        locationInfo = Transformations.map(repository.getPlaceResult(), new Function<RepositoryResponse<Event<Place>>, Event<Place>>()
+        {
+            @Override
+            public Event<Place> apply(RepositoryResponse<Event<Place>> input)
+            {
+                if (input.isSuccessful())
+                {
+                    return input.getResponse();
+                }
+                else
+                {
+                    Event<Place> event = new Event<>(new Place());
+                    event.setHandled(true);
+                    return event;
+                }
             }
         });
     }
@@ -104,5 +127,15 @@ public class CreateMemoryViewModel extends ViewModel
         if (country == null) return false;
 
         return country.code != 0;
+    }
+
+    public void getLocationInfo(double latitude, double longitude)
+    {
+        repository.getLocationInfo(latitude, longitude);
+    }
+
+    public LiveData<Event<Place>> getLocationInfo()
+    {
+        return locationInfo;
     }
 }
