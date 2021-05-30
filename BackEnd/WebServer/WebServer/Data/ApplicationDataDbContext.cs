@@ -8,7 +8,7 @@ namespace WebServer.Data
     {
         #region Public Dababase Sets
 
-        public DbSet<UserModel> Users { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public DbSet<Image> Images { get; set; }
 
@@ -17,6 +17,10 @@ namespace WebServer.Data
         public DbSet<Activity> Activities { get; set; }
 
         public DbSet<Post> Posts { get; set; }
+
+        public DbSet<Like> Likes { get; set; }
+
+        public DbSet<Comment> Comments { get; set; }
 
         #endregion
 
@@ -42,6 +46,8 @@ namespace WebServer.Data
             modelBuilder.Entity<Activity>().Property(e => e.ActivityID).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Post>().Property(e => e.PostID).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Like>().Property(e => e.LikeID).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Comment>().Property(e => e.CommentID).ValueGeneratedOnAdd();
         }
 
         #endregion

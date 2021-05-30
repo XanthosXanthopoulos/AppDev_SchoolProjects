@@ -1,26 +1,24 @@
 package com.example.demoapp.data.model;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
-
-import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Post extends Item
 {
     private int postID;
     private String profileImageID;
     private String thumbnailImageID;
+    private String countrySummary;
     private String username;
     private String title;
     private String description;
     private Date date;
+    private int likes;
 
     private Deque<Activity> activities;
     private Deque<String> images;
+    private Deque<Comment> comments;
 
     public Post()
     {
@@ -28,6 +26,7 @@ public class Post extends Item
 
         this.activities = new LinkedList<>();
         this.images = new LinkedList<>();
+        this.comments = new LinkedList<>();
     }
 
     public Post(String username, String description, Date date)
@@ -129,5 +128,35 @@ public class Post extends Item
     public void setPostID(int postID)
     {
         this.postID = postID;
+    }
+
+    public String getCountrySummary()
+    {
+        return countrySummary;
+    }
+
+    public void setCountrySummary(String countrySummary)
+    {
+        this.countrySummary = countrySummary;
+    }
+
+    public int getLikes()
+    {
+        return likes;
+    }
+
+    public void setLikes(int likes)
+    {
+        this.likes = likes;
+    }
+
+    public Deque<Comment> getComments()
+    {
+        return comments;
+    }
+
+    public void setComments(Deque<Comment> comments)
+    {
+        this.comments = comments;
     }
 }

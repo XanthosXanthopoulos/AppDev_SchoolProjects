@@ -1,66 +1,27 @@
 package com.example.demoapp.ui.main.plan.moment;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.content.ClipData;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.Image;
-import com.example.demoapp.data.model.Item;
-import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.ui.adapter.ImageUriAdapter;
-import com.example.demoapp.ui.adapter.SearchResultAdapter;
-import com.example.demoapp.ui.adapter.TripAdapter;
-import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.util.ViewModelFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 

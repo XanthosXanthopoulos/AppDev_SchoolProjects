@@ -47,19 +47,6 @@ public class TripFragment extends Fragment
     {
         List<Item> listViewItems = new ArrayList<>();
 
-        String title = "Lorem ipsum";
-        String desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce elementum neque non sapien sagittis, vestibulum dignissim ipsum pellentesque. Sed fringilla vulputate urna et consectetur.";
-        String address = "Fusce porta tincidunt eros";
-        String type = "Indoor";
-        String tags = "Curabitur, Tortor, Libero";
-
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
-//        listViewItems.add(new Activity("", title, desc, tags, address, type));
 
         return listViewItems;
     }

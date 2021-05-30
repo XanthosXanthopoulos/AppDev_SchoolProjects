@@ -83,7 +83,8 @@
         android:background="@drawable/round_bg"
         android:text="Create memory"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textColor="@color/white"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/Trip_List"

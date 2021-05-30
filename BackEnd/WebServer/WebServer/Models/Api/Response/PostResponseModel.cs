@@ -19,10 +19,14 @@ namespace WebServer.Models.Api.Response
 
         public string Username { get; set; }
 
+        public int Likes { get; set; }
+
         public DateTime Date { get; set; }
 
         public ICollection<string> Images { get; set; }
 
         public ICollection<ActivityResponse> Activities { get; set; }
+
+        public ICollection<CommentResponse> Comments { get; set; }
     }
 }

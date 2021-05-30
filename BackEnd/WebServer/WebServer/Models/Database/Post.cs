@@ -20,9 +20,13 @@ namespace WebServer.Models.Database
 
         public ICollection<Activity> Activities { get; set; }
 
+        public ICollection<Like> Likes { get; set; }
+
+        public ICollection<Comment> Comments { get; set; }
+
         [ForeignKey("User")]
         public string UserID { get; set; }
 
-        public UserModel User { get; set; }
+        public User User { get; set; }
     }
 }

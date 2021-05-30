@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 
 namespace WebServer.Utilities
 {
-    public class EnumUtilities
+    public static class EnumUtilities
     {
         public static T GetValueFromDescription<T>(string description) where T : Enum
         {
@@ -23,6 +24,21 @@ namespace WebServer.Utilities
             }
 
             throw new ArgumentException("Not found.", nameof(description));
+        }
+
+        public static string Description(this Enum value)
+        {
+            var field = value.GetType().GetField(value.ToString());
+            var attributes = field.GetCustomAttributes(false);
+
+            dynamic displayAttribute = null;
+
+            if (attributes.Any())
+            {
+                displayAttribute = attributes.ElementAt(0);
+            }
+
+            return displayAttribute?.Description ?? "Description Not Found";
         }
     }
 }

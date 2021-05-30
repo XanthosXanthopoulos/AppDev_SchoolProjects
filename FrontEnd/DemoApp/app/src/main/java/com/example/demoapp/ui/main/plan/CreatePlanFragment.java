@@ -21,7 +21,7 @@ import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.demoapp.R;
-import com.example.demoapp.ui.adapter.ViewPagerAdapter;
+import com.example.demoapp.ui.adapter.CreatePlanViewPagerAdapter;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -70,7 +70,7 @@ public class CreatePlanFragment extends Fragment
         loadingProgressBar = view.findViewById(R.id.loading);
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
-        viewPager.setAdapter(new ViewPagerAdapter(this));
+        viewPager.setAdapter(new CreatePlanViewPagerAdapter(this));
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(new String[]{"Memories", "Moments"}[position])).attach();
 

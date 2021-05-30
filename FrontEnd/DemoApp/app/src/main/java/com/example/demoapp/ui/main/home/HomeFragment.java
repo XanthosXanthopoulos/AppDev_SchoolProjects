@@ -9,14 +9,12 @@ import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.demoapp.R;
-import com.example.demoapp.data.Event;
-import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.CommentLikeClickListener;
 import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.ui.adapter.NotificationAdapter;
 import com.example.demoapp.ui.adapter.SearchResultAdapter;
@@ -24,7 +22,6 @@ import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.LinkedList;
-import java.util.List;
 
 
 public class HomeFragment extends Fragment
@@ -51,54 +48,52 @@ public class HomeFragment extends Fragment
 
         adapter = new SearchResultAdapter();
         searchResultList.setAdapter(adapter);
-
-        notificationButton.setOnClickListener(new View.OnClickListener()
+        adapter.setCommentLikeClickListener(new CommentLikeClickListener()
         {
             @Override
-            public void onClick(View v)
+            public void sendComment(int postID, String content)
             {
-                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity(), R.style.BottomSheetDialogTheme);
-                View bottomSheetView = LayoutInflater.from(getParentFragment().getContext()).inflate(R.layout.layout_nottification_sheet, view.findViewById(R.id.bottomSheetContainer));
-                RecyclerView notificationResultList = bottomSheetView.findViewById(R.id.notification_list);
-                NotificationAdapter not = new NotificationAdapter(getContext());
+                viewModel.sendComment(postID, content);
+            }
 
-                StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
-                notificationResultList.setLayoutManager(_sGridLayoutManager);
-                notificationResultList.setAdapter(notificationAdapter);
-                bottomSheetDialog.setContentView(bottomSheetView);
-                bottomSheetDialog.show();
-
-                notificationButton.setColorFilter(Color.rgb(255, 255, 255));
-                notificationResultList.smoothScrollToPosition(0);
+            @Override
+            public void sendLike(int postID)
+            {
+                viewModel.sendLike(postID);
             }
         });
 
-        viewModel.getFeedResult().observe(getViewLifecycleOwner(), new Observer<List<Item>>()
+        notificationButton.setOnClickListener(v ->
         {
-            @Override
-            public void onChanged(List<Item> items)
-            {
-                adapter.setItems(items);
-            }
+            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity(), R.style.BottomSheetDialogTheme);
+            View bottomSheetView = LayoutInflater.from(getParentFragment().getContext()).inflate(R.layout.layout_nottification_sheet, view.findViewById(R.id.bottomSheetContainer));
+            RecyclerView notificationResultList = bottomSheetView.findViewById(R.id.notification_list);
+
+            StaggeredGridLayoutManager _sGridLayoutManager1 = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+            notificationResultList.setLayoutManager(_sGridLayoutManager1);
+            notificationResultList.setAdapter(notificationAdapter);
+            bottomSheetDialog.setContentView(bottomSheetView);
+            bottomSheetDialog.show();
+
+            notificationButton.setColorFilter(Color.rgb(255, 255, 255));
+            notificationResultList.smoothScrollToPosition(0);
         });
 
-        viewModel.getNotification().observe(getViewLifecycleOwner(), new Observer<Event<Notification>>()
+        viewModel.getFeedResult().observe(getViewLifecycleOwner(), items -> adapter.setItems(items));
+
+        viewModel.getNotification().observe(getViewLifecycleOwner(), notification ->
         {
-            @Override
-            public void onChanged(Event<Notification> notification)
+            if (!notification.isHandled())
             {
-                if (!notification.isHandled())
+                if (!notificationAdapter.getItems().isEmpty() && notificationAdapter.getItems().getFirst().equals(notification.getData()))
                 {
-                    if (!notificationAdapter.getItems().isEmpty() && notificationAdapter.getItems().getFirst().equals(notification.getData()))
-                    {
-                        notification.setHandled(true);
-                        return;
-                    }
-
-                    notificationAdapter.appendNotification(notification.getData());
                     notification.setHandled(true);
-                    notificationButton.setColorFilter(Color.rgb(200, 120, 150));
+                    return;
                 }
+
+                notificationAdapter.appendNotification(notification.getData());
+                notification.setHandled(true);
+                notificationButton.setColorFilter(Color.rgb(200, 120, 150));
             }
         });
 

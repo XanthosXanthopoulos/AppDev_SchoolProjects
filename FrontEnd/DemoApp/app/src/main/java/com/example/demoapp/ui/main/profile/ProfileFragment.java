@@ -1,5 +1,6 @@
 package com.example.demoapp.ui.main.profile;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -22,14 +23,12 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.Trip;
+import com.example.demoapp.data.model.Item;
+import com.example.demoapp.data.model.Post;
 import com.example.demoapp.ui.adapter.TripAdapter;
 import com.example.demoapp.util.ApiRoutes;
 import com.example.demoapp.util.ViewModelFactory;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +45,8 @@ public class ProfileFragment extends Fragment
     private TextView followersTextView;
     private ImageView profileImage;
 
+    private TripAdapter adapter;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
@@ -56,12 +57,15 @@ public class ProfileFragment extends Fragment
         followsTextView = view.findViewById(R.id.follows);
         followersTextView = view.findViewById(R.id.followers);
         profileImage = view.findViewById(R.id.Register_ProfileImage);
+        adapter = new TripAdapter(getContext());
 
         RecyclerView recyclerView = view.findViewById(R.id.Trip_List);
         recyclerView.setHasFixedSize(true);
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(_sGridLayoutManager);
+
+        recyclerView.setAdapter(adapter);
 
 
         followsTextView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_followee));
@@ -76,6 +80,15 @@ public class ProfileFragment extends Fragment
         GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + getContext().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).getString("JWToken", "")).build());
 
         Glide.with(getContext()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(profileImage);
+
+        viewModel.getFeedResult().observe(getViewLifecycleOwner(), items ->
+        {
+            List<Post> posts = new ArrayList<>(items.size());
+            items.forEach(item -> posts.add((Post)item));
+            adapter.setItems(posts);
+        });
+
+        viewModel.getFeed();
 
         return view;
     }

@@ -22,6 +22,7 @@ import android.widget.SearchView;
 
 import com.example.demoapp.CustomMarkerInfoWindowView;
 import com.example.demoapp.R;
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.util.Place;
 import com.example.demoapp.util.ViewModelFactory;
@@ -77,25 +78,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap)
+    public void onMapReady(@NotNull GoogleMap googleMap)
     {
         map = googleMap;
-        search_bar = (SearchView) requireView().findViewById(R.id.search_bar);
+        search_bar = requireView().findViewById(R.id.search_bar);
         Drawable temp = search_bar.getBackground();
         List<Place> PlacesList = getListItemData();
 
         map.clear();
         map.setInfoWindowAdapter(new CustomMarkerInfoWindowView(getContext()));
 
-        search_bar.setOnSearchClickListener(new View.OnClickListener()
-        {
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            public void onClick(View v)
-            {
-                search_bar.setBackground(getResources().getDrawable(R.drawable.search_bar));
-            }
-        });
+        search_bar.setOnSearchClickListener(v -> search_bar.setBackground(getResources().getDrawable(R.drawable.search_bar)));
 
         search_bar.setOnCloseListener(new SearchView.OnCloseListener()
         {
@@ -108,28 +101,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         });
 
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+        map.setOnMarkerClickListener(marker ->
         {
-            @Override
-            public boolean onMarkerClick(@NonNull @NotNull Marker marker)
-            {
-                map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-                marker.showInfoWindow();
+            map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+            marker.showInfoWindow();
 
-                return true;
-            }
+            return true;
         });
 
-        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener()
+        map.setOnCameraIdleListener(() ->
         {
-            @Override
-            public void onCameraIdle()
+            if (map.getCameraPosition().zoom >= 13.0f)
             {
-                if (map.getCameraPosition().zoom >= 8.0f)
-                {
-                    LatLng center = map.getCameraPosition().target;
-                    viewModel.getActivities(center.latitude, center.longitude, getMaxRadiusAfterZoom());
-                }
+                LatLng center = map.getCameraPosition().target;
+                viewModel.getActivities(center.latitude, center.longitude, getMaxRadiusAfterZoom());
             }
         });
 
@@ -138,7 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             @Override
             public boolean onQueryTextSubmit(String query)
             {
-                Place p = getPlaceData(PlacesList, query);
+                viewModel.searchPlace(query);
                 return false;
             }
 
@@ -149,39 +134,36 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
             }
         });
 
-        viewModel.getActivitiesLiveData().observe(getViewLifecycleOwner(), new Observer<List<Activity>>()
+        viewModel.getActivitiesLiveData().observe(getViewLifecycleOwner(), this::addPath);
+
+        viewModel.getNearActivitiesLiveData().observe(getViewLifecycleOwner(), activities ->
         {
-                @Override
-            public void onChanged(List<Activity> activities)
+            Map<String, Activity> newActivities = activities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
+
+            Iterator<Map.Entry<String, Marker>> iterator = nearMarkers.entrySet().iterator();
+            while (iterator.hasNext())
             {
-                addPath(activities);
+                Map.Entry<String, Marker> entry = iterator.next();
+
+                if (!newActivities.containsKey(entry.getKey()))
+                {
+                    entry.getValue().remove();
+                    iterator.remove();
+                }
+            }
+
+            for (Activity activity : activities)
+            {
+                if (!nearMarkers.containsKey(activity.getId())) nearMarkers.put(activity.getId(), addMarker(activity));
             }
         });
 
-        viewModel.getNearActivitiesLiveData().observe(getViewLifecycleOwner(), new Observer<List<Activity>>()
+        viewModel.getSearchResult().observe(getViewLifecycleOwner(), event ->
         {
-            @Override
-            public void onChanged(List<Activity> activities)
-            {
-                Map<String, Activity> newActivities = activities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
+            if (event.isHandled()) return;
 
-                Iterator<Map.Entry<String, Marker>> iterator = nearMarkers.entrySet().iterator();
-                while (iterator.hasNext())
-                {
-                    Map.Entry<String, Marker> entry = iterator.next();
-
-                    if (!newActivities.containsKey(entry.getKey()))
-                    {
-                        entry.getValue().remove();
-                        iterator.remove();
-                    }
-                }
-
-                for (Activity activity : activities)
-                {
-                    if (!nearMarkers.containsKey(activity.getId())) nearMarkers.put(activity.getId(), addMarker(activity));
-                }
-            }
+            event.setHandled(true);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(event.getData().getLatitude(), event.getData().getLongitude()), 13));
         });
     }
 
@@ -252,19 +234,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback
     private List<Place> getListItemData()
     {
         List<Place> listViewItems = new ArrayList<>();
-        String description = "The capital of Australia";
 
-        final Place MELBOURNE = new Place("MELBOURNE", description, new LatLng(-37.813628, 144.963058));
-        final Place ADELAIDE = new Place("ADELAIDE", new LatLng(-34.928499, 138.600746));
-        final Place BRISBANE = new Place("BRISBANE", new LatLng(-27.469771, 153.025124));
-        final Place SYDNEY = new Place("SYDNEY", new LatLng(-33.86882, 151.209296));
-        final Place PERTH = new Place("PERTH", new LatLng(-31.952312, 115.861309));
-
-        listViewItems.add(MELBOURNE);
-        listViewItems.add(ADELAIDE);
-        listViewItems.add(BRISBANE);
-        listViewItems.add(SYDNEY);
-        listViewItems.add(PERTH);
 
         return listViewItems;
     }

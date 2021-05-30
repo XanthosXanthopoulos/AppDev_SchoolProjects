@@ -57,7 +57,7 @@ namespace WebServer.Controllers
 
                     if (createResult.Succeeded)
                     {
-                        await _context.Users.AddAsync(new UserModel { UserID = user.Id, Name = user.UserName });
+                        await _context.Users.AddAsync(new User { UserID = user.Id, Name = user.UserName });
                         await _context.SaveChangesAsync();
 
                         return new ApiResponse<AuthenticationResponseModel> 
@@ -151,7 +151,7 @@ namespace WebServer.Controllers
             if (userID != null)
             {
                 IdentityUser user = await userManager.FindByIdAsync(userID);
-                UserModel userInfo = await _context.Users.FindAsync(userID);
+                User userInfo = await _context.Users.FindAsync(userID);
 
                 ICollection<Follow> follows = _context.Follows.Where(f => f.FolloweeID == userID).ToList();
                 _context.Follows.RemoveRange(follows);
@@ -176,7 +176,7 @@ namespace WebServer.Controllers
 
             if (userID != null)
             {
-                UserModel userInfo = await _context.Users.Where(u => u.UserID == userID).Include(i => i.Image).FirstAsync();
+                User userInfo = await _context.Users.Where(u => u.UserID == userID).Include(i => i.Image).FirstAsync();
 
                 return new ApiResponse<ProfileInfoResponseModel>
                 {
@@ -200,13 +200,13 @@ namespace WebServer.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ApiResponse<bool>> UpdateProfile([FromBody] ProfileInfoRequestModel profileInfo)
+        public async Task<ApiResponse<AuthenticationResponseModel>> UpdateProfile([FromBody] ProfileInfoRequestModel profileInfo)
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userID != null)
             {
-                UserModel userInfo = await _context.Users.FindAsync(userID);
+                User userInfo = await _context.Users.FindAsync(userID);
 
                 userInfo.Name = profileInfo.Name;
                 userInfo.Surname = profileInfo.Surname;
@@ -229,11 +229,11 @@ namespace WebServer.Controllers
                 _context.Update(userInfo);
                 await _context.SaveChangesAsync();
 
-                return new ApiResponse<bool> { Response = true };
+                return new ApiResponse<AuthenticationResponseModel> { Response = new AuthenticationResponseModel { ProfileImageID = userInfo.ImageID } };
             }
             else
             {
-                return new ApiResponse<bool> { Response = false };
+                return new ApiResponse<AuthenticationResponseModel> { ErrorMessage = "User not found" };
             }
         }
     }

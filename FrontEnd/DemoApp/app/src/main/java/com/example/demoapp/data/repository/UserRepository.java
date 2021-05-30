@@ -16,6 +16,7 @@ import com.example.demoapp.data.model.Follow;
 import com.example.demoapp.data.model.User;
 import com.example.demoapp.data.model.api.request.RegisterCredentialsModel;
 import com.example.demoapp.data.model.api.request.SingInCredentialsModel;
+import com.example.demoapp.data.model.api.response.AuthenticationResponseModel;
 import com.example.demoapp.data.model.api.response.ProfileInfoResponseModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
@@ -154,67 +155,56 @@ public class UserRepository extends Repository
 
     public void updateProfile(Uri profileImage, String name, String surname, String description, Date birthday, Country country, AccountType accountType)
     {
-        LiveData<DataSourceResponse<Boolean>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(profileImage, name, surname, description, birthday, country, accountType), loadFromPrefs("JWToken"));
-        actionResult.addSource(dataSourceResult, new Observer<DataSourceResponse<Boolean>>()
+        LiveData<DataSourceResponse<AuthenticationResponseModel>> dataSourceResult = dataSource.updateProfile(new ProfileInfoResponseModel(profileImage, name, surname, description, birthday, country, accountType), loadFromPrefs("JWToken"));
+        actionResult.addSource(dataSourceResult, user ->
         {
-            @Override
-            public void onChanged(@Nullable DataSourceResponse<Boolean> user)
+            if (user.isSuccessful())
             {
-                if (user.isSuccessful())
-                {
-                    actionResult.setValue(new RepositoryResponse<>(new Event<Boolean>(true)));
-                }
-                else
-                {
-                    actionResult.setValue(new RepositoryResponse<>(new Event<Boolean>(false)));
-                }
-
-                actionResult.removeSource(dataSourceResult);
+                getUser().setProfileImageID(user.getResponse().getProfileImageID());
+                actionResult.setValue(new RepositoryResponse<>(new Event<>(true)));
             }
+            else
+            {
+                actionResult.setValue(new RepositoryResponse<>(new Event<>(false)));
+            }
+
+            actionResult.removeSource(dataSourceResult);
         });
     }
 
     public void getFollows()
     {
         LiveData<DataSourceResponse<List<Follow>>> result = dataSource.getFollowees(loadFromPrefs("JWToken"));
-        followResult.addSource(result, new Observer<DataSourceResponse<List<Follow>>>()
+        followResult.addSource(result, response ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<List<Follow>> response)
+            if (response.isSuccessful())
             {
-                if (response.isSuccessful())
-                {
-                    followResult.setValue(new RepositoryResponse<>(response.getResponse()));
-                }
-                else
-                {
-                    followResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
-                }
-
-                followResult.removeSource(result);
+                followResult.setValue(new RepositoryResponse<>(response.getResponse()));
             }
+            else
+            {
+                followResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            followResult.removeSource(result);
         });
     }
 
     public void getFollowers()
     {
         LiveData<DataSourceResponse<List<Follow>>> result = dataSource.getFollowers(loadFromPrefs("JWToken"));
-        followResult.addSource(result, new Observer<DataSourceResponse<List<Follow>>>()
+        followResult.addSource(result, response ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<List<Follow>> response)
+            if (response.isSuccessful())
             {
-                if (response.isSuccessful())
-                {
-                    followResult.setValue(new RepositoryResponse<>(response.getResponse()));
-                }
-                else
-                {
-                    followResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
-                }
-
-                followResult.removeSource(result);
+                followResult.setValue(new RepositoryResponse<>(response.getResponse()));
             }
+            else
+            {
+                followResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            followResult.removeSource(result);
         });
     }
 

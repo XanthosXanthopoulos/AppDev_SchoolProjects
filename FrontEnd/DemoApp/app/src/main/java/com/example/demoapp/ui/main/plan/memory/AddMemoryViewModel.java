@@ -24,19 +24,15 @@ public class AddMemoryViewModel extends ViewModel
     {
         this.repository = repository;
 
-        activitiesLiveData = Transformations.map(repository.getCurrentPost(), new Function<Post, Iterable<Activity>>()
+        activitiesLiveData = Transformations.map(repository.getCurrentPost(), post ->
         {
-            @Override
-            public Iterable<Activity> apply(Post post)
+            if (post == null)
             {
-                if (post == null)
-                {
-                    return new LinkedList<>();
-                }
-                else
-                {
-                    return post.getActivities();
-                }
+                return new LinkedList<>();
+            }
+            else
+            {
+                return post.getActivities();
             }
         });
     }

@@ -98,4 +98,14 @@ public class NotificationHub
     {
         hubConnection.send("Cancel", userID);
     }
+
+    public void sendComment(int postID, String content)
+    {
+        hubConnection.send("SendComment", postID, content);
+    }
+
+    public void sendLike(int postID)
+    {
+        hubConnection.send("SendLike", postID);
+    }
 }

@@ -27,28 +27,22 @@ public class HomeViewModel extends ViewModel
         this.repository = repository;
         this.hub = hub;
 
-        feedResult = Transformations.map(repository.getFeedResult(), new Function<RepositoryResponse<List<Item>>, List<Item>>()
+        feedResult = Transformations.map(repository.getFeedResult(), input ->
         {
-            @Override
-            public List<Item> apply(RepositoryResponse<List<Item>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                return new ArrayList<>();
             }
         });
-
-
     }
 
     public void getFeed()
     {
-        repository.updateFeed();
+        repository.updateFeed(false);
     }
 
     public LiveData<List<Item>> getFeedResult()
@@ -64,5 +58,15 @@ public class HomeViewModel extends ViewModel
     public LinkedList<Notification> getNotifications()
     {
         return hub.getNotifications();
+    }
+
+    public void sendLike(int postID)
+    {
+        hub.sendLike(postID);
+    }
+
+    public void sendComment(int postID, String comment)
+    {
+        hub.sendComment(postID, comment);
     }
 }

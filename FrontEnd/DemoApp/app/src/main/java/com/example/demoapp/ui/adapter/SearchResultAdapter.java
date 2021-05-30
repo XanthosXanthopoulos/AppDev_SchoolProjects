@@ -6,14 +6,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.transition.Visibility;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -23,12 +27,12 @@ import com.example.demoapp.App;
 import com.example.demoapp.R;
 import com.example.demoapp.actions.FollowActions;
 import com.example.demoapp.data.ActivityItemClickListener;
+import com.example.demoapp.data.CommentLikeClickListener;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Follow;
 import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Post;
-import com.example.demoapp.data.model.Trip;
 import com.example.demoapp.util.ApiRoutes;
 
 import java.text.SimpleDateFormat;
@@ -37,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.view.View.GONE;
 import static com.example.demoapp.App.SHARED_PREFS;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -51,6 +54,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final SimpleDateFormat formatter;
     private final SharedPreferences sharedPreferences;
     private FollowActions actions;
+    private CommentLikeClickListener commentLikeClickListener;
     private ActivityItemClickListener itemClickListener;
 
     public SearchResultAdapter()
@@ -71,10 +75,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case 1:
                 return new ImageViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, null));
             case 2:
-                return new TripViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_travel, null));
-            case 3:
                 return new PostViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, null));
-            case  4:
+            case  3:
                 return new UserViewHolder((LayoutInflater.from(parent.getContext()).inflate(R.layout.item_profile, null)));
             default:
                 return null;
@@ -123,20 +125,11 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 layoutParams.setFullSpan(true);
                 break;
             case 2:
-                TripViewHolder tripViewHolder = (TripViewHolder)holder;
-                Trip trip = (Trip) items.get(position);
-
-                tripViewHolder.description.setText(trip.getDescription());
-                tripViewHolder.country.setText(trip.getCountry().toString());
-                tripViewHolder.date.setText(formatter.format(trip.getDate()));
-
-                if (trip.getUsername() == null) tripViewHolder.username.setVisibility(GONE);
-                break;
-            case 3:
                 PostViewHolder postViewHolder = (PostViewHolder)holder;
                 Post post = (Post) items.get(position);
 
                 postViewHolder.username.setText(post.getUsername());
+                postViewHolder.title.setText(post.getTitle());
 
 
                 params.put("id", post.getProfileImageID());
@@ -152,10 +145,26 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 postViewHolder.planImage.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_ViewPlan, bundle));
 
                 postViewHolder.showOnMapButton.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_map, bundle));
+
+                postViewHolder.commentButton.setOnClickListener(v ->
+                        postViewHolder.commentSection.setVisibility(postViewHolder.commentSection.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
+
+                postViewHolder.approveButton.setOnClickListener(v -> commentLikeClickListener.sendLike(post.getPostID()));
+
+                postViewHolder.sendComment.setOnClickListener(v ->
+                {
+                    if (postViewHolder.comment.getText().toString().isEmpty()) return;
+
+                    commentLikeClickListener.sendComment(post.getPostID(), postViewHolder.comment.getText().toString());
+
+                    Toast.makeText(v.getContext(), "Comment sent", Toast.LENGTH_LONG).show();
+                    postViewHolder.commentSection.setVisibility(View.GONE);
+                });
+
                 layoutParams.setFullSpan(true);
                 break;
 
-            case 4:
+            case 3:
                 UserViewHolder userViewHolder = (UserViewHolder)holder;
                 Follow follow = (Follow) items.get(position);
 
@@ -231,13 +240,17 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.itemClickListener = itemClickListener;
     }
 
+    public void setCommentLikeClickListener(CommentLikeClickListener commentLikeClickListener)
+    {
+        this.commentLikeClickListener = commentLikeClickListener;
+    }
+
     public static class ActivityViewHolder extends RecyclerView.ViewHolder
     {
         private final TextView title;
         private final TextView description;
         private final TextView tags;
         private final TextView address;
-        private final TextView type;
 
         public ActivityViewHolder(@NonNull View itemView)
         {
@@ -247,7 +260,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             description = itemView.findViewById(R.id.Activity_Description);
             tags = itemView.findViewById(R.id.Activity_Tags);
             address = itemView.findViewById(R.id.Activity_Address);
-            type = itemView.findViewById(R.id.Activity_Type);
 
             Button showMore = itemView.findViewById(R.id.Activity_ShowMore);
             Button showLess = itemView.findViewById(R.id.Activity_ShowLess);
@@ -257,7 +269,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 showMore.setVisibility(View.GONE);
 
                 address.setVisibility(View.VISIBLE);
-                type.setVisibility(View.VISIBLE);
                 tags.setVisibility(View.VISIBLE);
                 showLess.setVisibility(View.VISIBLE);
             });
@@ -266,7 +277,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             {
                 showLess.setVisibility(View.GONE);
                 address.setVisibility(View.GONE);
-                type.setVisibility(View.GONE);
                 tags.setVisibility(View.GONE);
 
                 showMore.setVisibility(View.VISIBLE);
@@ -286,26 +296,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    public static class TripViewHolder extends RecyclerView.ViewHolder
-    {
-        private final TextView username;
-        private final TextView description;
-        private final TextView country;
-        private final TextView date;
-
-        public TripViewHolder(View view)
-        {
-            super(view);
-
-            itemView.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_trip));
-
-            username = (TextView) itemView.findViewById(R.id.Trip_Username);
-            description = (TextView) itemView.findViewById(R.id.Description);
-            country = (TextView) itemView.findViewById(R.id.Country_Description);
-            date = (TextView) itemView.findViewById(R.id.Date_Description);
-        }
-    }
-
     public static class PostViewHolder extends RecyclerView.ViewHolder
     {
         private final ImageView accountImage;
@@ -314,6 +304,10 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private final ImageButton approveButton;
         private final ImageButton commentButton;
         private final ImageButton showOnMapButton;
+        private final TextView title;
+        private final LinearLayout commentSection;
+        private final EditText comment;
+        private final ImageButton sendComment;
 
         public PostViewHolder(View view)
         {
@@ -325,6 +319,10 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             approveButton = view.findViewById(R.id.approve_button);
             commentButton = view.findViewById(R.id.comment_button);
             showOnMapButton = view.findViewById(R.id.show_to_map);
+            title = view.findViewById(R.id.title);
+            commentSection = view.findViewById(R.id.comment_section);
+            comment = view.findViewById(R.id.comment);
+            sendComment = view.findViewById(R.id.send_comment);
         }
     }
 

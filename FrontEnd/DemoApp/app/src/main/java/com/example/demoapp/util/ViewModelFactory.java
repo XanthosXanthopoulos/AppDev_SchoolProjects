@@ -15,10 +15,12 @@ import com.example.demoapp.ui.main.follower.FollowerViewModel;
 import com.example.demoapp.ui.main.home.HomeViewModel;
 import com.example.demoapp.ui.main.map.MapViewModel;
 import com.example.demoapp.ui.main.plan.CreatePlanViewModel;
-import com.example.demoapp.ui.main.plan.ViewPlanViewModel;
+import com.example.demoapp.ui.main.plan.view.ViewPlanViewModel;
 import com.example.demoapp.ui.main.plan.memory.AddMemoryViewModel;
 import com.example.demoapp.ui.main.plan.memory.create.CreateMemoryViewModel;
 import com.example.demoapp.ui.main.plan.moment.AddMomentViewModel;
+import com.example.demoapp.ui.main.plan.view.activities.ActivityViewModel;
+import com.example.demoapp.ui.main.plan.view.comments.CommentViewModel;
 import com.example.demoapp.ui.main.profile.ProfileViewModel;
 import com.example.demoapp.ui.authentication.register.RegisterViewModel;
 import com.example.demoapp.ui.main.dashboard.DashboardViewModel;
@@ -50,7 +52,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         }
         else if(modelClass.isAssignableFrom(ProfileViewModel.class))
         {
-            return (T) new ProfileViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()));
+            return (T) new ProfileViewModel(UserRepository.getInstance(new ApiDataSource(), NotificationHub.getInstance()), ContentRepository.getInstance(new ApiDataSource()));
         }
         else if(modelClass.isAssignableFrom(AccountViewModel.class))
         {
@@ -95,6 +97,14 @@ public class ViewModelFactory implements ViewModelProvider.Factory
         else if (modelClass.isAssignableFrom(SearchViewModel.class))
         {
             return (T) new SearchViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if (modelClass.isAssignableFrom(ActivityViewModel.class))
+        {
+            return (T) new ActivityViewModel(ContentRepository.getInstance(new ApiDataSource()));
+        }
+        else if (modelClass.isAssignableFrom(CommentViewModel.class))
+        {
+            return (T) new CommentViewModel(ContentRepository.getInstance(new ApiDataSource()));
         }
         else
         {

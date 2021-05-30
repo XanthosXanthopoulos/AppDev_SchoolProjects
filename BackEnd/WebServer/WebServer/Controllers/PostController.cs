@@ -29,24 +29,66 @@ namespace WebServer.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ApiResponse<ICollection<PostSummaryResponseModel>>> GetPostSummaries()
+        public async Task<ApiResponse<ICollection<PostSummaryResponseModel>>> GetPostSummaries(bool? self)
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var followees = from f in _context.Follows where f.FollowerID == userID select f;
+            List<PostSummaryResponseModel> result;
 
-            List<PostSummaryResponseModel> result = await (from p in _context.Posts
-                                                           join f in followees
-                                                           on p.UserID equals f.FolloweeID
-                                                           orderby p.PostID descending
-                                                           select new PostSummaryResponseModel 
-                                                           { 
-                                                               PostID = p.PostID,
-                                                               Username = f.Followee.Name, 
-                                                               ProfileImageID = f.Followee.Image.ImageID, 
-                                                               ThumbnailImageID = p.Images.First().ImageID 
-                                                           })
-                                                           .ToListAsync();
+            List<List<Activity>> activities;
+
+            if (self.Value)
+            {
+                result = await (from p in _context.Posts
+                                where p.UserID == userID
+                                orderby p.PostID descending
+                                select new PostSummaryResponseModel
+                                {
+                                    PostID = p.PostID,
+                                    ThumbnailImageID = p.Images.First().ImageID,
+                                    Title = p.Title,
+                                    Date = p.Date,
+                                    Likes = p.Likes.Count
+                                })
+                                .ToListAsync();
+
+                activities = await (from p in _context.Posts
+                                    where p.UserID == userID
+                                    orderby p.PostID descending
+                                    select p.Activities.ToList())
+                                .ToListAsync();
+            }
+            else
+            {
+                var followees = from f in _context.Follows where f.FollowerID == userID && f.Accepted select f;
+
+                result = await (from p in _context.Posts
+                                join f in followees
+                                on p.UserID equals f.FolloweeID
+                                orderby p.PostID descending
+                                select new PostSummaryResponseModel
+                                {
+                                    PostID = p.PostID,
+                                    Username = f.Followee.Name,
+                                    Title = p.Title,
+                                    ProfileImageID = f.Followee.Image.ImageID,
+                                    ThumbnailImageID = p.Images.First().ImageID,
+                                    Date = p.Date
+                                })
+                                .ToListAsync();
+
+                activities = await (from p in _context.Posts
+                                    join f in followees
+                                    on p.UserID equals f.FolloweeID
+                                    orderby p.PostID descending
+                                    select p.Activities.ToList())
+                                .ToListAsync();
+            }
+
+            for(int i = 0; i < result.Count; ++i)
+            {
+                result[i].CountrySummary = activities[i].Select(a => a.Country.Description()).ToHashSet().Aggregate((sum, j) => sum + ", " + j);
+            }
 
             return new ApiResponse<ICollection<PostSummaryResponseModel>> { Response = result };
         }
@@ -97,15 +139,21 @@ namespace WebServer.Controllers
                                                   Username = p.User.Name,
                                                   ProfileImageID = p.User.Image.ImageID,
                                                   Images = p.Images.Select(i => i.ImageID).ToList(),
-                                                  Activities = p.Activities.Select(a => new ActivityResponse()
+                                                  Likes = p.Likes.Count,
+                                                  Activities = p.Activities.Select(a => new ActivityResponse
                                                   {
                                                       ID = a.ActivityID,
                                                       Title = a.Title,
                                                       Description = a.Description,
-                                                      Address = a.Address,
+                                                      Address = a.Address + ", " + a.City + ", " + a.Country.Description(),
                                                       Tags = a.Tags,
                                                       Country = a.Country.ToString()
-
+                                                  }).ToList(),
+                                                  Comments = p.Comments.Select(c => new CommentResponse
+                                                  {
+                                                      Username = c.User.Name,
+                                                      ProfileImageID = c.User.ImageID,
+                                                      Content = c.Content
                                                   }).ToList()
                                               })
                                        .FirstAsync();
@@ -119,7 +167,15 @@ namespace WebServer.Controllers
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            List<Image> images = _context.Images.Where(i => postSubmit.Images.Contains(i.ImageID)).ToList();
+            List<Image> images;
+            if (postSubmit.Images == null || postSubmit.Images.Count == 0)
+            {
+                images = _context.Images.Where(i => i.ImageID == "00000000-0000-0000-0000-000000000001").ToList();
+            }
+            else 
+            {
+                images = _context.Images.Where(i => postSubmit.Images.Contains(i.ImageID)).ToList();
+            }
 
             Post post = new Post
             {
@@ -127,8 +183,10 @@ namespace WebServer.Controllers
                 Description = postSubmit.Description,
                 Date = postSubmit.Date,
                 Images = images,
-                Activities = postSubmit.Activities.Select(a => _context.Activities.FirstOrDefault( ac => ac.ActivityID == a)).ToList(),
-                User = await _context.Users.FindAsync(userID)
+                Activities = postSubmit.Activities.Select(a => _context.Activities.FirstOrDefault(ac => ac.ActivityID == a)).ToList(),
+                User = await _context.Users.FindAsync(userID),
+                Likes = new List<Like>(),
+                Comments = new List<Comment>()
             };
 
             await _context.Posts.AddAsync(post);

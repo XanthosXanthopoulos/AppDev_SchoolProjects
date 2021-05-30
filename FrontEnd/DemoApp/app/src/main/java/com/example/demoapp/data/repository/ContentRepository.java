@@ -129,25 +129,21 @@ public class ContentRepository extends Repository
         });
     }
 
-    public void updateFeed()
+    public void updateFeed(boolean self)
     {
-        LiveData<DataSourceResponse<List<Item>>> dataSourceResult = dataSource.getFeed(loadFromPrefs("JWToken"));
-        feedResult.addSource(dataSourceResult, new Observer<DataSourceResponse<List<Item>>>()
+        LiveData<DataSourceResponse<List<Item>>> dataSourceResult = dataSource.getFeed(self, loadFromPrefs("JWToken"));
+        feedResult.addSource(dataSourceResult, result ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<List<Item>> result)
+            if (!result.isSuccessful())
             {
-                if (!result.isSuccessful())
-                {
-                    feedResult.setValue(new RepositoryResponse<>(result.getErrorMessage()));
-                }
-                else
-                {
-                    feedResult.setValue(new RepositoryResponse<>(result.getResponse()));
-                }
-
-                feedResult.removeSource(dataSourceResult);
+                feedResult.setValue(new RepositoryResponse<>(result.getErrorMessage()));
             }
+            else
+            {
+                feedResult.setValue(new RepositoryResponse<>(result.getResponse()));
+            }
+
+            feedResult.removeSource(dataSourceResult);
         });
     }
 
@@ -281,22 +277,36 @@ public class ContentRepository extends Repository
     public void getLocationInfo(double latitude, double longitude)
     {
         LiveData<DataSourceResponse<Place>> result = dataSource.getLocationInfo(latitude, longitude);
-        placeResult.addSource(result, new Observer<DataSourceResponse<Place>>()
+        placeResult.addSource(result, response ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<Place> response)
+            if (response.isSuccessful())
             {
-                if (response.isSuccessful())
-                {
-                    placeResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
-                }
-                else
-                {
-                    activitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
-                }
-
-                placeResult.removeSource(result);
+                placeResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
             }
+            else
+            {
+                activitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            placeResult.removeSource(result);
+        });
+    }
+
+    public void getLocationInfo(String query)
+    {
+        LiveData<DataSourceResponse<Place>> result = dataSource.getCoordinates(query);
+        placeResult.addSource(result, response ->
+        {
+            if (response.isSuccessful())
+            {
+                placeResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
+            }
+            else
+            {
+                activitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            placeResult.removeSource(result);
         });
     }
 

@@ -11,8 +11,16 @@ namespace WebServer.Models.Api.Response
 
         public string Username { get; set; }
 
+        public string Title { get; set; }
+
+        public DateTime Date { get; set; }
+
+        public string CountrySummary { get; set; }
+
         public string ProfileImageID { get; set; }
 
         public string ThumbnailImageID { get; set; }
+
+        public int Likes { get; set; }
     }
 }

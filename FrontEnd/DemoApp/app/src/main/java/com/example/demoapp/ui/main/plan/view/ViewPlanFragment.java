@@ -1,11 +1,10 @@
-package com.example.demoapp.ui.main.plan;
+package com.example.demoapp.ui.main.plan.view;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewpager2.widget.CompositePageTransformer;
@@ -24,17 +23,17 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.example.demoapp.R;
-import com.example.demoapp.data.model.Item;
-import com.example.demoapp.data.model.Post;
-import com.example.demoapp.ui.adapter.ImageUriAdapter;
 import com.example.demoapp.ui.adapter.ImageUrlAdapter;
 import com.example.demoapp.ui.adapter.SearchResultAdapter;
+import com.example.demoapp.ui.adapter.CreatePlanViewPagerAdapter;
+import com.example.demoapp.ui.adapter.ViewPlanViewPagerAdapter;
 import com.example.demoapp.util.ApiRoutes;
 import com.example.demoapp.util.ViewModelFactory;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.demoapp.App.SHARED_PREFS;
@@ -43,13 +42,16 @@ public class ViewPlanFragment extends Fragment
 {
     private ViewPlanViewModel viewModel;
 
-    private RecyclerView activityList;
-    private SearchResultAdapter adapter;
-    private ViewPager2 viewPager2;
+    private ViewPager2 imagesCarousel;
     private ImageUrlAdapter slideshowAdapter;
     private TextView nameTextView;
     private ImageView profileImage;
     private ImageButton showToMapButton;
+    private TextView title;
+    private TextView description;
+
+    private TabLayout tabLayout;
+    private ViewPager2 content;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -58,39 +60,39 @@ public class ViewPlanFragment extends Fragment
 
         viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(ViewPlanViewModel.class);
 
-        activityList = view.findViewById(R.id.activity_list);
-        viewPager2 = view.findViewById(R.id.post_images);
+        imagesCarousel = view.findViewById(R.id.post_images);
         profileImage = view.findViewById(R.id.account_image);
         nameTextView = view.findViewById(R.id.account_name);
         showToMapButton = view.findViewById(R.id.show_to_map);
+        title = view.findViewById(R.id.title);
+        description = view.findViewById(R.id.description);
+
+        tabLayout = view.findViewById(R.id.tab_layout);
+        content = view.findViewById(R.id.view_pager);
+        content.setAdapter(new ViewPlanViewPagerAdapter(this));
+
+        new TabLayoutMediator(tabLayout, content, (tab, position) -> tab.setText(new String[]{"Memories", "Comments"}[position])).attach();
 
 
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
-        activityList.setLayoutManager(_sGridLayoutManager);
-
-        adapter = new SearchResultAdapter();
-        activityList.setAdapter(adapter);
 
         slideshowAdapter = new ImageUrlAdapter(getContext());
 
-        viewPager2.setAdapter(slideshowAdapter);
-        viewPager2.setClipToPadding(false);
-        viewPager2.setClipChildren(false);
-        viewPager2.setOffscreenPageLimit(3);
-        viewPager2.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
+        imagesCarousel.setAdapter(slideshowAdapter);
+        imagesCarousel.setClipToPadding(false);
+        imagesCarousel.setClipChildren(false);
+        imagesCarousel.setOffscreenPageLimit(3);
+        imagesCarousel.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
 
         CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
         compositePageTransformer.addTransformer(new MarginPageTransformer(40));
-        compositePageTransformer.addTransformer(new ViewPager2.PageTransformer()
+        compositePageTransformer.addTransformer((page, position) ->
         {
-            @Override
-            public void transformPage(@NonNull View page, float position)
-            {
-                float r = 1 - Math.abs(position);
-                page.setScaleY(0.85F + r * 0.15f);
-            }
+            float r = 1 - Math.abs(position);
+            page.setScaleY(0.85F + r * 0.15f);
         });
-        viewPager2.setPageTransformer(compositePageTransformer);
+
+        imagesCarousel.setPageTransformer(compositePageTransformer);
 //        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
 //            @Override
 //            public void onPageSelected(int position) {
@@ -100,27 +102,25 @@ public class ViewPlanFragment extends Fragment
 //            }
 //        });
 
-        viewModel.getPostLiveData().observe(getViewLifecycleOwner(), new Observer<Post>()
+        viewModel.getPostLiveData().observe(getViewLifecycleOwner(), post ->
         {
-            @Override
-            public void onChanged(Post post)
-            {
-                if (post == null) return;
+            if (post == null) return;
 
-                adapter.setItems(new ArrayList<>(post.getActivities()));
-                slideshowAdapter.setItems(new ArrayList<>(post.getImages()));
+            slideshowAdapter.setItems(new ArrayList<>(post.getImages()));
+            title.setText(post.getTitle());
+            if (post.getDescription().isEmpty()) description.setVisibility(View.GONE);
+            else description.setText(post.getDescription());
 
-                nameTextView.setText(post.getUsername());
+            nameTextView.setText(post.getUsername());
 
-                HashMap<String, String> params = new HashMap<>();
-                params.put("id", post.getProfileImageID());
-                GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + getContext().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).getString("JWToken", "")).build());
+            HashMap<String, String> params = new HashMap<>();
+            params.put("id", post.getProfileImageID());
+            GlideUrl url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + getContext().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).getString("JWToken", "")).build());
 
-                Glide.with(getContext()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(profileImage);
-            }
+            Glide.with(getContext()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(profileImage);
         });
 
-
+        showToMapButton.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.navigation_map, getArguments()));
 
         viewModel.loadPost(getArguments().getInt("PostID"));
 

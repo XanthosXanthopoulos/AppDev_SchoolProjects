@@ -6,10 +6,12 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.demoapp.ui.main.plan.memory.AddMemoryFragment;
 import com.example.demoapp.ui.main.plan.moment.AddMomentFragment;
+import com.example.demoapp.ui.main.plan.view.activities.ActivityFragment;
+import com.example.demoapp.ui.main.plan.view.comments.CommentFragment;
 
-public class ViewPagerAdapter extends FragmentStateAdapter
+public class ViewPlanViewPagerAdapter extends FragmentStateAdapter
 {
-    public ViewPagerAdapter(Fragment fragment)
+    public ViewPlanViewPagerAdapter(Fragment fragment)
     {
         super(fragment);
     }
@@ -21,9 +23,9 @@ public class ViewPagerAdapter extends FragmentStateAdapter
         switch (position)
         {
             case 0:
-                return new AddMemoryFragment();
+                return new ActivityFragment();
             case 1:
-                return new AddMomentFragment();
+                return new CommentFragment();
             default:
                 return null;
         }
@@ -34,6 +36,4 @@ public class ViewPagerAdapter extends FragmentStateAdapter
     {
         return 2;
     }
-
-
 }

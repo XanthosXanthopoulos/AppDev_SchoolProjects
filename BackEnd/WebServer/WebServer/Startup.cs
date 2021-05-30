@@ -110,7 +110,7 @@ namespace WebServer
                 {
                     for (int i = 0; i < 50; ++i)
                     {
-                        Point point = new Point(23.727881 + (2 * random.NextDouble() - 1) * 0.029503, 37.983772 + (2 * random.NextDouble() - 1) * 0.04402) { SRID = 4326 };
+                        Point point = new Point(23.727881 + (2 * random.NextDouble() - 1) * 0.039503, 37.983772 + (2 * random.NextDouble() - 1) * 0.04402) { SRID = 4326 };
 
                         using (var response = httpClient.GetAsync("https://api.opencagedata.com/geocode/v1/json?q=" + point.Y + "+" + point.X + "&key=255230665c9249b28259b49dacc2c198").Result)
                         {
@@ -129,7 +129,7 @@ namespace WebServer
                                 {
                                     city = Convert.ToString(item.components.city);
                                 }
-                                catch (Exception ignored) { }
+                                catch (Exception) { }
 
                                 if (city == null || city.Length == 0)
                                 {
@@ -137,7 +137,7 @@ namespace WebServer
                                     {
                                         city = Convert.ToString(item.components.neighbourhood);
                                     }
-                                    catch (Exception ignored) { }
+                                    catch (Exception) { }
                                 }
 
                                 if (city == null || city.Length == 0)
@@ -146,14 +146,14 @@ namespace WebServer
                                     {
                                         city = Convert.ToString(item.components.municipality);
                                     }
-                                    catch (Exception ignored) { }
+                                    catch (Exception) { }
                                 }
 
                                 try
                                 {
                                     address = Convert.ToString(item.components.road) + Convert.ToString(item.components.house_number);
                                 }
-                                catch (Exception ignored) { }
+                                catch (Exception) { }
 
                                 if (city == null) city = "";
                                 if (address == null) address = "";
@@ -178,6 +178,11 @@ namespace WebServer
                 dbContext.Images.Add(new Models.Database.Image()
                 {
                     ImageID = Guid.Empty.ToString()
+                });
+
+                dbContext.Images.Add(new Models.Database.Image()
+                {
+                    ImageID = "00000000-0000-0000-0000-000000000001"
                 });
 
                 dbContext.SaveChanges();

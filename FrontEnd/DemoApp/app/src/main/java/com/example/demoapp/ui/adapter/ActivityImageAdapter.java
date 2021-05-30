@@ -84,7 +84,6 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
         private TextView description;
         private TextView tags;
         private TextView address;
-        private TextView type;
 
         public ActivityViewHolder(@NonNull View itemView)
         {
@@ -94,47 +93,27 @@ public class ActivityImageAdapter extends RecyclerView.Adapter<RecyclerView.View
             description = itemView.findViewById(R.id.Activity_Description);
             tags = itemView.findViewById(R.id.Activity_Tags);
             address = itemView.findViewById(R.id.Activity_Address);
-            type = itemView.findViewById(R.id.Activity_Type);
 
             Button showMore = itemView.findViewById(R.id.Activity_ShowMore);
             Button showLess = itemView.findViewById(R.id.Activity_ShowLess);
 
-            showMore.setOnClickListener(new View.OnClickListener()
+            showMore.setOnClickListener(v ->
             {
-                @Override
-                public void onClick(View v)
-                {
-                    showMore.setVisibility(View.GONE);
+                showMore.setVisibility(View.GONE);
 
-                    address.setVisibility(View.VISIBLE);
-                    type.setVisibility(View.VISIBLE);
-                    tags.setVisibility(View.VISIBLE);
-                    showLess.setVisibility(View.VISIBLE);
-                }
+                address.setVisibility(View.VISIBLE);
+                tags.setVisibility(View.VISIBLE);
+                showLess.setVisibility(View.VISIBLE);
             });
 
-            showLess.setOnClickListener(new View.OnClickListener()
+            showLess.setOnClickListener(v ->
             {
-                @Override
-                public void onClick(View v)
-                {
-                    showLess.setVisibility(View.GONE);
-                    address.setVisibility(View.GONE);
-                    type.setVisibility(View.GONE);
-                    tags.setVisibility(View.GONE);
+                showLess.setVisibility(View.GONE);
+                address.setVisibility(View.GONE);
+                tags.setVisibility(View.GONE);
 
-                    showMore.setVisibility(View.VISIBLE);
-                }
+                showMore.setVisibility(View.VISIBLE);
             });
-        }
-    }
-
-    public static class ImageViewHolder extends RecyclerView.ViewHolder
-    {
-
-        public ImageViewHolder(@NonNull View itemView)
-        {
-            super(itemView);
         }
     }
 }

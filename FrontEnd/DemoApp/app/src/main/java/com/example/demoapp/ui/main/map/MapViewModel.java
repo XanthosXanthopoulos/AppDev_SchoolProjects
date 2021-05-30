@@ -1,14 +1,12 @@
 package com.example.demoapp.ui.main.map;
 
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Activity;
-import com.example.demoapp.data.model.repository.RepositoryResponse;
+import com.example.demoapp.data.model.Place;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
@@ -19,41 +17,48 @@ public class MapViewModel extends ViewModel
     private final ContentRepository repository;
 
     private final LiveData<List<Activity>> activitiesLiveData;
-
     private final LiveData<List<Activity>> nearActivitiesLiveData;
+    private final LiveData<Event<Place>> searchResult;
 
     public MapViewModel(ContentRepository repository)
     {
         this.repository = repository;
 
-        activitiesLiveData = Transformations.map(repository.getActivitiesResult(), new Function<RepositoryResponse<List<Activity>>, List<Activity>>()
+        activitiesLiveData = Transformations.map(repository.getActivitiesResult(), input ->
         {
-            @Override
-            public List<Activity> apply(RepositoryResponse<List<Activity>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                return new ArrayList<>();
             }
         });
-        nearActivitiesLiveData = Transformations.map(repository.getNearActivitiesResult(), new Function<RepositoryResponse<List<Activity>>, List<Activity>>()
+
+        nearActivitiesLiveData = Transformations.map(repository.getNearActivitiesResult(), input ->
         {
-            @Override
-            public List<Activity> apply(RepositoryResponse<List<Activity>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                return new ArrayList<>();
+            }
+        });
+
+        searchResult = Transformations.map(repository.getPlaceResult(), input ->
+        {
+            if (input.isSuccessful())
+            {
+                return input.getResponse();
+            }
+            else
+            {
+                Event<Place> event = new Event<>(new Place());
+                event.setHandled(true);
+                return event;
             }
         });
     }
@@ -63,9 +68,9 @@ public class MapViewModel extends ViewModel
         repository.getPostActivities(postID);
     }
 
-    public void getActivities(double latitude, double longtitude, double radius)
+    public void getActivities(double latitude, double longitude, double radius)
     {
-        repository.searchNearActivities(latitude, longtitude, radius);
+        repository.searchNearActivities(latitude, longitude, radius);
     }
 
     public LiveData<List<Activity>> getActivitiesLiveData()
@@ -76,5 +81,15 @@ public class MapViewModel extends ViewModel
     public LiveData<List<Activity>> getNearActivitiesLiveData()
     {
         return nearActivitiesLiveData;
+    }
+
+    public void searchPlace(String query)
+    {
+        repository.getLocationInfo(query);
+    }
+
+    public LiveData<Event<Place>> getSearchResult()
+    {
+        return searchResult;
     }
 }

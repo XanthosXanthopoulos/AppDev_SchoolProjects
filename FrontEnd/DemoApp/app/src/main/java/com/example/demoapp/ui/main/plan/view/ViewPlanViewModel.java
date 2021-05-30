@@ -1,4 +1,4 @@
-package com.example.demoapp.ui.main.plan;
+package com.example.demoapp.ui.main.plan.view;
 
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;

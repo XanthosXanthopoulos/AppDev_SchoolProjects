@@ -8,8 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Follow;
@@ -27,6 +27,7 @@ import com.example.demoapp.data.model.api.response.ProfileInfoResponseModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.util.ApiHandler;
 import com.example.demoapp.util.ApiRoutes;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -176,13 +177,13 @@ public class ApiDataSource
         return result;
     }
 
-    public LiveData<DataSourceResponse<Boolean>> updateProfile(ProfileInfoResponseModel profile, String JWToken)
+    public LiveData<DataSourceResponse<AuthenticationResponseModel>> updateProfile(ProfileInfoResponseModel profile, String JWToken)
     {
         ApiHandler apiHandler = ApiHandler.getInstance();
         JSONObject postBody = new JSONObject();
-        MutableLiveData<DataSourceResponse<Boolean>> result = new MutableLiveData<>();
+        MutableLiveData<DataSourceResponse<AuthenticationResponseModel>> result = new MutableLiveData<>();
 
-        Response.ErrorListener errorListener = error -> result.setValue(new DataSourceResponse<>(false));
+        Response.ErrorListener errorListener = error -> result.setValue(new DataSourceResponse<>(error.toString()));
 
         imageUpload = response ->
         {
@@ -206,11 +207,11 @@ public class ApiDataSource
                 @Override
                 public void onResponse(JSONObject response)
                 {
-                    ApiResponse<Boolean> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<Boolean>>(){}.getType());
+                    ApiResponse<AuthenticationResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<AuthenticationResponseModel>>(){}.getType());
 
                     if (apiResponse.isSuccessful())
                     {
-                        result.setValue(new DataSourceResponse<>(true));
+                        result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
                     }
                     else
                     {
@@ -251,11 +252,11 @@ public class ApiDataSource
 
                 initialRequest = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPDATE_PROFILE), postBody, response ->
                 {
-                    ApiResponse<Boolean> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<Boolean>>(){}.getType());
+                    ApiResponse<AuthenticationResponseModel> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<AuthenticationResponseModel>>(){}.getType());
 
                     if (apiResponse.isSuccessful())
                     {
-                        result.setValue(new DataSourceResponse<>(true));
+                        result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
                     }
                     else
                     {
@@ -268,7 +269,7 @@ public class ApiDataSource
                 })
                 {
                     @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError
+                    public Map<String, String> getHeaders()
                     {
                         Map<String, String> headers = new HashMap<>();
                         headers.put("Authorization", "Bearer " + JWToken);
@@ -300,33 +301,25 @@ public class ApiDataSource
         }
         params.put("city", query.getCity());
 
-        Response.Listener<JSONObject> searchResponse = new Response.Listener<JSONObject>()
+        Response.Listener<JSONObject> searchResponse = response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
+            ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    List<Item> items = new ArrayList<>(apiResponse.getResponse());
-                    result.setValue(new DataSourceResponse<>(items));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
+            if (apiResponse.isSuccessful())
+            {
+                List<Item> items = new ArrayList<>(apiResponse.getResponse());
+                result.setValue(new DataSourceResponse<>(items));
+            }
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
             }
         };
 
-        Response.ErrorListener errorListener = new Response.ErrorListener()
+        Response.ErrorListener errorListener = error ->
         {
-            @Override
-            public void onErrorResponse(VolleyError error)
-            {
-                System.err.println(error.networkResponse);
-                result.setValue(new DataSourceResponse<>("Network error"));
-            }
+            System.err.println(error.networkResponse);
+            result.setValue(new DataSourceResponse<>("Network error"));
         };
 
         if (query.getCity() != null && !query.getCity().isEmpty())
@@ -334,54 +327,46 @@ public class ApiDataSource
             HashMap<String, String> geoParams = new HashMap<>();
             geoParams.put("key", "255230665c9249b28259b49dacc2c198");
             geoParams.put("q", query.getCity());
-            JsonObjectRequest init = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, new Response.Listener<JSONObject>()
+            JsonObjectRequest init = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
-                @Override
-                public void onResponse(JSONObject response)
+                try
                 {
-                    try
-                    {
-                        JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                        params.put("latitude", String.valueOf(coordinates.getDouble("lat")));
-                        params.put("longtitude", String.valueOf(coordinates.getDouble("lng")));
-                        params.put("radius", String.valueOf(query.getRadius()));
-                    }
-                    catch (JSONException e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, searchResponse, errorListener)
-                    {
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
-                        {
-                            Map<String, String> headers = new HashMap<>();
-                            headers.put("Authorization", "Bearer " + JWToken);
-                            return headers;
-                        }
-                    };
-
-                    apiHandler.addToRequestQueue(request);
+                    JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                    params.put("latitude", String.valueOf(coordinates.getDouble("lat")));
+                    params.put("longtitude", String.valueOf(coordinates.getDouble("lng")));
+                    params.put("radius", String.valueOf(query.getRadius()));
                 }
-            }, new Response.ErrorListener()
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, searchResponse, errorListener)
+                {
+                    @Override
+                    public Map<String, String> getHeaders()
+                    {
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
+
+                apiHandler.addToRequestQueue(request);
+            }, error ->
             {
-                @Override
-                public void onErrorResponse(VolleyError error)
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, searchResponse, errorListener)
                 {
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, searchResponse, errorListener)
+                    @Override
+                    public Map<String, String> getHeaders()
                     {
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
-                        {
-                            Map<String, String> headers = new HashMap<>();
-                            headers.put("Authorization", "Bearer " + JWToken);
-                            return headers;
-                        }
-                    };
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
 
-                    apiHandler.addToRequestQueue(request);
-                }
+                apiHandler.addToRequestQueue(request);
             });
 
             apiHandler.addToRequestQueue(init);
@@ -391,7 +376,7 @@ public class ApiDataSource
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, searchResponse, errorListener)
             {
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError
+                public Map<String, String> getHeaders()
                 {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + JWToken);
@@ -415,33 +400,22 @@ public class ApiDataSource
         params.put("longtitude", String.valueOf(longtitude));
         params.put("radius", String.valueOf(radius));
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_ACTIVITY, params), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
+            ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                result.setValue(new DataSourceResponse<>(error.getMessage()));
+                result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
             }
-        })
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error -> result.setValue(new DataSourceResponse<>(error.getMessage())))
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -467,33 +441,25 @@ public class ApiDataSource
         }
         params.put("city", query.getCity());
 
-        Response.Listener<JSONObject> searchResponse = new Response.Listener<JSONObject>()
+        Response.Listener<JSONObject> searchResponse = response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Post>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Post>>>(){}.getType());
+            ApiResponse<List<Post>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Post>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    List<Item> items = new ArrayList<>(apiResponse.getResponse());
-                    result.setValue(new DataSourceResponse<>(items));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
+            if (apiResponse.isSuccessful())
+            {
+                List<Item> items = new ArrayList<>(apiResponse.getResponse());
+                result.setValue(new DataSourceResponse<>(items));
+            }
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
             }
         };
 
-        Response.ErrorListener errorListener = new Response.ErrorListener()
+        Response.ErrorListener errorListener = error ->
         {
-            @Override
-            public void onErrorResponse(VolleyError error)
-            {
-                System.err.println(error.networkResponse);
-                result.setValue(new DataSourceResponse<>("Network error"));
-            }
+            System.err.println(error.networkResponse);
+            result.setValue(new DataSourceResponse<>("Network error"));
         };
 
         if (query.getCity() != null && !query.getCity().isEmpty())
@@ -501,54 +467,46 @@ public class ApiDataSource
             HashMap<String, String> geoParams = new HashMap<>();
             geoParams.put("key", "255230665c9249b28259b49dacc2c198");
             geoParams.put("q", query.getCity());
-            JsonObjectRequest init = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, new Response.Listener<JSONObject>()
+            JsonObjectRequest init = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
-                @Override
-                public void onResponse(JSONObject response)
+                try
                 {
-                    try
-                    {
-                        JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                        params.put("latitude", String.valueOf(coordinates.getDouble("lat")));
-                        params.put("longtitude", String.valueOf(coordinates.getDouble("lng")));
-                        params.put("radius", String.valueOf(query.getRadius()));
-                    }
-                    catch (JSONException e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_POST, params), null, searchResponse, errorListener)
-                    {
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
-                        {
-                            Map<String, String> headers = new HashMap<>();
-                            headers.put("Authorization", "Bearer " + JWToken);
-                            return headers;
-                        }
-                    };
-
-                    apiHandler.addToRequestQueue(request);
+                    JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                    params.put("latitude", String.valueOf(coordinates.getDouble("lat")));
+                    params.put("longtitude", String.valueOf(coordinates.getDouble("lng")));
+                    params.put("radius", String.valueOf(query.getRadius()));
                 }
-            }, new Response.ErrorListener()
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_POST, params), null, searchResponse, errorListener)
+                {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError
+                    {
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
+
+                apiHandler.addToRequestQueue(request);
+            }, error ->
             {
-                @Override
-                public void onErrorResponse(VolleyError error)
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_POST, params), null, searchResponse, errorListener)
                 {
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_POST, params), null, searchResponse, errorListener)
+                    @Override
+                    public Map<String, String> getHeaders()
                     {
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
-                        {
-                            Map<String, String> headers = new HashMap<>();
-                            headers.put("Authorization", "Bearer " + JWToken);
-                            return headers;
-                        }
-                    };
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
 
-                    apiHandler.addToRequestQueue(request);
-                }
+                apiHandler.addToRequestQueue(request);
             });
 
             apiHandler.addToRequestQueue(init);
@@ -558,7 +516,7 @@ public class ApiDataSource
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_POST, params), null, searchResponse, errorListener)
             {
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError
+                public Map<String, String> getHeaders()
                 {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + JWToken);
@@ -572,41 +530,35 @@ public class ApiDataSource
         return result;
     }
 
-    public LiveData<DataSourceResponse<List<Item>>> getFeed(String JWToken)
+    public LiveData<DataSourceResponse<List<Item>>> getFeed(boolean self, String JWToken)
     {
         MutableLiveData<DataSourceResponse<List<Item>>> result = new MutableLiveData<>();
         ApiHandler apiHandler = ApiHandler.getInstance();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.FEED), null, new Response.Listener<JSONObject>()
+        HashMap<String, String> params = new HashMap<>();
+        params.put("self", String.valueOf(self));
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.FEED, params), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Post>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Post>>>(){}.getType());
+            ApiResponse<List<Post>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Post>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    List<Item> items = new ArrayList<>(apiResponse.getResponse().size());
-                    items.addAll(apiResponse.getResponse());
-                    result.setValue(new DataSourceResponse<>(items));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                System.err.println(error.networkResponse);
-                result.setValue(new DataSourceResponse<>("Network error"));
+                List<Item> items = new ArrayList<>(apiResponse.getResponse().size());
+                items.addAll(apiResponse.getResponse());
+                result.setValue(new DataSourceResponse<>(items));
             }
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error ->
+        {
+            System.err.println(error.networkResponse);
+            result.setValue(new DataSourceResponse<>("Network error"));
         })
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -626,34 +578,26 @@ public class ApiDataSource
 
         HashMap<String, String> params = new HashMap<>();
         params.put("postID", String.valueOf(postID));
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST, params), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST, params), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<Post> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<Post>>(){}.getType());
+            ApiResponse<Post> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<Post>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                System.err.println(error.networkResponse);
-                result.setValue(new DataSourceResponse<>("Network error"));
+                result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
             }
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error ->
+        {
+            System.err.println(error.networkResponse);
+            result.setValue(new DataSourceResponse<>("Network error"));
         })
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -679,38 +623,134 @@ public class ApiDataSource
         LinkedList<String> imageIDs = new LinkedList<>();
         LinkedList<String> activityIDs = new LinkedList<>();
 
-        Response.ErrorListener errorListener = new Response.ErrorListener()
+        Response.ErrorListener errorListener = error -> result.setValue(new DataSourceResponse<>(false));
+
+        postUpload = response -> result.setValue(new DataSourceResponse<>(true));
+
+        activityUpload = response ->
         {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            ApiResponse<String> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<String>>(){}.getType());
+            activityIDs.add(apiResponse.getResponse());
+            JsonObjectRequest request;
+
+            if (pendingActivities.isEmpty())
             {
-                result.setValue(new DataSourceResponse<>(false));
+                JSONObject postSubmitModel = new JSONObject();
+                JSONArray images = new JSONArray();
+                JSONArray activities = new JSONArray();
+                try
+                {
+                    postSubmitModel.put("Title", post.getTitle());
+                    postSubmitModel.put("Description", post.getDescription());
+                    postSubmitModel.put("Date", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(post.getDate()));
+
+                    for (String image : imageIDs)
+                    {
+                        images.put(image);
+                    }
+
+                    for (String activity : activityIDs)
+                    {
+                        activities.put(activity);
+                    }
+
+                    postSubmitModel.put("Images", images);
+                    postSubmitModel.put("Activities", activities);
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+                request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_POST), postSubmitModel, postUpload, errorListener)
+                {
+                    @Override
+                    public Map<String, String> getHeaders()
+                    {
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
             }
+            else
+            {
+                Activity activity = pendingActivities.pop();
+                JSONObject activitySubmitModel = new JSONObject();
+                try
+                {
+                    activitySubmitModel.put("Title", activity.getTitle());
+                    activitySubmitModel.put("Description", activity.getDescription());
+                    activitySubmitModel.put("Address", activity.getAddress());
+                    activitySubmitModel.put("Country", activity.getCountry().code);
+                    activitySubmitModel.put("Tags", activity.getTags());
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+                HashMap<String, String> geoParams = new HashMap<>();
+                geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+                geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
+                request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response12 ->
+                {
+                    try
+                    {
+                        JSONObject coordinates = response12.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                        activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
+                        activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                    }
+                    catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    JsonObjectRequest request14 = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
+                    {
+                        @Override
+                        public Map<String, String> getHeaders()
+                        {
+                            Map<String, String> headers = new HashMap<>();
+                            headers.put("Authorization", "Bearer " + JWToken);
+                            return headers;
+                        }
+                    };
+
+                    apiHandler.addToRequestQueue(request14);
+                }, error ->
+                {
+                    JsonObjectRequest request13 = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
+                    {
+                        @Override
+                        public Map<String, String> getHeaders()
+                        {
+                            Map<String, String> headers = new HashMap<>();
+                            headers.put("Authorization", "Bearer " + JWToken);
+                            return headers;
+                        }
+                    };
+
+                    apiHandler.addToRequestQueue(request13);
+                });
+            }
+
+            apiHandler.addToRequestQueue(request);
         };
 
-        postUpload = new Response.Listener<JSONObject>()
+        imageUpload = response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                result.setValue(new DataSourceResponse<>(true));
-            }
-        };
+            Request request;
+            imageIDs.add(response);
 
-        activityUpload = new Response.Listener<JSONObject>()
-        {
-            @Override
-            public void onResponse(JSONObject response)
+            if (pendingImages.isEmpty())
             {
-                ApiResponse<String> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<String>>(){}.getType());
-                activityIDs.add(apiResponse.getResponse());
-                JsonObjectRequest request;
-
                 if (pendingActivities.isEmpty())
                 {
                     JSONObject postSubmitModel = new JSONObject();
                     JSONArray images = new JSONArray();
                     JSONArray activities = new JSONArray();
+
                     try
                     {
                         postSubmitModel.put("Title", post.getTitle());
@@ -738,7 +778,7 @@ public class ApiDataSource
                     request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_POST), postSubmitModel, postUpload, errorListener)
                     {
                         @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
+                        public Map<String, String> getHeaders()
                         {
                             Map<String, String> headers = new HashMap<>();
                             headers.put("Authorization", "Bearer " + JWToken);
@@ -766,188 +806,54 @@ public class ApiDataSource
                     HashMap<String, String> geoParams = new HashMap<>();
                     geoParams.put("key", "255230665c9249b28259b49dacc2c198");
                     geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
-                    request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, new Response.Listener<JSONObject>()
+                    request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response1 ->
                     {
-                        @Override
-                        public void onResponse(JSONObject response)
-                        {
-                            try
-                            {
-                                JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                                activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
-                                activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
-                            }
-                            catch (JSONException e)
-                            {
-                                e.printStackTrace();
-                            }
-
-                            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
-                            {
-                                @Override
-                                public Map<String, String> getHeaders() throws AuthFailureError
-                                {
-                                    Map<String, String> headers = new HashMap<>();
-                                    headers.put("Authorization", "Bearer " + JWToken);
-                                    return headers;
-                                }
-                            };
-
-                            apiHandler.addToRequestQueue(request);
-                        }
-                    }, new Response.ErrorListener()
-                    {
-                        @Override
-                        public void onErrorResponse(VolleyError error)
-                        {
-                            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
-                            {
-                                @Override
-                                public Map<String, String> getHeaders() throws AuthFailureError
-                                {
-                                    Map<String, String> headers = new HashMap<>();
-                                    headers.put("Authorization", "Bearer " + JWToken);
-                                    return headers;
-                                }
-                            };
-
-                            apiHandler.addToRequestQueue(request);
-                        }
-                    });
-                }
-
-                apiHandler.addToRequestQueue(request);
-            }
-        };
-
-        imageUpload = new Response.Listener<String>()
-        {
-            @Override
-            public void onResponse(String response)
-            {
-                Request request;
-                imageIDs.add(response);
-
-                if (pendingImages.isEmpty())
-                {
-                    if (pendingActivities.isEmpty())
-                    {
-                        JSONObject postSubmitModel = new JSONObject();
-                        JSONArray images = new JSONArray();
-                        JSONArray activities = new JSONArray();
-
                         try
                         {
-                            postSubmitModel.put("Title", post.getTitle());
-                            postSubmitModel.put("Description", post.getDescription());
-                            postSubmitModel.put("Date", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(post.getDate()));
-
-                            for (String image : imageIDs)
-                            {
-                                images.put(image);
-                            }
-
-                            for (String activity : activityIDs)
-                            {
-                                activities.put(activity);
-                            }
-
-                            postSubmitModel.put("Images", images);
-                            postSubmitModel.put("Activities", activities);
+                            JSONObject coordinates = response1.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                            activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
+                            activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
                         }
                         catch (JSONException e)
                         {
                             e.printStackTrace();
                         }
 
-                        request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_POST), postSubmitModel, postUpload, errorListener)
+                        JsonObjectRequest request12 = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
                         {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError
+                            public Map<String, String> getHeaders()
                             {
                                 Map<String, String> headers = new HashMap<>();
                                 headers.put("Authorization", "Bearer " + JWToken);
                                 return headers;
                             }
                         };
-                    }
-                    else
+
+                        apiHandler.addToRequestQueue(request12);
+                    }, error ->
                     {
-                        Activity activity = pendingActivities.pop();
-                        JSONObject activitySubmitModel = new JSONObject();
-                        try
-                        {
-                            activitySubmitModel.put("Title", activity.getTitle());
-                            activitySubmitModel.put("Description", activity.getDescription());
-                            activitySubmitModel.put("Address", activity.getAddress());
-                            activitySubmitModel.put("Country", activity.getCountry().code);
-                            activitySubmitModel.put("Tags", activity.getTags());
-                        }
-                        catch (JSONException e)
-                        {
-                            e.printStackTrace();
-                        }
-
-                        HashMap<String, String> geoParams = new HashMap<>();
-                        geoParams.put("key", "255230665c9249b28259b49dacc2c198");
-                        geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
-                        request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, new Response.Listener<JSONObject>()
+                        JsonObjectRequest request1 = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
                         {
                             @Override
-                            public void onResponse(JSONObject response)
+                            public Map<String, String> getHeaders()
                             {
-                                try
-                                {
-                                    JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                                    activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
-                                    activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
-                                }
-                                catch (JSONException e)
-                                {
-                                    e.printStackTrace();
-                                }
-
-                                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
-                                {
-                                    @Override
-                                    public Map<String, String> getHeaders() throws AuthFailureError
-                                    {
-                                        Map<String, String> headers = new HashMap<>();
-                                        headers.put("Authorization", "Bearer " + JWToken);
-                                        return headers;
-                                    }
-                                };
-
-                                apiHandler.addToRequestQueue(request);
+                                Map<String, String> headers = new HashMap<>();
+                                headers.put("Authorization", "Bearer " + JWToken);
+                                return headers;
                             }
-                        }, new Response.ErrorListener()
-                        {
-                            @Override
-                            public void onErrorResponse(VolleyError error)
-                            {
-                                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
-                                {
-                                    @Override
-                                    public Map<String, String> getHeaders() throws AuthFailureError
-                                    {
-                                        Map<String, String> headers = new HashMap<>();
-                                        headers.put("Authorization", "Bearer " + JWToken);
-                                        return headers;
-                                    }
-                                };
+                        };
 
-                                apiHandler.addToRequestQueue(request);
-                            }
-                        });
-                    }
+                        apiHandler.addToRequestQueue(request1);
+                    });
                 }
-                else
-                {
-                    request = new ImageUploadRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_UPLOAD), pendingImages.pop(), JWToken, imageUpload, errorListener);
-                }
-
-                apiHandler.addToRequestQueue(request);
             }
+            else
+            {
+                request = new ImageUploadRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_UPLOAD), pendingImages.pop(), JWToken, imageUpload, errorListener);
+            }
+
+            apiHandler.addToRequestQueue(request);
         };
 
         while (!pendingActivities.isEmpty() && !pendingActivities.peek().getId().isEmpty())
@@ -980,53 +886,45 @@ public class ApiDataSource
             HashMap<String, String> geoParams = new HashMap<>();
             geoParams.put("key", "255230665c9249b28259b49dacc2c198");
             geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
-            initialRequest = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, new Response.Listener<JSONObject>()
+            initialRequest = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
-                @Override
-                public void onResponse(JSONObject response)
+                try
                 {
-                    try
-                    {
-                        JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                        activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
-                        activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
-                    }
-                    catch (JSONException e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
-                    {
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
-                        {
-                            Map<String, String> headers = new HashMap<>();
-                            headers.put("Authorization", "Bearer " + JWToken);
-                            return headers;
-                        }
-                    };
-
-                    apiHandler.addToRequestQueue(request);
+                    JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                    activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
+                    activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
                 }
-            }, new Response.ErrorListener()
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
+                {
+                    @Override
+                    public Map<String, String> getHeaders()
+                    {
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
+
+                apiHandler.addToRequestQueue(request);
+            }, error ->
             {
-                @Override
-                public void onErrorResponse(VolleyError error)
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
                 {
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_ACTIVITY), activitySubmitModel, activityUpload, errorListener)
+                    @Override
+                    public Map<String, String> getHeaders()
                     {
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError
-                        {
-                            Map<String, String> headers = new HashMap<>();
-                            headers.put("Authorization", "Bearer " + JWToken);
-                            return headers;
-                        }
-                    };
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Authorization", "Bearer " + JWToken);
+                        return headers;
+                    }
+                };
 
-                    apiHandler.addToRequestQueue(request);
-                }
+                apiHandler.addToRequestQueue(request);
             });
         }
         else
@@ -1062,7 +960,7 @@ public class ApiDataSource
             initialRequest = new JsonObjectRequest(Request.Method.POST, ApiRoutes.getRoute(ApiRoutes.Route.UPLOAD_POST), postSubmitModel, postUpload, errorListener)
             {
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError
+                public Map<String, String> getHeaders()
                 {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + JWToken);
@@ -1087,35 +985,27 @@ public class ApiDataSource
 
         HashMap<String, String> params = new HashMap<>();
         params.put("query", query);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_USER, params), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.SEARCH_USER, params), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Follow>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Follow>>>(){}.getType());
+            ApiResponse<List<Follow>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Follow>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    List<Item> items = new ArrayList<>(apiResponse.getResponse());
-                    result.setValue(new DataSourceResponse<>(items));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                System.err.println(error.networkResponse);
-                result.setValue(new DataSourceResponse<>("Network error"));
+                List<Item> items = new ArrayList<>(apiResponse.getResponse());
+                result.setValue(new DataSourceResponse<>(items));
             }
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error ->
+        {
+            System.err.println(error.networkResponse);
+            result.setValue(new DataSourceResponse<>("Network error"));
         })
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -1133,33 +1023,22 @@ public class ApiDataSource
         MutableLiveData<DataSourceResponse<List<Follow>>> result = new MutableLiveData<>();
         ApiHandler apiHandler = ApiHandler.getInstance();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_FOLLOWEES), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_FOLLOWEES), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Follow>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Follow>>>(){}.getType());
+            ApiResponse<List<Follow>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Follow>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                result.setValue(new DataSourceResponse<>(error.toString()));
+                result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
             }
-        })
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error -> result.setValue(new DataSourceResponse<>(error.toString())))
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -1177,33 +1056,22 @@ public class ApiDataSource
         MutableLiveData<DataSourceResponse<List<Follow>>> result = new MutableLiveData<>();
         ApiHandler apiHandler = ApiHandler.getInstance();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_FOLLOWERS), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_FOLLOWERS), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Follow>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Follow>>>(){}.getType());
+            ApiResponse<List<Follow>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Follow>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                result.setValue(new DataSourceResponse<>(error.toString()));
+                result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
             }
-        })
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error -> result.setValue(new DataSourceResponse<>(error.toString())))
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -1231,30 +1099,19 @@ public class ApiDataSource
             e.printStackTrace();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "https://countriesnow.space/api/v0.1/countries/cities", body, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "https://countriesnow.space/api/v0.1/countries/cities", body, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                CityResponseModel apiResponse = new Gson().fromJson(response.toString(), new TypeToken<CityResponseModel>(){}.getType());
+            CityResponseModel apiResponse = new Gson().fromJson(response.toString(), new TypeToken<CityResponseModel>(){}.getType());
 
-                if (!apiResponse.isError())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getData()));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getMsg()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (!apiResponse.isError())
             {
-                result.setValue(new DataSourceResponse<>(error.toString()));
+                result.setValue(new DataSourceResponse<>(apiResponse.getData()));
             }
-        });
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getMsg()));
+            }
+        }, error -> result.setValue(new DataSourceResponse<>(error.toString())));
 
 
         apiHandler.addToRequestQueue(request);
@@ -1270,33 +1127,22 @@ public class ApiDataSource
         HashMap<String, String> params = new HashMap<>();
         params.put("postID", String.valueOf(postID));
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST_ACTIVITIES, params), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.GET_POST_ACTIVITIES, params), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
-            {
-                ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
+            ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
 
-                if (apiResponse.isSuccessful())
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
-                }
-                else
-                {
-                    result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
-                }
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            if (apiResponse.isSuccessful())
             {
-                result.setValue(new DataSourceResponse<>(error.toString()));
+                result.setValue(new DataSourceResponse<>(apiResponse.getResponse()));
             }
-        })
+            else
+            {
+                result.setValue(new DataSourceResponse<>(apiResponse.getErrorMessage()));
+            }
+        }, error -> result.setValue(new DataSourceResponse<>(error.toString())))
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError
+            public Map<String, String> getHeaders()
             {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + JWToken);
@@ -1317,47 +1163,67 @@ public class ApiDataSource
         HashMap<String, String> geoParams = new HashMap<>();
         geoParams.put("key", "255230665c9249b28259b49dacc2c198");
         geoParams.put("q", latitude + "+" + longitude);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, new Response.Listener<JSONObject>()
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
         {
-            @Override
-            public void onResponse(JSONObject response)
+            Place place = new Place();
+
+            try
             {
-                Place place = new Place();
+                JSONObject info = response.getJSONArray("results").getJSONObject(0).getJSONObject("components");
+                place.setCountry(info.getString("country"));
 
-                try
+                if (info.has("city")) place.setCity(info.getString("city"));
+                else if (info.has("neighbourhood")) place.setCity(info.getString("neighbourhood"));
+
+                if (info.has("road") && info.has("house_number"))
                 {
-                    JSONObject info = response.getJSONArray("results").getJSONObject(0).getJSONObject("components");
-                    place.setCountry(info.getString("country"));
-
-                    if (info.has("city")) place.setCity(info.getString("city"));
-                    else if (info.has("neighbourhood")) place.setCity(info.getString("neighbourhood"));
-
-                    if (info.has("road") && info.has("house_number"))
-                    {
-                        place.setAddress(info.getString("road") + " " + info.getString("house_number"));
-                    }
-                    else if (info.has("road")) place.setAddress(info.getString("road"));
-
-                    place.setLatitude(latitude);
-                    place.setLongitude(longitude);
-
-                    result.setValue(new DataSourceResponse<>(place));
+                    place.setAddress(info.getString("road") + " " + info.getString("house_number"));
                 }
-                catch (JSONException e)
-                {
-                    e.printStackTrace();
+                else if (info.has("road")) place.setAddress(info.getString("road"));
 
-                    result.setValue(new DataSourceResponse<>("Network error"));
-                }
+                place.setLatitude(latitude);
+                place.setLongitude(longitude);
+
+                result.setValue(new DataSourceResponse<>(place));
             }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
+            catch (JSONException e)
             {
+                e.printStackTrace();
+
                 result.setValue(new DataSourceResponse<>("Network error"));
             }
-        });
+        }, error -> result.setValue(new DataSourceResponse<>("Network error")));
+
+        apiHandler.addToRequestQueue(request);
+
+        return result;
+    }
+
+    public LiveData<DataSourceResponse<Place>> getCoordinates(String query)
+    {
+        MutableLiveData<DataSourceResponse<Place>> result = new MutableLiveData<>();
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        HashMap<String, String> geoParams = new HashMap<>();
+        geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+        geoParams.put("q", query);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
+        {
+            Place place = new Place();
+            try
+            {
+                JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                place.setLatitude(coordinates.getDouble("lat"));
+                place.setLongitude(coordinates.getDouble("lng"));
+                result.setValue(new DataSourceResponse<>(place));
+            }
+            catch (JSONException e)
+            {
+                e.printStackTrace();
+
+                result.setValue(new DataSourceResponse<>("Place not found"));
+            }
+        }, error -> result.setValue(new DataSourceResponse<>("Network error")));
 
         apiHandler.addToRequestQueue(request);
 

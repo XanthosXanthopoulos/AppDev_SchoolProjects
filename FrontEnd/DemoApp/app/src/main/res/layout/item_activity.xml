@@ -54,15 +54,6 @@
             android:visibility="gone"/>
 
         <TextView
-            android:id="@+id/Activity_Type"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding ="8dp"
-            android:text="Hello world"
-            android:textSize="14sp"
-            android:visibility="gone"/>
-
-        <TextView
             android:id="@+id/Activity_Tags"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

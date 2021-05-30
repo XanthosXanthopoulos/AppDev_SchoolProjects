@@ -7,10 +7,10 @@ namespace WebServer.Models.Database
     public class Follow
     {
         public string FolloweeID { get; set; }
-        public UserModel Followee { get; set; }
+        public User Followee { get; set; }
 
         public string FollowerID { get; set; }
-        public UserModel Follower { get; set; }
+        public User Follower { get; set; }
 
         [Required]
         public DateTime RequestTime { get; set; }

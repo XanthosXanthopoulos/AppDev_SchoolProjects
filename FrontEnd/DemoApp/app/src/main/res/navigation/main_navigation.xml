@@ -43,7 +43,7 @@
 
     <fragment
         android:id="@+id/navigation_ViewPlan"
-        android:name="com.example.demoapp.ui.main.plan.ViewPlanFragment"
+        android:name="com.example.demoapp.ui.main.plan.view.ViewPlanFragment"
         android:label="ViewPlan"
         tools:layout="@layout/fragment_view_plan" />
 

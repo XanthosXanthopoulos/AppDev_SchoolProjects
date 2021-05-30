@@ -34,25 +34,33 @@ namespace WebServer.Hubs
         {
             string userID = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            UserModel user = await _context.Users.Include(u => u.Image).Where(u => u.UserID == userID).Select(u => u).FirstOrDefaultAsync();
+            User user = await _context.Users.Include(u => u.Image).Where(u => u.UserID == userID).Select(u => u).FirstOrDefaultAsync();
+            User followee = await _context.Users.Include(u => u.Image).Where(u => u.UserID == followeeID).Select(u => u).FirstOrDefaultAsync();
 
             Follow follow = new Follow();
             follow.FolloweeID = followeeID;
             follow.FollowerID = userID;
-            follow.Accepted = false;
+            follow.Accepted = followee.AccountType == Models.Enums.AccountType.Public ? true : false;
             follow.RequestTime = DateTime.Now;
 
             await _context.Follows.AddAsync(follow);
             await _context.SaveChangesAsync();
 
-            await Clients.Groups(followeeID).SendAsync("followRequest", userID, user.Name, user.Image.ImageID);
+            if (followee.AccountType == Models.Enums.AccountType.Public)
+            {
+                await Clients.Groups(userID).SendAsync("acceptRequest", followeeID, followee.Name, followee.Image.ImageID);
+            }
+            else
+            {
+                await Clients.Groups(followeeID).SendAsync("followRequest", userID, user.Name, user.Image.ImageID);
+            }
         }
 
         public async Task Accept(string followerID)
         {
             string userID = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            UserModel user = await _context.Users.Include(u => u.Image).Where(u => u.UserID == userID).Select(u => u).FirstOrDefaultAsync();
+            User user = await _context.Users.Include(u => u.Image).Where(u => u.UserID == userID).Select(u => u).FirstOrDefaultAsync();
 
             Follow follow = await _context.Follows.FindAsync(new string[] { userID, followerID });
             follow.Accepted = true;
@@ -70,8 +78,6 @@ namespace WebServer.Hubs
             _context.Remove(follow);
 
             await _context.SaveChangesAsync();
-
-            await Clients.Groups(followerID).SendAsync("declineRequest", userID);
         }
 
         public async Task Unfollow(string followeeID)
@@ -100,6 +106,34 @@ namespace WebServer.Hubs
 
             Follow follow = await _context.Follows.FindAsync(new string[] { followeeID, userID });
             _context.Remove(follow);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SendComment(int postID, string content)
+        {
+            string userID = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            Post post = await _context.Posts.Include(p => p.Comments).Where(p => p.PostID == postID).FirstOrDefaultAsync();
+            User user = await _context.Users.FindAsync(userID);
+            Comment comment = new Comment { User = user, Content = content };
+
+            _context.Comments.Add(comment);
+            post.Comments.Add(comment);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SendLike(int postID)
+        {
+            string userID = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            Post post = await _context.Posts.Include(p => p.Likes).Where(p => p.PostID == postID).FirstOrDefaultAsync();
+            User user = await _context.Users.FindAsync(userID);
+            Like like = new Like { User = user };
+
+            _context.Likes.Add(like);
+            post.Likes.Add(like);
 
             await _context.SaveChangesAsync();
         }
