@@ -128,7 +128,8 @@ namespace WebServer.Controllers
                                                                PostID = p.PostID,
                                                                Username = f.Followee.Name,
                                                                ProfileImageID = f.Followee.Image.ImageID,
-                                                               ThumbnailImageID = p.Images.FirstOrDefault().ImageID
+                                                               ThumbnailImageID = p.Images.FirstOrDefault().ImageID,
+                                                               Liked = p.Likes.Any(l => l.User.UserID == userID)
                                                            }).ToListAsync();
 
             return new ApiResponse<ICollection<PostSummaryResponseModel>> { Response = result };
