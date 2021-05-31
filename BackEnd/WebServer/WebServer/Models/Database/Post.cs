@@ -18,7 +18,7 @@ namespace WebServer.Models.Database
 
         public ICollection<Image> Images { get; set; } 
 
-        public ICollection<Activity> Activities { get; set; }
+        public ICollection<PostActivity> PostActivities { get; set; }
 
         public ICollection<Like> Likes { get; set; }
 

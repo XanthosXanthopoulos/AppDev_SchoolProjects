@@ -22,6 +22,8 @@ namespace WebServer.Data
 
         public DbSet<Comment> Comments { get; set; }
 
+        public DbSet<PostActivity> PostActivity { get; set; }
+
         #endregion
 
         #region Constructor
@@ -48,6 +50,21 @@ namespace WebServer.Data
             modelBuilder.Entity<Post>().Property(e => e.PostID).ValueGeneratedOnAdd();
             modelBuilder.Entity<Like>().Property(e => e.LikeID).ValueGeneratedOnAdd();
             modelBuilder.Entity<Comment>().Property(e => e.CommentID).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Post>().HasMany(p => p.Images).WithOne().IsRequired(false).OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<PostActivity>().HasKey(sc => new { sc.PostID, sc.ActivityID });
+
+            modelBuilder.Entity<PostActivity>()
+                .HasOne(sc => sc.Post)
+                .WithMany(s => s.PostActivities)
+                .HasForeignKey(sc => sc.PostID);
+
+
+            modelBuilder.Entity<PostActivity>()
+                .HasOne(sc => sc.Activity)
+                .WithMany(s => s.PostActivities)
+                .HasForeignKey(sc => sc.ActivityID);
         }
 
         #endregion

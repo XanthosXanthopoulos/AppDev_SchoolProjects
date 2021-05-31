@@ -58,26 +58,6 @@ namespace WebServer.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Authorize]
-        //public async Task<IActionResult> UploadFileMetadata([FromBody] ImageMetadataModel image)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        //        await _context.Images.AddAsync(new Image ());
-        //        await _context.SaveChangesAsync();
-
-        //        // return the file name for the locally stored file
-        //        return Ok();
-        //    }
-        //    else
-        //    {
-        //        return StatusCode(StatusCodes.Status400BadRequest);
-        //    }
-        //}
-
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Download(string? id)

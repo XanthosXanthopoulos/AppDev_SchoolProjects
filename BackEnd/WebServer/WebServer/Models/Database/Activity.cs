@@ -17,13 +17,15 @@ namespace WebServer.Models.Database
 
         public string Address { get; set; }
 
-        public string Tags { get; set; } 
+        public string Tags { get; set; }
 
         public Country Country { get; set; }
 
         public string City { get; set; }
 
         public Point Coordinates { get; set; }
+
+        public ICollection<PostActivity> PostActivities { get; set; }
 
         public static implicit operator ActivityResponse(Activity activity)
         {
