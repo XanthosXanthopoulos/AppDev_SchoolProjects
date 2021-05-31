@@ -61,16 +61,6 @@ public class CreateMemoryViewModel extends ViewModel
         });
     }
 
-    public void addMemory(String title, Country country, String address, String description, String tags)
-    {
-        repository.addActivity(new Activity("", title, description, tags, country, address));
-    }
-
-    public void storeActivity(String title, Country country, String address, String description, String tags)
-    {
-        repository.storeActivity(new Activity("", title, description, tags, country, address));
-    }
-
     public LiveData<Activity> getStoredActivity()
     {
         return repository.getCurrentActivity();

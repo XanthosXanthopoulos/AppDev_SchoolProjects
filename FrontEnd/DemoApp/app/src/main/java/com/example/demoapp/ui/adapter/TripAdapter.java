@@ -33,6 +33,11 @@ import static com.example.demoapp.App.SHARED_PREFS;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
 {
+    public List<Post> getItems()
+    {
+        return items;
+    }
+
     private List<Post> items;
     @SuppressLint("SimpleDateFormat")
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");

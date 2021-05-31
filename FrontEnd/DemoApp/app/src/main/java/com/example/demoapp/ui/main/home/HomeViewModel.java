@@ -11,6 +11,7 @@ import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
+import com.example.demoapp.data.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,12 +19,14 @@ import java.util.List;
 
 public class HomeViewModel extends ViewModel
 {
+    private UserRepository userRepository;
     private ContentRepository repository;
     private NotificationHub hub;
-    private final LiveData<List<Item>> feedResult;
+    private final LiveData<Event<List<Item>>> feedResult;
 
-    public HomeViewModel(ContentRepository repository, NotificationHub hub)
+    public HomeViewModel(UserRepository userRepository, ContentRepository repository, NotificationHub hub)
     {
+        this.userRepository = userRepository;
         this.repository = repository;
         this.hub = hub;
 
@@ -35,7 +38,9 @@ public class HomeViewModel extends ViewModel
             }
             else
             {
-                return new ArrayList<>();
+                Event<List<Item>> event = new Event<>(new LinkedList<>());
+                event.setHandled(true);
+                return event;
             }
         });
     }
@@ -45,7 +50,7 @@ public class HomeViewModel extends ViewModel
         repository.updateFeed(false);
     }
 
-    public LiveData<List<Item>> getFeedResult()
+    public LiveData<Event<List<Item>>> getFeedResult()
     {
         return feedResult;
     }
@@ -68,5 +73,10 @@ public class HomeViewModel extends ViewModel
     public void sendComment(int postID, String comment)
     {
         hub.sendComment(postID, comment);
+    }
+
+    public void logout()
+    {
+        userRepository.logout();
     }
 }

@@ -18,6 +18,8 @@ namespace WebServer.Models.Api.Response
 
         public string Country { get; set; }
 
+        public string City { get; set; }
+
         public string Tags { get; set; }
 
         public double Latitude { get; set; }

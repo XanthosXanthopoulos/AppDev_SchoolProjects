@@ -15,10 +15,11 @@ public class Post extends Item
     private String description;
     private Date date;
     private int likes;
+    private boolean liked;
 
-    private Deque<Activity> activities;
-    private Deque<String> images;
-    private Deque<Comment> comments;
+    private LinkedList<Activity> activities;
+    private LinkedList<String> images;
+    private LinkedList<Comment> comments;
 
     public Post()
     {
@@ -90,22 +91,22 @@ public class Post extends Item
         this.thumbnailImageID = thumbnailImageID;
     }
 
-    public Deque<Activity> getActivities()
+    public LinkedList<Activity> getActivities()
     {
         return activities;
     }
 
-    public void setActivities(Deque<Activity> activities)
+    public void setActivities(LinkedList<Activity> activities)
     {
         this.activities = activities;
     }
 
-    public Deque<String> getImages()
+    public LinkedList<String> getImages()
     {
         return images;
     }
 
-    public void setImages(Deque<String> images)
+    public void setImages(LinkedList<String> images)
     {
         this.images = images;
     }
@@ -150,13 +151,23 @@ public class Post extends Item
         this.likes = likes;
     }
 
-    public Deque<Comment> getComments()
+    public LinkedList<Comment> getComments()
     {
         return comments;
     }
 
-    public void setComments(Deque<Comment> comments)
+    public void setComments(LinkedList<Comment> comments)
     {
         this.comments = comments;
+    }
+
+    public boolean isLiked()
+    {
+        return liked;
+    }
+
+    public void setLiked(boolean liked)
+    {
+        this.liked = liked;
     }
 }

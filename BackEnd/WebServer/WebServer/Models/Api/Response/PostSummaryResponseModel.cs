@@ -22,5 +22,7 @@ namespace WebServer.Models.Api.Response
         public string ThumbnailImageID { get; set; }
 
         public int Likes { get; set; }
+
+        public bool Liked { get; set; }
     }
 }

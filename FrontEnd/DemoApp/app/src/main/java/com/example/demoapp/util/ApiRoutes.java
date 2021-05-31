@@ -9,11 +9,13 @@ public final class ApiRoutes
     private static final String GEO_BASE = "https://api.opencagedata.com/geocode/v1/json";
 
     public static final String LOGIN = "/account/login";
+    public static final String LOGOUT = "/account/logout";
     public static final String REGISTER = "/account/register";
     public static final String PROFILE_INFO = "/account/profileinfo";
     public static final String UPDATE_PROFILE = "/account/updateprofile";
     public static final String SEARCH_ACTIVITY = "/activity/searchactivities";
     public static final String SEARCH_POST = "/post/searchposts";
+    public static final String DELETE_POST = "/post/deletepost";
     public static final String SEARCH_USER = "/relationship/searchusers";
     public static final String GET_FOLLOWEES = "/relationship/getfollowees";
     public static final String GET_FOLLOWERS = "/relationship/getfollowers";
@@ -100,6 +102,7 @@ public final class ApiRoutes
         SEARCH_POST,
         SEARCH_USER,
         GET_FOLLOWEES,
+        DELETE_POST,
         GET_FOLLOWERS
     }
 }

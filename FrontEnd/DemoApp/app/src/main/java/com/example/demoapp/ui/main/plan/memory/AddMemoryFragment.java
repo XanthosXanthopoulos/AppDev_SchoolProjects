@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -76,13 +77,26 @@ public class AddMemoryFragment extends Fragment
             @Override
             public void onChanged(Iterable<Activity> activities)
             {
-                //if (activities == null) return;
-
                 List<Item> items = new ArrayList<>();
                 activities.forEach(items::add);
                 adapter.setItems(items);
             }
         });
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT)
+        {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target)
+            {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction)
+            {
+                viewModel.removeMemory(viewHolder.getAdapterPosition());
+            }
+        }).attachToRecyclerView(activityList);
 
         createMemory.setOnClickListener(v -> startActivityForResult(new Intent(getActivity(),  CreateMemoryActivity.class), ACTIVITY_ADD));
 

@@ -149,74 +149,53 @@ public class SearchActivity extends AppCompatActivity
         StaggeredGridLayoutManager _sGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         searchResultList.setLayoutManager(_sGridLayoutManager);
         adapter = new SearchResultAdapter();
-        adapter.setItemClickListener(new ActivityItemClickListener()
+
+        adapter.setItemClickListener(activity ->
         {
-            @Override
-            public void onItemClickListener(Activity activity)
-            {
-                Intent data = new Intent();
-                data.putExtra("id", activity.getId());
-                data.putExtra("title", activity.getTitle());
-                data.putExtra("country", activity.getCountry());
-                //data.putExtra("city", activity.getCity());
-                data.putExtra("address", activity.getAddress());
-                data.putExtra("description", activity.getDescription());
-                data.putExtra("tags", activity.getTags());
-                setResult(RESULT_OK, data);
-                finish();
-            }
+            Intent data = new Intent();
+            data.putExtra("id", activity.getId());
+            data.putExtra("title", activity.getTitle());
+            data.putExtra("country", activity.getCountry());
+            data.putExtra("city", activity.getCity());
+            data.putExtra("address", activity.getAddress());
+            data.putExtra("description", activity.getDescription());
+            data.putExtra("tags", activity.getTags());
+            setResult(RESULT_OK, data);
+            finish();
         });
 
         searchResultList.setAdapter(adapter);
 
-        viewModel.getSearchResult().observe(this, new Observer<List<Item>>()
+        viewModel.getSearchResult().observe(this, event ->
         {
-            @Override
-            public void onChanged(List<Item> items)
-            {
-                adapter.setItems(items);
+            if (event.isHandled()) return;
 
-                if (items.size() == 0)
-                {
-                    listMessage.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    listMessage.setVisibility(View.GONE);
-                }
+            event.setHandled(true);
+
+            adapter.setItems(event.getData());
+
+            if (event.getData().size() == 0)
+            {
+                listMessage.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                listMessage.setVisibility(View.GONE);
             }
         });
 
-        viewModel.getCitiesResult().observe(this, new Observer<List<String>>()
+        viewModel.getCitiesResult().observe(this, strings -> citySpinner.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, strings)));
+
+        locationButton.setOnClickListener(v -> startActivityForResult(new Intent(v.getContext(), LocationActivity.class), 0));
+
+        viewModel.getLocationInfo().observe(this, event ->
         {
-            @Override
-            public void onChanged(List<String> strings)
-            {
-                citySpinner.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, strings));
-            }
-        });
+            if (event.isHandled()) return;
 
-        locationButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                startActivityForResult(new Intent(v.getContext(), LocationActivity.class), 0);
-            }
-        });
+            event.setHandled(true);
 
-        viewModel.getLocationInfo().observe(this, new Observer<Event<Place>>()
-        {
-            @Override
-            public void onChanged(Event<Place> event)
-            {
-                if (event.isHandled()) return;
-
-                event.setHandled(true);
-
-                countrySpinner.setText(event.getData().getCountry());
-                citySpinner.setText(event.getData().getCity());
-            }
+            countrySpinner.setText(event.getData().getCountry());
+            citySpinner.setText(event.getData().getCity());
         });
     }
 

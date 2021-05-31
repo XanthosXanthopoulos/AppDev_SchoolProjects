@@ -46,6 +46,18 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:textAlignment="center"
+        android:textColor="#222"
+        android:textSize="18sp"/>
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,20 +71,9 @@
             android:maxHeight="350dp"
             android:layout_gravity="center"
             android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
             android:src="@drawable/ic_launcher_background" />
     </androidx.cardview.widget.CardView>
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="6dp"
-        android:textAlignment="center"
-        android:textColor="#222"
-        android:textSize="16sp" />
 
     <LinearLayout
         android:layout_width="match_parent"

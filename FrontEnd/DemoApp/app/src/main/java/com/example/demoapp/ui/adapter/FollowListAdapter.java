@@ -86,58 +86,50 @@ public class FollowListAdapter extends RecyclerView.Adapter<FollowListAdapter.Vi
                 break;
         }
 
-        holder.deleteButton.setOnClickListener(new View.OnClickListener()
+        holder.deleteButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                Button button = (Button)v;
+            Button button = (Button)v;
 
-                switch (items.get(position).getStatus())
-                {
-                    case PENDING_INCOMING:
-                        actions.decline(items.get(position).getUserID());
-                        break;
-                }
+            switch (items.get(position).getStatus())
+            {
+                case PENDING_INCOMING:
+                    actions.decline(items.get(position).getUserID());
+                    break;
             }
         });
 
-        holder.actionButton.setOnClickListener(new View.OnClickListener()
+        holder.actionButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                Button button = (Button)v;
+            Button button = (Button)v;
 
-                switch (items.get(position).getStatus())
-                {
-                    case NONE:
-                        button.setText("Cancel");
-                        items.get(position).setStatus(Status.PENDING_OUTCOMING);
-                        actions.follow(items.get(position).getUserID());
-                        break;
-                    case FOLLOWED:
-                        actions.remove(items.get(position).getUserID());
-                        items.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, getItemCount());
-                        break;
-                    case FOLLOWING:
-                        button.setText("Follow");
-                        items.get(position).setStatus(Status.NONE);
-                        actions.unfollow(items.get(position).getUserID());
-                        break;
-                    case PENDING_INCOMING:
-                        button.setText("Remove");
-                        items.get(position).setStatus(Status.FOLLOWED);
-                        actions.accept(items.get(position).getUserID());
-                        break;
-                    case PENDING_OUTCOMING:
-                        button.setText("Follow");
-                        items.get(position).setStatus(Status.NONE);
-                        actions.cancel(items.get(position).getUserID());
-                        break;
-                }
+            switch (items.get(position).getStatus())
+            {
+                case NONE:
+                    button.setText("Cancel");
+                    items.get(position).setStatus(Status.PENDING_OUTCOMING);
+                    actions.follow(items.get(position).getUserID());
+                    break;
+                case FOLLOWED:
+                    actions.remove(items.get(position).getUserID());
+                    items.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, getItemCount());
+                    break;
+                case FOLLOWING:
+                    button.setText("Follow");
+                    items.get(position).setStatus(Status.NONE);
+                    actions.unfollow(items.get(position).getUserID());
+                    break;
+                case PENDING_INCOMING:
+                    button.setText("Remove");
+                    items.get(position).setStatus(Status.FOLLOWED);
+                    actions.accept(items.get(position).getUserID());
+                    break;
+                case PENDING_OUTCOMING:
+                    button.setText("Follow");
+                    items.get(position).setStatus(Status.NONE);
+                    actions.cancel(items.get(position).getUserID());
+                    break;
             }
         });
     }

@@ -7,6 +7,7 @@ public class Activity extends Item
     private String description;
     private String tags;
     private String address;
+    private String city;
     private Country country;
     private double latitude;
     private double longtitude;
@@ -16,7 +17,7 @@ public class Activity extends Item
         super(ContentType.ACTIVITY);
     }
 
-    public Activity(String id, String title, String description, String tags, Country country, String address)
+    public Activity(String id, String title, String description, String tags, Country country, String city, String address)
     {
         super(ContentType.ACTIVITY);
 
@@ -106,5 +107,15 @@ public class Activity extends Item
     public void setLongtitude(double longtitude)
     {
         this.longtitude = longtitude;
+    }
+
+    public String getCity()
+    {
+        return city;
+    }
+
+    public void setCity(String city)
+    {
+        this.city = city;
     }
 }

@@ -8,7 +8,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Activity;
 import com.example.demoapp.data.model.Country;
@@ -683,6 +685,7 @@ public class ApiDataSource
                     activitySubmitModel.put("Description", activity.getDescription());
                     activitySubmitModel.put("Address", activity.getAddress());
                     activitySubmitModel.put("Country", activity.getCountry().code);
+                    activitySubmitModel.put("City", activity.getCity());
                     activitySubmitModel.put("Tags", activity.getTags());
                 }
                 catch (JSONException e)
@@ -692,7 +695,7 @@ public class ApiDataSource
 
                 HashMap<String, String> geoParams = new HashMap<>();
                 geoParams.put("key", "255230665c9249b28259b49dacc2c198");
-                geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
+                geoParams.put("q", activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
                 request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response12 ->
                 {
                     try
@@ -796,6 +799,7 @@ public class ApiDataSource
                         activitySubmitModel.put("Description", activity.getDescription());
                         activitySubmitModel.put("Address", activity.getAddress());
                         activitySubmitModel.put("Country", activity.getCountry().code);
+                        activitySubmitModel.put("City", activity.getCity());
                         activitySubmitModel.put("Tags", activity.getTags());
                     }
                     catch (JSONException e)
@@ -805,7 +809,7 @@ public class ApiDataSource
 
                     HashMap<String, String> geoParams = new HashMap<>();
                     geoParams.put("key", "255230665c9249b28259b49dacc2c198");
-                    geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
+                    geoParams.put("q", activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
                     request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response1 ->
                     {
                         try
@@ -1228,5 +1232,55 @@ public class ApiDataSource
         apiHandler.addToRequestQueue(request);
 
         return result;
+    }
+
+    public void logout(String JWToken)
+    {
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        StringRequest request = new StringRequest(Request.Method.GET, ApiRoutes.getRoute(ApiRoutes.Route.LOGOUT), response ->
+        {
+
+        }, error ->
+        {
+
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders()
+            {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + JWToken);
+                return headers;
+            }
+        };
+
+        apiHandler.addToRequestQueue(request);
+    }
+
+    public void deletePost(int postID, String JWToken)
+    {
+        ApiHandler apiHandler = ApiHandler.getInstance();
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("postID", String.valueOf(postID));
+        StringRequest request = new StringRequest(Request.Method.DELETE, ApiRoutes.getRoute(ApiRoutes.Route.DELETE_POST, params), response ->
+        {
+
+        }, error ->
+        {
+
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders()
+            {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + JWToken);
+                return headers;
+            }
+        };
+
+        apiHandler.addToRequestQueue(request);
     }
 }

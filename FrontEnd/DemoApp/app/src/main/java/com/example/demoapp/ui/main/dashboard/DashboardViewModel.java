@@ -15,11 +15,12 @@ import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DashboardViewModel extends ViewModel
 {
-    private final LiveData<List<Item>> searchResult;
+    private final LiveData<Event<List<Item>>> searchResult;
     private final LiveData<List<String>> citiesResult;
     private final LiveData<Event<Place>> locationInfo;
     private final ContentRepository repository;
@@ -30,53 +31,43 @@ public class DashboardViewModel extends ViewModel
         this.repository = repository;
         this.hub = hub;
 
-        searchResult = Transformations.map(repository.getSearchResult(), new Function<RepositoryResponse<List<Item>>, List<Item>>()
+        searchResult = Transformations.map(repository.getSearchResult(), input ->
         {
-            @Override
-            public List<Item> apply(RepositoryResponse<List<Item>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                Event<List<Item>> event = new Event<>(new LinkedList<>());
+                event.setHandled(true);
+                return event;
             }
         });
 
-        citiesResult = Transformations.map(repository.getCitiesResult(), new Function<RepositoryResponse<List<String>>, List<String>>()
+        citiesResult = Transformations.map(repository.getCitiesResult(), input ->
         {
-            @Override
-            public List<String> apply(RepositoryResponse<List<String>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                return new ArrayList<>();
             }
         });
 
-        locationInfo = Transformations.map(repository.getPlaceResult(), new Function<RepositoryResponse<Event<Place>>, Event<Place>>()
+        locationInfo = Transformations.map(repository.getPlaceResult(), input ->
         {
-            @Override
-            public Event<Place> apply(RepositoryResponse<Event<Place>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    Event<Place> event = new Event<>(new Place());
-                    event.setHandled(true);
-                    return event;
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                Event<Place> event = new Event<>(new Place());
+                event.setHandled(true);
+                return event;
             }
         });
     }
@@ -86,7 +77,7 @@ public class DashboardViewModel extends ViewModel
         repository.search(query, country, city, type, radius);
     }
 
-    public LiveData<List<Item>> getSearchResult()
+    public LiveData<Event<List<Item>>> getSearchResult()
     {
         return searchResult;
     }
@@ -98,12 +89,12 @@ public class DashboardViewModel extends ViewModel
 
     public void cancelFollowRequest(String userID)
     {
-
+        hub.cancelFollowRequest(userID);
     }
 
     public void unfollow(String userID)
     {
-
+        hub.unfollow(userID);
     }
 
     public LiveData<List<String>> getCitiesResult()
@@ -119,6 +110,16 @@ public class DashboardViewModel extends ViewModel
     public void getLocationInfo(double latitude, double longitude)
     {
         repository.getLocationInfo(latitude, longitude);
+    }
+
+    public void sendLike(int postID)
+    {
+        hub.sendLike(postID);
+    }
+
+    public void sendComment(int postID, String comment)
+    {
+        hub.sendComment(postID, comment);
     }
 
     public LiveData<Event<Place>> getLocationInfo()

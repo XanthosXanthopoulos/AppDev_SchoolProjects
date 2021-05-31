@@ -71,6 +71,7 @@ namespace WebServer.Controllers
                                                                           Description = a.Description,
                                                                           Tags = a.Tags,
                                                                           Country = a.Country.ToString(),
+                                                                          City = a.City,
                                                                           Latitude = a.Coordinates.Y,
                                                                           Longtitude = a.Coordinates.X
                                                                       }).ToListAsync();
@@ -82,7 +83,7 @@ namespace WebServer.Controllers
         [Authorize]
         public async Task<ApiResponse<ICollection<ActivityResponse>>> GetActivities(int? postID)
         {
-            ICollection<Activity> result = await _context.Posts.Include(p => p.Activities).Where(p => p.PostID == postID).Select(p => p.Activities).FirstAsync();
+            ICollection<Activity> result = _context.Posts.Include(p => p.PostActivities).ThenInclude(pa => pa.Activity).Where(p => p.PostID == postID).Select(p => p.PostActivities).First().Select(pa => pa.Activity).ToList();
 
             return new ApiResponse<ICollection<ActivityResponse>>
             {
@@ -90,6 +91,7 @@ namespace WebServer.Controllers
                 {
                     ID = a.ActivityID,
                     Address = a.Address,
+                    City = a.City,
                     Country = a.Country.ToString(),
                     Description = a.Description,
                     Tags = a.Tags,

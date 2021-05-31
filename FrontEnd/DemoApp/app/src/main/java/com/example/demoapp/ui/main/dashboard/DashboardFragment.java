@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.demoapp.R;
 import com.example.demoapp.actions.FollowActions;
+import com.example.demoapp.data.CommentLikeClickListener;
 import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Country;
 import com.example.demoapp.data.model.Item;
@@ -159,21 +160,35 @@ public class DashboardFragment extends Fragment
         adapter = new SearchResultAdapter();
         searchResultList.setAdapter(adapter);
 
-        dashboardViewModel.getSearchResult().observe(getViewLifecycleOwner(), new Observer<List<Item>>()
+        adapter.setCommentLikeClickListener(new CommentLikeClickListener()
         {
             @Override
-            public void onChanged(List<Item> items)
+            public void sendComment(int postID, String content)
             {
-                adapter.setItems(items);
+                dashboardViewModel.sendComment(postID, content);
+            }
 
-                if (items.size() == 0)
-                {
-                    listMessage.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    listMessage.setVisibility(View.GONE);
-                }
+            @Override
+            public void sendLike(int postID)
+            {
+                dashboardViewModel.sendLike(postID);
+            }
+        });
+
+        dashboardViewModel.getSearchResult().observe(getViewLifecycleOwner(), event ->
+        {
+            if (event.isHandled()) return;
+
+            event.setHandled(true);
+            adapter.setItems(event.getData());
+
+            if (event.getData().size() == 0)
+            {
+                listMessage.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                listMessage.setVisibility(View.GONE);
             }
         });
 
@@ -203,7 +218,7 @@ public class DashboardFragment extends Fragment
             @Override
             public void unfollow(String userID)
             {
-                //viewModel.unfollow(userID);
+                dashboardViewModel.unfollow(userID);
             }
 
             @Override
@@ -212,7 +227,7 @@ public class DashboardFragment extends Fragment
             @Override
             public void cancel(String userID)
             {
-                //viewModel.cancelFollowRequest(userID);
+                dashboardViewModel.cancelFollowRequest(userID);
             }
         });
 

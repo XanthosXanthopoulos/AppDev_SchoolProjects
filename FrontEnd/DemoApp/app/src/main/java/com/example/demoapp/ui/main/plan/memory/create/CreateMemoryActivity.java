@@ -1,16 +1,9 @@
 package com.example.demoapp.ui.main.plan.memory.create;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -18,19 +11,18 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.example.demoapp.R;
-import com.example.demoapp.data.Event;
 import com.example.demoapp.data.model.Country;
-import com.example.demoapp.data.model.Place;
 import com.example.demoapp.ui.location_picker.LocationActivity;
 import com.example.demoapp.util.ViewModelFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 public class CreateMemoryActivity extends AppCompatActivity
 {
@@ -73,19 +65,15 @@ public class CreateMemoryActivity extends AppCompatActivity
             @Override
             public boolean isValid(CharSequence text)
             {
-                int index = Arrays.binarySearch(Country.values(), text.toString(), new Comparator<Serializable>()
+                int index = Arrays.binarySearch(Country.values(), text.toString(), (Comparator<Serializable>) (o1, o2) ->
                 {
-                    @Override
-                    public int compare(Serializable o1, Serializable o2)
+                    if (o1 instanceof Country && o2 instanceof String)
                     {
-                        if (o1 instanceof Country && o2 instanceof String)
-                        {
-                            return  ((Country) o1).label.compareTo((String)o2);
-                        }
-                        else
-                        {
-                            return 1;
-                        }
+                        return  ((Country) o1).label.compareTo((String)o2);
+                    }
+                    else
+                    {
+                        return 1;
                     }
                 });
 
@@ -102,14 +90,7 @@ public class CreateMemoryActivity extends AppCompatActivity
             }
         });
 
-        viewModel.getCitiesResult().observe(this, new Observer<List<String>>()
-        {
-            @Override
-            public void onChanged(List<String> strings)
-            {
-                cityEditText.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, strings));
-            }
-        });
+        viewModel.getCitiesResult().observe(this, strings -> cityEditText.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, strings)));
 
         viewModel.getStoredActivity().observe(this, activity ->
         {
@@ -165,69 +146,50 @@ public class CreateMemoryActivity extends AppCompatActivity
         titleEditText.addTextChangedListener(afterTextChangedListener);
         countryEditText.addTextChangedListener(afterTextChangedListener);
 
-        locateButton.setOnClickListener(new View.OnClickListener()
+        locateButton.setOnClickListener(v -> startActivityForResult(new Intent(getApplicationContext(), LocationActivity.class), LOCATION_SELECT));
+
+        submitButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
+            if (countryEditText.getText().toString().trim().isEmpty())
             {
-                startActivityForResult(new Intent(getApplicationContext(), LocationActivity.class), LOCATION_SELECT);
+                Toast.makeText(getApplicationContext(), "Please select a country", Toast.LENGTH_LONG).show();
+                return;
             }
+
+            String title = titleEditText.getText().toString();
+            Country country = Country.lookupByLabel(countryEditText.getText().toString());
+            String city = cityEditText.getText().toString();
+            String address = addressEditText.getText().toString();
+            String description = descriptionEditText.getText().toString();
+            String tags = tagsEditText.getText().toString();
+
+            Intent data = new Intent();
+            data.putExtra("title", title);
+            data.putExtra("country", country);
+            data.putExtra("city", city);
+            data.putExtra("address", address);
+            data.putExtra("description", description);
+            data.putExtra("tags", tags);
+            setResult(RESULT_OK, data);
+            finish();
         });
 
-        submitButton.setOnClickListener(new View.OnClickListener()
+        cancelButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                if (countryEditText.getText().toString().trim().isEmpty())
-                {
-                    Toast.makeText(getApplicationContext(), "Please select a country", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                String title = titleEditText.getText().toString();
-                Country country = Country.lookupByLabel(countryEditText.getText().toString());
-                String city = cityEditText.getText().toString();
-                String address = addressEditText.getText().toString();
-                String description = descriptionEditText.getText().toString();
-                String tags = tagsEditText.getText().toString();
-
-                Intent data = new Intent();
-                data.putExtra("title", title);
-                data.putExtra("country", country);
-                data.putExtra("city", city);
-                data.putExtra("address", address);
-                data.putExtra("description", description);
-                data.putExtra("tags", tags);
-                setResult(RESULT_OK, data);
-                finish();
-            }
+            Intent data = new Intent();
+            setResult(RESULT_CANCELED, data);
+            finish();
         });
 
-        cancelButton.setOnClickListener(new View.OnClickListener()
+        viewModel.getLocationInfo().observe(this, event ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                Intent data = new Intent();
-                setResult(RESULT_CANCELED, data);
-                finish();
-            }
-        });
+            if (event.isHandled()) return;
 
-        viewModel.getLocationInfo().observe(this, new Observer<Event<Place>>()
-        {
-            @Override
-            public void onChanged(Event<Place> event)
-            {
-                if (event.isHandled()) return;
+            event.setHandled(true);
 
-                event.setHandled(true);
-
-                countryEditText.setText(event.getData().getCountry());
-                cityEditText.setText(event.getData().getCity());
-                addressEditText.setText(event.getData().getAddress());
-            }
+            countryEditText.setText(event.getData().getCountry());
+            cityEditText.setText(event.getData().getCity());
+            addressEditText.setText(event.getData().getAddress());
         });
     }
 

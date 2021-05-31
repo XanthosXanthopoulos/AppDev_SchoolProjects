@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -55,7 +58,7 @@ namespace WebServer.Controllers
                 activities = await (from p in _context.Posts
                                     where p.UserID == userID
                                     orderby p.PostID descending
-                                    select p.Activities.ToList())
+                                    select p.PostActivities.Select(pa => pa.Activity).ToList())
                                 .ToListAsync();
             }
             else
@@ -73,7 +76,8 @@ namespace WebServer.Controllers
                                     Title = p.Title,
                                     ProfileImageID = f.Followee.Image.ImageID,
                                     ThumbnailImageID = p.Images.First().ImageID,
-                                    Date = p.Date
+                                    Date = p.Date,
+                                    Liked = p.Likes.Any(l => l.User.UserID == userID)
                                 })
                                 .ToListAsync();
 
@@ -81,12 +85,18 @@ namespace WebServer.Controllers
                                     join f in followees
                                     on p.UserID equals f.FolloweeID
                                     orderby p.PostID descending
-                                    select p.Activities.ToList())
+                                    select p.PostActivities.Select(pa => pa.Activity).ToList())
                                 .ToListAsync();
             }
 
             for(int i = 0; i < result.Count; ++i)
             {
+                if (activities[i].Count == 0)
+                {
+                    result[i].CountrySummary = "";
+                    continue;
+                }
+
                 result[i].CountrySummary = activities[i].Select(a => a.Country.Description()).ToHashSet().Aggregate((sum, j) => sum + ", " + j);
             }
 
@@ -109,9 +119,9 @@ namespace WebServer.Controllers
             List<PostSummaryResponseModel> result = await (from p in _context.Posts
                                                            join f in _context.Follows on p.UserID equals f.FolloweeID
                                                            where f.FollowerID == userID
-                                                           where country == null || p.Activities.Any(a => a.Country == (Country)country)
-                                                           where city == null || p.Activities.Any(a => a.City == city)
-                                                           where point == null || radius == null || p.Activities.Any(a => a.Coordinates.Distance(point) < radius)
+                                                           where country == null || p.PostActivities.Select(pa => pa.Activity).Any(a => a.Country == (Country)country)
+                                                           where city == null || p.PostActivities.Select(pa => pa.Activity).Any(a => a.City == city)
+                                                           where point == null || radius == null || p.PostActivities.Select(pa => pa.Activity).Any(a => a.Coordinates.Distance(point) < radius)
                                                            where query == null || EF.Functions.FreeText(p.Description, query) || EF.Functions.FreeText(p.Title, query)
                                                            select new PostSummaryResponseModel
                                                            {
@@ -140,12 +150,13 @@ namespace WebServer.Controllers
                                                   ProfileImageID = p.User.Image.ImageID,
                                                   Images = p.Images.Select(i => i.ImageID).ToList(),
                                                   Likes = p.Likes.Count,
-                                                  Activities = p.Activities.Select(a => new ActivityResponse
+                                                  Activities = p.PostActivities.Select(pa => pa.Activity).Select(a => new ActivityResponse
                                                   {
                                                       ID = a.ActivityID,
                                                       Title = a.Title,
                                                       Description = a.Description,
                                                       Address = a.Address + ", " + a.City + ", " + a.Country.Description(),
+                                                      City = a.City,
                                                       Tags = a.Tags,
                                                       Country = a.Country.ToString()
                                                   }).ToList(),
@@ -170,12 +181,27 @@ namespace WebServer.Controllers
             List<Image> images;
             if (postSubmit.Images == null || postSubmit.Images.Count == 0)
             {
-                images = _context.Images.Where(i => i.ImageID == "00000000-0000-0000-0000-000000000001").ToList();
+                string id = Guid.NewGuid().ToString();
+
+                Image image = new Image { ImageID = id };
+                _context.Images.Add(image);
+
+                images = new List<Image>
+                {
+                    image
+                };
+
+                string original = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "FileStorage"), "00000000-0000-0000-0000-000000000001" + ".*")[0];
+                string copy = Path.Combine(Environment.CurrentDirectory, "FileStorage", id + ".jpg");
+
+                System.IO.File.Copy(original, copy);
             }
             else 
             {
                 images = _context.Images.Where(i => postSubmit.Images.Contains(i.ImageID)).ToList();
             }
+
+            ICollection<Activity> activities = _context.Activities.Where(a => postSubmit.Activities.Contains(a.ActivityID)).ToList();
 
             Post post = new Post
             {
@@ -183,16 +209,52 @@ namespace WebServer.Controllers
                 Description = postSubmit.Description,
                 Date = postSubmit.Date,
                 Images = images,
-                Activities = postSubmit.Activities.Select(a => _context.Activities.FirstOrDefault(ac => ac.ActivityID == a)).ToList(),
                 User = await _context.Users.FindAsync(userID),
                 Likes = new List<Like>(),
                 Comments = new List<Comment>()
             };
 
+            post.PostActivities = activities.Select(a => new PostActivity { Activity = a, Post = post }).ToList();
+
             await _context.Posts.AddAsync(post);
             await _context.SaveChangesAsync();
 
             return new ApiResponse<bool> { Response = true };
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeletePost(int postID)
+        {
+            string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            Post post = _context.Posts.Include(p => p.User).Where(p => p.PostID == postID).First();
+
+            if (userID != post.User.UserID) return StatusCode(StatusCodes.Status401Unauthorized);
+
+            ICollection<Image> images = await _context.Posts.Include(p => p.Images).Where(p => p.PostID == postID).Select(p => p.Images).FirstAsync();
+
+            _context.Posts.Remove(post);
+
+            foreach (Image image in images)
+            {
+                if (image.ImageID == "00000000-0000-0000-0000-000000000001") continue;
+
+                string[] files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "FileStorage"), image.ImageID + ".*");
+
+                if (files.Length > 0)
+                {
+
+                    FileInfo file = new FileInfo(files[0]);
+                    file.Delete();
+
+                    _context.Images.Remove(image);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

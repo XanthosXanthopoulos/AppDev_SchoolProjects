@@ -9,9 +9,9 @@ public class AuthenticationResult
     @Nullable
     private AuthenticatedUserView success;
     @Nullable
-    private Integer error;
+    private String error;
 
-    public AuthenticationResult(@Nullable Integer error)
+    public AuthenticationResult(@Nullable String error)
     {
         this.error = error;
     }
@@ -28,7 +28,7 @@ public class AuthenticationResult
     }
 
     @Nullable
-    public Integer getError()
+    public String getError()
     {
         return error;
     }

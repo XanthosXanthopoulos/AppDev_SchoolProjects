@@ -32,7 +32,6 @@ public class UserRepository extends Repository
 {
     private static volatile UserRepository instance;
     private final ApiDataSource dataSource;
-    private final NotificationHub hub;
 
     private User user = null;
 
@@ -46,21 +45,20 @@ public class UserRepository extends Repository
     private final MediatorLiveData<RepositoryResponse<Event<Boolean>>> actionResult;
     private final MediatorLiveData<RepositoryResponse<List<Follow>>> followResult;
 
-    private UserRepository(ApiDataSource dataSource, NotificationHub hub)
+    private UserRepository(ApiDataSource dataSource)
     {
         this.dataSource = dataSource;
-        this.hub = hub;
 
         result = new MediatorLiveData<>();
         followResult = new MediatorLiveData<>();
         actionResult = new MediatorLiveData<>();
     }
 
-    public static UserRepository getInstance(ApiDataSource dataSource, NotificationHub hub)
+    public static UserRepository getInstance(ApiDataSource dataSource)
     {
         if (instance == null)
         {
-            instance = new UserRepository(dataSource, hub);
+            instance = new UserRepository(dataSource);
         }
         return instance;
     }
@@ -73,7 +71,8 @@ public class UserRepository extends Repository
     public void logout()
     {
         user = null;
-        //dataSource.logout();
+        result.setValue(new RepositoryResponse<>("Logged out successfully"));
+        dataSource.logout(loadFromPrefs("JWToken"));
     }
 
     private void setUser(User user)
@@ -84,25 +83,21 @@ public class UserRepository extends Repository
     public void login(String username, String password)
     {
         LiveData<DataSourceResponse<User>> dataSourceResult = dataSource.login(new SingInCredentialsModel(username, password));
-        result.addSource(dataSourceResult, new Observer<DataSourceResponse<User>>()
+        result.addSource(dataSourceResult, user ->
         {
-            @Override
-            public void onChanged(@Nullable DataSourceResponse<User> user)
+            if (user.isSuccessful())
             {
-                if (user.isSuccessful())
-                {
-                    setUser(user.getResponse());
-                    saveToPrefs("JWToken" ,user.getResponse().getJwToken());
-                    NotificationHub.init(user.getResponse().getJwToken());
-                    result.setValue(new RepositoryResponse<>(user.getResponse()));
-                }
-                else
-                {
-                    result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
-                }
-
-                result.removeSource(dataSourceResult);
+                setUser(user.getResponse());
+                saveToPrefs("JWToken" ,user.getResponse().getJwToken());
+                NotificationHub.init(user.getResponse().getJwToken());
+                result.setValue(new RepositoryResponse<>(user.getResponse()));
             }
+            else
+            {
+                result.setValue(new RepositoryResponse<>(user.getErrorMessage()));
+            }
+
+            result.removeSource(dataSourceResult);
         });
     }
 

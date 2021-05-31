@@ -13,11 +13,12 @@ import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class SearchViewModel extends ViewModel
 {
-    private final LiveData<List<Item>> searchResult;
+    private final LiveData<Event<List<Item>>> searchResult;
     private final LiveData<List<String>> citiesResult;
     private final LiveData<Event<Place>> locationInfo;
     private final ContentRepository repository;
@@ -26,19 +27,17 @@ public class SearchViewModel extends ViewModel
     {
         this.repository = repository;
 
-        searchResult = Transformations.map(repository.getSearchResult(), new Function<RepositoryResponse<List<Item>>, List<Item>>()
+        searchResult = Transformations.map(repository.getSearchResult(), input ->
         {
-            @Override
-            public List<Item> apply(RepositoryResponse<List<Item>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                Event<List<Item>> event = new Event<>(new LinkedList<>());
+                event.setHandled(true);
+                return event;
             }
         });
 
@@ -82,7 +81,7 @@ public class SearchViewModel extends ViewModel
         repository.search(query, country, city, type, radius);
     }
 
-    public LiveData<List<Item>> getSearchResult()
+    public LiveData<Event<List<Item>>> getSearchResult()
     {
         return searchResult;
     }

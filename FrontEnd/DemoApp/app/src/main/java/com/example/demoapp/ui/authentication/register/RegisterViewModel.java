@@ -28,20 +28,15 @@ public class RegisterViewModel extends ViewModel
         this.userRepository = userRepository;
         registerFormState = new MutableLiveData<>();
 
-        registerResult = Transformations.map(userRepository.getResult(), new Function<RepositoryResponse<User>, AuthenticationResult>()
+        registerResult = Transformations.map(userRepository.getResult(), input ->
         {
-            @WorkerThread
-            @Override
-            public AuthenticationResult apply(RepositoryResponse<User> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return new AuthenticationResult(new AuthenticatedUserView(input.getResponse().getJwToken()));
-                }
-                else
-                {
-                    return new AuthenticationResult(R.string.login_failed);
-                }
+                return new AuthenticationResult(new AuthenticatedUserView(input.getResponse().getJwToken()));
+            }
+            else
+            {
+                return new AuthenticationResult(input.getErrorMessage());
             }
         });
     }

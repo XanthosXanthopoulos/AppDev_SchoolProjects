@@ -61,19 +61,12 @@ public class AccountViewModel extends ViewModel
                 }
                 else
                 {
-                    return new AuthenticationResult(R.string.login_failed);
+                    return new AuthenticationResult(input.getErrorMessage());
                 }
             }
         });
 
-        saveResult = Transformations.map(userRepository.getActionResult(), new Function<RepositoryResponse<Event<Boolean>>, Event<Boolean>>()
-        {
-            @Override
-            public Event<Boolean> apply(RepositoryResponse<Event<Boolean>> input)
-            {
-                return  input.getResponse();
-            }
-        });
+        saveResult = Transformations.map(userRepository.getActionResult(), input -> input.getResponse());
     }
 
     public void loadUserProfile()

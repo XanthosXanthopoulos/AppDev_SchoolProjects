@@ -39,7 +39,16 @@
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
                 android:src="@drawable/ic_notifications_black_24dp"
-                android:tint="#FFFFFF"/>
+                app:tint="#FFFFFF" />
+
+            <ImageButton
+                android:id="@+id/logout_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#00FFFFFF"
+                android:src="@drawable/ic_logout"
+                app:tint="#FFFFFF" />
 
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>

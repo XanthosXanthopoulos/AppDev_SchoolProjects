@@ -1,6 +1,7 @@
 package com.example.demoapp.ui.adapter;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import androidx.transition.Visibility;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -33,6 +33,7 @@ import com.example.demoapp.data.model.Follow;
 import com.example.demoapp.data.model.Image;
 import com.example.demoapp.data.model.Item;
 import com.example.demoapp.data.model.Post;
+import com.example.demoapp.data.model.Status;
 import com.example.demoapp.util.ApiRoutes;
 
 import java.text.SimpleDateFormat;
@@ -149,7 +150,18 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 postViewHolder.commentButton.setOnClickListener(v ->
                         postViewHolder.commentSection.setVisibility(postViewHolder.commentSection.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
 
-                postViewHolder.approveButton.setOnClickListener(v -> commentLikeClickListener.sendLike(post.getPostID()));
+                if (post.isLiked())
+                {
+                    postViewHolder.approveButton.setColorFilter(Color.rgb(0, 153, 255));
+                }
+                else
+                {
+                    postViewHolder.approveButton.setOnClickListener(v ->
+                    {
+                        commentLikeClickListener.sendLike(post.getPostID());
+                        postViewHolder.approveButton.setColorFilter(Color.rgb(0, 153, 255));
+                    });
+                }
 
                 postViewHolder.sendComment.setOnClickListener(v ->
                 {
@@ -174,33 +186,36 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 url = new GlideUrl(ApiRoutes.getRoute(ApiRoutes.Route.IMAGE_DOWNLOAD, params), new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + sharedPreferences.getString("JWToken", "")).build());
 
                 Glide.with(App.getInstance()).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(userViewHolder.profileImage);
+                userViewHolder.deleteButton.setVisibility(View.GONE);
 
                 switch (follow.getStatus())
                 {
                     case NONE:
                         userViewHolder.actionButton.setText("Follow");
-                        userViewHolder.deleteButton.setVisibility(View.GONE);
-                        userViewHolder.actionButton.setOnClickListener(v -> actions.follow(follow.getUserID()));
+                        userViewHolder.actionButton.setOnClickListener(v ->
+                        {
+                            actions.follow(follow.getUserID());
+                            follow.setStatus(Status.PENDING_OUTCOMING);
+                            notifyItemChanged(position);
+                        });
                         break;
-                    case FOLLOWED:
-                        userViewHolder.actionButton.setText("Unfollow");
-                        userViewHolder.deleteButton.setVisibility(View.GONE);
-                        userViewHolder.actionButton.setOnClickListener(v -> actions.unfollow(follow.getUserID()));
                     case FOLLOWING:
-                        userViewHolder.actionButton.setText("Remove");
-                        userViewHolder.deleteButton.setVisibility(View.GONE);
-                        userViewHolder.actionButton.setOnClickListener(v -> actions.remove(follow.getUserID()));
-                        break;
-                    case PENDING_INCOMING:
-                        userViewHolder.actionButton.setText("Accept");
-                        userViewHolder.deleteButton.setVisibility(View.VISIBLE);
-                        userViewHolder.actionButton.setOnClickListener(v -> actions.accept(follow.getUserID()));
-                        userViewHolder.deleteButton.setOnClickListener(v -> actions.decline(follow.getUserID()));
+                        userViewHolder.actionButton.setText("Unfollow");
+                        userViewHolder.actionButton.setOnClickListener(v ->
+                        {
+                            actions.unfollow(follow.getUserID());
+                            follow.setStatus(Status.NONE);
+                            notifyItemChanged(position);
+                        });
                         break;
                     case PENDING_OUTCOMING:
                         userViewHolder.actionButton.setText("Cancel");
-                        userViewHolder.deleteButton.setVisibility(View.GONE);
-                        userViewHolder.actionButton.setOnClickListener(v -> actions.cancel(follow.getUserID()));
+                        userViewHolder.actionButton.setOnClickListener(v ->
+                        {
+                            actions.cancel(follow.getUserID());
+                            follow.setStatus(Status.NONE);
+                            notifyItemChanged(position);
+                        });
                         break;
                 }
 

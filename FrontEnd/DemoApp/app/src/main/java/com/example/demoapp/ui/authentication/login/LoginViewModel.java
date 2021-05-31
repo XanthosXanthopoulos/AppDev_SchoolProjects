@@ -42,7 +42,7 @@ public class LoginViewModel extends ViewModel
                 }
                 else
                 {
-                    return new AuthenticationResult(R.string.login_failed);
+                    return new AuthenticationResult(input.getErrorMessage());
                 }
             }
         });

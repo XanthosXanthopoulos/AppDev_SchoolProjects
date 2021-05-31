@@ -170,6 +170,15 @@ namespace WebServer.Controllers
 
         [HttpGet]
         [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await signInManager.SignOutAsync();
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Authorize]
         public async Task<ApiResponse<ProfileInfoResponseModel>> ProfileInfo()
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

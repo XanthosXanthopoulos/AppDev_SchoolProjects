@@ -48,6 +48,11 @@ public class AddMomentViewModel extends ViewModel{
         repository.addImages(paths);
     }
 
+    public void removeImage(int index)
+    {
+        repository.removeImages(index);
+    }
+
     public LiveData<Iterable<String>> getImagesLiveData()
     {
         return imagesLiveData;

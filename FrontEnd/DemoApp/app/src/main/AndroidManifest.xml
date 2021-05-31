@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.main.plan.memory.create.CreateMemoryActivity"></activity>
+        <activity android:name=".ui.main.plan.memory.create.CreateMemoryActivity" />
         <activity android:name=".ui.main.search.SearchActivity" />
         <activity android:name=".ui.location_picker.LocationActivity" />
         <activity android:name=".ui.authentication.AuthenticationActivity">
@@ -29,15 +29,7 @@
         </activity>
         <activity
             android:name=".ui.main.MainActivity"
-            android:label="">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:label="" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

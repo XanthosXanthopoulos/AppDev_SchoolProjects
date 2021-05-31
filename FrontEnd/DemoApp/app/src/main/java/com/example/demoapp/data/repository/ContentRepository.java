@@ -27,8 +27,8 @@ public class ContentRepository extends Repository
     private static volatile ContentRepository instance;
     private final ApiDataSource dataSource;
 
-    private final MediatorLiveData<RepositoryResponse<List<Item>>> searchResult;
-    private final MediatorLiveData<RepositoryResponse<List<Item>>> feedResult;
+    private final MediatorLiveData<RepositoryResponse<Event<List<Item>>>> searchResult;
+    private final MediatorLiveData<RepositoryResponse<Event<List<Item>>>> feedResult;
     private final MediatorLiveData<RepositoryResponse<Event<Boolean>>> uploadResult;
     private final MediatorLiveData<RepositoryResponse<Post>> postResult;
     private final MediatorLiveData<RepositoryResponse<List<String>>> citiesData;
@@ -110,22 +110,18 @@ public class ContentRepository extends Repository
             dataSourceResult = dataSource.searchUsers(query, loadFromPrefs("JWToken"));
         }
 
-        searchResult.addSource(dataSourceResult, new Observer<DataSourceResponse<List<Item>>>()
+        searchResult.addSource(dataSourceResult, result ->
         {
-            @Override
-            public void onChanged(@Nullable DataSourceResponse<List<Item>> result)
+            if (result.isSuccessful())
             {
-                if (result.isSuccessful())
-                {
-                    searchResult.setValue(new RepositoryResponse<>(result.getResponse()));
-                }
-                else
-                {
-                    searchResult.setValue(new RepositoryResponse<>(result.getErrorMessage()));
-                }
-
-                searchResult.removeSource(dataSourceResult);
+                searchResult.setValue(new RepositoryResponse<>(new Event<>(result.getResponse())));
             }
+            else
+            {
+                searchResult.setValue(new RepositoryResponse<>(result.getErrorMessage()));
+            }
+
+            searchResult.removeSource(dataSourceResult);
         });
     }
 
@@ -134,25 +130,25 @@ public class ContentRepository extends Repository
         LiveData<DataSourceResponse<List<Item>>> dataSourceResult = dataSource.getFeed(self, loadFromPrefs("JWToken"));
         feedResult.addSource(dataSourceResult, result ->
         {
-            if (!result.isSuccessful())
+            if (result.isSuccessful())
             {
-                feedResult.setValue(new RepositoryResponse<>(result.getErrorMessage()));
+                feedResult.setValue(new RepositoryResponse<>(new Event<>(result.getResponse())));
             }
             else
             {
-                feedResult.setValue(new RepositoryResponse<>(result.getResponse()));
+                feedResult.setValue(new RepositoryResponse<>(result.getErrorMessage()));
             }
 
             feedResult.removeSource(dataSourceResult);
         });
     }
 
-    public LiveData<RepositoryResponse<List<Item>>> getSearchResult()
+    public LiveData<RepositoryResponse<Event<List<Item>>>> getSearchResult()
     {
         return searchResult;
     }
 
-    public LiveData<RepositoryResponse<List<Item>>> getFeedResult()
+    public LiveData<RepositoryResponse<Event<List<Item>>>> getFeedResult()
     {
         return feedResult;
     }
@@ -170,14 +166,10 @@ public class ContentRepository extends Repository
         post.setTitle(title);
 
         LiveData<DataSourceResponse<Boolean>> result = dataSource.uploadPost(post, loadFromPrefs("JWToken"));
-        uploadResult.addSource(result, new Observer<DataSourceResponse<Boolean>>()
+        uploadResult.addSource(result, booleanDataSourceResponse ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<Boolean> booleanDataSourceResponse)
-            {
-                uploadResult.setValue(new RepositoryResponse<>(new Event<>(booleanDataSourceResponse.getResponse())));
-                uploadResult.removeSource(result);
-            }
+            uploadResult.setValue(new RepositoryResponse<>(new Event<>(booleanDataSourceResponse.getResponse())));
+            uploadResult.removeSource(result);
         });
     }
 
@@ -200,77 +192,76 @@ public class ContentRepository extends Repository
         currentPost.setValue(currentPost.getValue());
     }
 
+    public void removeActivity(int index)
+    {
+        currentPost.getValue().getActivities().remove(index);
+
+        currentPost.setValue(currentPost.getValue());
+    }
+
+    public void removeImages(int index)
+    {
+        currentPost.getValue().getImages().remove(index);
+
+        currentPost.setValue(currentPost.getValue());
+    }
+
     public void initializePostData()
     {
-        if (currentPost.getValue() == null)
-        {
-            currentPost.setValue(new Post());
-        }
+        currentPost.setValue(new Post());
     }
 
     public void loadPost(int postID)
     {
         LiveData<DataSourceResponse<Post>> result = dataSource.getPost(postID, loadFromPrefs("JWToken"));
-        postResult.addSource(result, new Observer<DataSourceResponse<Post>>()
+        postResult.addSource(result, postDataSourceResponse ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<Post> postDataSourceResponse)
+            if (postDataSourceResponse.isSuccessful())
             {
-                if (postDataSourceResponse.isSuccessful())
-                {
-                    postResult.setValue(new RepositoryResponse<>(postDataSourceResponse.getResponse()));
-                }
-                else
-                {
-                    postResult.setValue(new RepositoryResponse<>(postDataSourceResponse.getErrorMessage()));
-                }
-
-                postResult.removeSource(result);
+                postResult.setValue(new RepositoryResponse<>(postDataSourceResponse.getResponse()));
             }
+            else
+            {
+                postResult.setValue(new RepositoryResponse<>(postDataSourceResponse.getErrorMessage()));
+            }
+
+            postResult.removeSource(result);
         });
     }
 
     public void getCities(String country)
     {
         LiveData<DataSourceResponse<List<String>>> result = dataSource.getCities(country);
-        citiesData.addSource(result, new Observer<DataSourceResponse<List<String>>>()
+        citiesData.addSource(result, response ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<List<String>> response)
+            if (response.isSuccessful())
             {
-                if (response.isSuccessful())
-                {
-                    citiesData.setValue(new RepositoryResponse<>(response.getResponse()));
-                }
-                else
-                {
-                    citiesData.setValue(new RepositoryResponse<>(response.getErrorMessage()));
-                }
-
-                citiesData.removeSource(result);
+                citiesData.setValue(new RepositoryResponse<>(response.getResponse()));
             }
+            else
+            {
+                citiesData.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            citiesData.removeSource(result);
         });
     }
 
     public void getPostActivities(int postID)
     {
         LiveData<DataSourceResponse<List<Activity>>> result = dataSource.getPostActivities(postID, loadFromPrefs("JWToken"));
-        activitiesResult.addSource(result, new Observer<DataSourceResponse<List<Activity>>>()
+        activitiesResult.addSource(result, response ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<List<Activity>> response)
+            if (response.isSuccessful())
             {
-                if (response.isSuccessful())
-                {
-                    activitiesResult.setValue(new RepositoryResponse<>(response.getResponse()));
-                }
-                else
-                {
-                    activitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
-                }
-
-                activitiesResult.removeSource(result);
+                activitiesResult.setValue(new RepositoryResponse<>(response.getResponse()));
             }
+            else
+            {
+                activitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            activitiesResult.removeSource(result);
         });
     }
 
@@ -308,6 +299,11 @@ public class ContentRepository extends Repository
 
             placeResult.removeSource(result);
         });
+    }
+
+    public void deletePost(int postID)
+    {
+        dataSource.deletePost(postID, loadFromPrefs("JWToken"));
     }
 
     public void resetPostData()

@@ -1,5 +1,7 @@
 package com.example.demoapp.ui.main.home;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -18,6 +21,7 @@ import com.example.demoapp.data.CommentLikeClickListener;
 import com.example.demoapp.data.model.Notification;
 import com.example.demoapp.ui.adapter.NotificationAdapter;
 import com.example.demoapp.ui.adapter.SearchResultAdapter;
+import com.example.demoapp.ui.authentication.AuthenticationActivity;
 import com.example.demoapp.util.ViewModelFactory;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -31,6 +35,7 @@ public class HomeFragment extends Fragment
     private RecyclerView searchResultList;
     private SearchResultAdapter adapter;
     private ImageButton notificationButton;
+    private ImageButton logoutButton;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -40,6 +45,7 @@ public class HomeFragment extends Fragment
 
         searchResultList = view.findViewById(R.id.Post_list);
         notificationButton = view.findViewById(R.id.notification_button);
+        logoutButton = view.findViewById(R.id.logout_button);
         NotificationAdapter notificationAdapter = new NotificationAdapter(getContext());
         notificationAdapter.setItems((LinkedList<Notification>) viewModel.getNotifications().clone());
 
@@ -79,7 +85,14 @@ public class HomeFragment extends Fragment
             notificationResultList.smoothScrollToPosition(0);
         });
 
-        viewModel.getFeedResult().observe(getViewLifecycleOwner(), items -> adapter.setItems(items));
+        viewModel.getFeedResult().observe(getViewLifecycleOwner(), event ->
+        {
+            if (event.isHandled()) return;
+
+            event.setHandled(true);
+
+            adapter.setItems(event.getData());
+        });
 
         viewModel.getNotification().observe(getViewLifecycleOwner(), notification ->
         {
@@ -96,6 +109,17 @@ public class HomeFragment extends Fragment
                 notificationButton.setColorFilter(Color.rgb(200, 120, 150));
             }
         });
+
+        logoutButton.setOnClickListener(v -> new AlertDialog.Builder(getContext())
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton(android.R.string.yes, (dialog, whichButton) ->
+                {
+                    viewModel.logout();
+                    startActivity(new Intent(getActivity(), AuthenticationActivity.class));
+                })
+                .setNegativeButton(android.R.string.no, null).show());
 
         viewModel.getFeed();
 

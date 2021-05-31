@@ -156,7 +156,7 @@ public class RegisterFragment extends Fragment
         editor.apply();
     }
 
-    private void showRegisterFailed(@StringRes Integer errorString)
+    private void showRegisterFailed(String errorString)
     {
         Toast.makeText(getContext(), errorString, Toast.LENGTH_SHORT).show();
     }

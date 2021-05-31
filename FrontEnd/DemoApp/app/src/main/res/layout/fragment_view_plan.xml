@@ -57,8 +57,6 @@
         android:textAlignment="center"
         android:textColor="#222"
         android:textSize="18sp"
-
-        android:background="#200455F4"
         app:layout_constraintTop_toBottomOf="@id/linearLayout2" />
 
     <androidx.cardview.widget.CardView
@@ -71,8 +69,10 @@
             android:id="@+id/post_images"
             android:layout_width="match_parent"
             android:layout_height="240dp"
+            android:maxHeight="240dp"
             android:paddingStart="30dp"
             android:paddingEnd="30dp"
+            android:adjustViewBounds="true"
             app:srcCompat="@drawable/ic_launcher_background" />
 
     </androidx.cardview.widget.CardView>
@@ -87,7 +87,6 @@
         android:paddingBottom="8dp"
         android:textColor="#222"
         android:textSize="16sp"
-        android:background="#200455F4"
         app:layout_constraintTop_toBottomOf="@id/cardView" />
 
     <com.google.android.material.tabs.TabLayout

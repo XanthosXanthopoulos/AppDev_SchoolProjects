@@ -148,7 +148,7 @@ public class LoginFragment extends Fragment
         editor.apply();
     }
 
-    private void showLoginFailed(@StringRes Integer errorString)
+    private void showLoginFailed(String errorString)
     {
         Toast.makeText(getContext(), errorString, Toast.LENGTH_SHORT).show();
     }
