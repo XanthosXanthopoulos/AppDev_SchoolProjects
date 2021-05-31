@@ -20,12 +20,37 @@ public class SearchQueryModel
 
     int radius;
 
-    public SearchQueryModel(String query, String country, String city, int radius)
+    public double getLatitude()
+    {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude)
+    {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude()
+    {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude)
+    {
+        this.longitude = longitude;
+    }
+
+    double latitude;
+    double longitude;
+
+    public SearchQueryModel(String query, String country, String city, int radius, double latitude, double longitude)
     {
         this.query = query;
         this.country = country;
         this.city = city;
         this.radius = radius;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public String getQuery()

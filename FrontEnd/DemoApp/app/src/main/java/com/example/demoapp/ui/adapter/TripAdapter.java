@@ -24,6 +24,7 @@ import com.example.demoapp.data.model.Post;
 import com.example.demoapp.util.ApiRoutes;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,7 +75,14 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>
         holder.title.setText(items.get(position).getTitle());
         holder.countries.setText(items.get(position).getCountrySummary());
         holder.likes.setText(String.valueOf(items.get(position).getLikes()));
-        holder.date.setText(formatter.format(items.get(position).getDate()));
+        if (items.get(position).getDate().compareTo(new Date(0)) == 0)
+        {
+            holder.date.setText("");
+        }
+        else
+        {
+            holder.date.setText(formatter.format(items.get(position).getDate()));
+        }
 
         HashMap<String, String> params = new HashMap<>();
         params.put("id", items.get(position).getThumbnailImageID());

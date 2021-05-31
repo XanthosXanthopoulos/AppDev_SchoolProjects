@@ -10,14 +10,15 @@ import com.example.demoapp.data.model.Place;
 import com.example.demoapp.data.repository.ContentRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MapViewModel extends ViewModel
 {
     private final ContentRepository repository;
 
-    private final LiveData<List<Activity>> activitiesLiveData;
-    private final LiveData<List<Activity>> nearActivitiesLiveData;
+    private final LiveData<Event<List<Activity>>> activitiesLiveData;
+    private final LiveData<Event<List<Activity>>> nearActivitiesLiveData;
     private final LiveData<Event<Place>> searchResult;
 
     public MapViewModel(ContentRepository repository)
@@ -32,7 +33,9 @@ public class MapViewModel extends ViewModel
             }
             else
             {
-                return new ArrayList<>();
+                Event<List<Activity>> event = new Event<>(new LinkedList<>());
+                event.setHandled(true);
+                return event;
             }
         });
 
@@ -44,7 +47,9 @@ public class MapViewModel extends ViewModel
             }
             else
             {
-                return new ArrayList<>();
+                Event<List<Activity>> event = new Event<>(new LinkedList<>());
+                event.setHandled(true);
+                return event;
             }
         });
 
@@ -73,12 +78,12 @@ public class MapViewModel extends ViewModel
         repository.searchNearActivities(latitude, longitude, radius);
     }
 
-    public LiveData<List<Activity>> getActivitiesLiveData()
+    public LiveData<Event<List<Activity>>> getActivitiesLiveData()
     {
         return activitiesLiveData;
     }
 
-    public LiveData<List<Activity>> getNearActivitiesLiveData()
+    public LiveData<Event<List<Activity>>> getNearActivitiesLiveData()
     {
         return nearActivitiesLiveData;
     }

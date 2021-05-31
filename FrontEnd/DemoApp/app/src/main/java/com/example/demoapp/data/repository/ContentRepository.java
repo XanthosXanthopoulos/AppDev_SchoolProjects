@@ -32,15 +32,15 @@ public class ContentRepository extends Repository
     private final MediatorLiveData<RepositoryResponse<Event<Boolean>>> uploadResult;
     private final MediatorLiveData<RepositoryResponse<Post>> postResult;
     private final MediatorLiveData<RepositoryResponse<List<String>>> citiesData;
-    private final MediatorLiveData<RepositoryResponse<List<Activity>>> activitiesResult;
+    private final MediatorLiveData<RepositoryResponse<Event<List<Activity>>>> activitiesResult;
     private final MediatorLiveData<RepositoryResponse<Event<Place>>> placeResult;
 
-    public MediatorLiveData<RepositoryResponse<List<Activity>>> getNearActivitiesResult()
+    public MediatorLiveData<RepositoryResponse<Event<List<Activity>>>> getNearActivitiesResult()
     {
         return nearActivitiesResult;
     }
 
-    private final MediatorLiveData<RepositoryResponse<List<Activity>>> nearActivitiesResult;
+    private final MediatorLiveData<RepositoryResponse<Event<List<Activity>>>> nearActivitiesResult;
 
     private final MutableLiveData<Activity> currentActivity;
     private final MutableLiveData<Post> currentPost;
@@ -74,36 +74,32 @@ public class ContentRepository extends Repository
     public void searchNearActivities(double latitude, double longtitude, double radius)
     {
         LiveData<DataSourceResponse<List<Activity>>> result = dataSource.searchNearActivities(latitude, longtitude, radius, loadFromPrefs("JWToken"));
-        nearActivitiesResult.addSource(result, new Observer<DataSourceResponse<List<Activity>>>()
+        nearActivitiesResult.addSource(result, response ->
         {
-            @Override
-            public void onChanged(DataSourceResponse<List<Activity>> response)
+            if (response.isSuccessful())
             {
-                if (response.isSuccessful())
-                {
-                    nearActivitiesResult.setValue(new RepositoryResponse<>(response.getResponse()));
-                }
-                else
-                {
-                    nearActivitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
-                }
-
-                nearActivitiesResult.removeSource(result);
+                nearActivitiesResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
             }
+            else
+            {
+                nearActivitiesResult.setValue(new RepositoryResponse<>(response.getErrorMessage()));
+            }
+
+            nearActivitiesResult.removeSource(result);
         });
     }
 
-    public void search(String query, String country, String city, String type, int radius)
+    public void search(String query, String country, String city, String type, int radius, double latitude, double longitude)
     {
         LiveData<DataSourceResponse<List<Item>>> dataSourceResult;
 
         if (type.equalsIgnoreCase("activity"))
         {
-            dataSourceResult= dataSource.searchActivities(new SearchQueryModel(query, country, city, radius), loadFromPrefs("JWToken"));
+            dataSourceResult= dataSource.searchActivities(new SearchQueryModel(query, country, city, radius, latitude, longitude), loadFromPrefs("JWToken"));
         }
         else if (type.equalsIgnoreCase("post"))
         {
-            dataSourceResult= dataSource.searchPosts(new SearchQueryModel(query, country, city, radius), loadFromPrefs("JWToken"));
+            dataSourceResult= dataSource.searchPosts(new SearchQueryModel(query, country, city, radius, latitude, longitude), loadFromPrefs("JWToken"));
         }
         else
         {
@@ -254,7 +250,7 @@ public class ContentRepository extends Repository
         {
             if (response.isSuccessful())
             {
-                activitiesResult.setValue(new RepositoryResponse<>(response.getResponse()));
+                activitiesResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
             }
             else
             {
@@ -306,11 +302,6 @@ public class ContentRepository extends Repository
         dataSource.deletePost(postID, loadFromPrefs("JWToken"));
     }
 
-    public void resetPostData()
-    {
-        currentPost.setValue(null);
-    }
-
     public MutableLiveData<Activity> getCurrentActivity()
     {
         return currentActivity;
@@ -331,7 +322,7 @@ public class ContentRepository extends Repository
         return citiesData;
     }
 
-    public MediatorLiveData<RepositoryResponse<List<Activity>>> getActivitiesResult()
+    public MediatorLiveData<RepositoryResponse<Event<List<Activity>>>> getActivitiesResult()
     {
         return activitiesResult;
     }

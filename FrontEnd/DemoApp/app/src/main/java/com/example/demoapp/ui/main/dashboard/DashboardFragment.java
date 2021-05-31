@@ -64,6 +64,9 @@ public class DashboardFragment extends Fragment
     private RecyclerView searchResultList;
     private SearchResultAdapter adapter;
 
+    private double latitude;
+    private double longitude;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -144,7 +147,7 @@ public class DashboardFragment extends Fragment
                 String type = ((Type)typeSpinner.getSelectedItem()).label;
                 int radius = ((Radius)radiusSpinner.getSelectedItem()).radius;
 
-                dashboardViewModel.search(query, country, city, type, radius);
+                dashboardViewModel.search(query, country, city, type, radius, latitude, longitude);
                 return false;
             }
 
@@ -192,14 +195,7 @@ public class DashboardFragment extends Fragment
             }
         });
 
-        dashboardViewModel.getCitiesResult().observe(getViewLifecycleOwner(), new Observer<List<String>>()
-        {
-            @Override
-            public void onChanged(List<String> strings)
-            {
-                citySpinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, strings));
-            }
-        });
+        dashboardViewModel.getCitiesResult().observe(getViewLifecycleOwner(), strings -> citySpinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, strings)));
 
         adapter.setActions(new FollowActions()
         {
@@ -231,27 +227,16 @@ public class DashboardFragment extends Fragment
             }
         });
 
-        locationButton.setOnClickListener(new View.OnClickListener()
+        locationButton.setOnClickListener(v -> startActivityForResult(new Intent(getActivity(), LocationActivity.class), 0));
+
+        dashboardViewModel.getLocationInfo().observe(getViewLifecycleOwner(), event ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                startActivityForResult(new Intent(getActivity(), LocationActivity.class), 0);
-            }
-        });
+            if (event.isHandled()) return;
 
-        dashboardViewModel.getLocationInfo().observe(getViewLifecycleOwner(), new Observer<Event<Place>>()
-        {
-            @Override
-            public void onChanged(Event<Place> event)
-            {
-                if (event.isHandled()) return;
+            event.setHandled(true);
 
-                event.setHandled(true);
-
-                countrySpinner.setText(event.getData().getCountry());
-                citySpinner.setText(event.getData().getCity());
-            }
+            countrySpinner.setText(event.getData().getCountry());
+            citySpinner.setText(event.getData().getCity());
         });
 
         return view;
@@ -264,8 +249,8 @@ public class DashboardFragment extends Fragment
 
         if (requestCode == LOCATION_SELECT && resultCode == RESULT_OK && data != null)
         {
-            double latitude = data.getDoubleExtra("latitude", 0);
-            double longitude = data.getDoubleExtra("longitude", 0);
+            latitude = data.getDoubleExtra("latitude", 0);
+            longitude = data.getDoubleExtra("longitude", 0);
 
             dashboardViewModel.getLocationInfo(latitude, longitude);
         }

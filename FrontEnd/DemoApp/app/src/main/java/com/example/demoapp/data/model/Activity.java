@@ -25,8 +25,24 @@ public class Activity extends Item
         this.title = title;
         this.description = description;
         this.tags = tags;
+        this.city = city;
         this.address = address;
         this.country = country;
+    }
+
+    public Activity(String id, String title, String description, String tags, Country country, String city, String address, double latitude, double longitude)
+    {
+        super(ContentType.ACTIVITY);
+
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.tags = tags;
+        this.city = city;
+        this.address = address;
+        this.country = country;
+        this.latitude = latitude;
+        this.longtitude = longitude;
     }
 
     public String getTitle()

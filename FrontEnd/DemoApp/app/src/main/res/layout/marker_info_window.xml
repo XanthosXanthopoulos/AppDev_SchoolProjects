@@ -10,12 +10,18 @@
 
     <TextView
         android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxWidth="170dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginBottom="1dp"
+        android:paddingStart="3dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="3dp"
+        android:paddingBottom="2dp"
+        android:textAlignment="center"
         android:textStyle="bold"/>
 
     <View
@@ -28,17 +34,35 @@
 
     <TextView
         android:id="@+id/description"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxWidth="170dp"
+        android:paddingStart="3dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="3dp"
+        android:paddingBottom="8dp"
+        android:gravity="top"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/view"
+        app:layout_constraintTop_toBottomOf="@id/view" />
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#bbb"
+        app:layout_constraintTop_toBottomOf="@id/description"
         android:layout_marginBottom="1dp"/>
 
     <TextView
         android:id="@+id/tags"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxWidth="170dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/description" />
+        app:layout_constraintTop_toBottomOf="@id/view2"
+        android:paddingStart="3dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="3dp"
+        android:paddingBottom="2dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

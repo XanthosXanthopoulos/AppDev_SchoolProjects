@@ -72,9 +72,9 @@ public class DashboardViewModel extends ViewModel
         });
     }
 
-    public void search(String query, String country, String city, String type, int radius)
+    public void search(String query, String country, String city, String type, int radius, double latitude, double longitude)
     {
-        repository.search(query, country, city, type, radius);
+        repository.search(query, country, city, type, radius, latitude, longitude);
     }
 
     public LiveData<Event<List<Item>>> getSearchResult()

@@ -47,6 +47,11 @@ public class AddMemoryViewModel extends ViewModel
         repository.addActivity(new Activity(id, title, description, tags, country, city, address));
     }
 
+    public void addMemory(String id, String title, Country country, String city, String address, String description, String tags, double latitude, double longitude)
+    {
+        repository.addActivity(new Activity(id, title, description, tags, country, city, address, latitude, longitude));
+    }
+
     public void removeMemory(int index)
     {
         repository.removeActivity(index);

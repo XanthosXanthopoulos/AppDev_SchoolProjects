@@ -23,6 +23,7 @@
             android:textSize="16sp"
             android:ellipsize="end"
             android:padding="8dp"
+            android:textAlignment="center"
             android:maxLines="1"/>
 
         <ImageView

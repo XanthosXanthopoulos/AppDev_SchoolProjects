@@ -41,6 +41,9 @@ public class CreateMemoryActivity extends AppCompatActivity
     private Button submitButton;
     private Button cancelButton;
 
+    private double latitude;
+    private double longitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -170,6 +173,8 @@ public class CreateMemoryActivity extends AppCompatActivity
             data.putExtra("address", address);
             data.putExtra("description", description);
             data.putExtra("tags", tags);
+            data.putExtra("latitude", latitude);
+            data.putExtra("longitude", longitude);
             setResult(RESULT_OK, data);
             finish();
         });
@@ -200,8 +205,8 @@ public class CreateMemoryActivity extends AppCompatActivity
 
         if (requestCode == LOCATION_SELECT && resultCode == RESULT_OK && data != null)
         {
-            double latitude = data.getDoubleExtra("latitude", 0);
-            double longitude = data.getDoubleExtra("longitude", 0);
+            latitude = data.getDoubleExtra("latitude", 0);
+            longitude = data.getDoubleExtra("longitude", 0);
 
             viewModel.getLocationInfo(latitude, longitude);
         }

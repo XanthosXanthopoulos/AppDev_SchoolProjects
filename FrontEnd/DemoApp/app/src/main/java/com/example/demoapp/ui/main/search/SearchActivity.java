@@ -54,6 +54,9 @@ public class SearchActivity extends AppCompatActivity
     private RecyclerView searchResultList;
     private SearchResultAdapter adapter;
 
+    double latitude;
+    double longitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -135,7 +138,7 @@ public class SearchActivity extends AppCompatActivity
                 String city = citySpinner.getEditableText().toString();
                 int radius = ((Radius)radiusSpinner.getSelectedItem()).radius;
 
-                viewModel.search(query, country, city, Type.ACTIVITY.label, radius);
+                viewModel.search(query, country, city, Type.ACTIVITY.label, radius, latitude, longitude);
                 return false;
             }
 
@@ -206,8 +209,8 @@ public class SearchActivity extends AppCompatActivity
 
         if (requestCode == LOCATION_SELECT && resultCode == RESULT_OK && data != null)
         {
-            double latitude = data.getDoubleExtra("latitude", 0);
-            double longitude = data.getDoubleExtra("longitude", 0);
+            latitude = data.getDoubleExtra("latitude", 0);
+            longitude = data.getDoubleExtra("longitude", 0);
 
             viewModel.getLocationInfo(latitude, longitude);
         }

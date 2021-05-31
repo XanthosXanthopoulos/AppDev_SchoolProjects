@@ -211,7 +211,7 @@ public class CreatePlanFragment extends Fragment
 
     private void updateLabel()
     {
-        String myFormat = "dd/MM/yyyy"; //In which you need put here
+        String myFormat = "dd/MM/yyyy";
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.UK);
         dateSpinner.setText(sdf.format(myCalendar.getTime()));
     }

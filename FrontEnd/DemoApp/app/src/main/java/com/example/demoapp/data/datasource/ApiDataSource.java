@@ -303,6 +303,13 @@ public class ApiDataSource
         }
         params.put("city", query.getCity());
 
+        if (query.getLatitude() != 0)
+        {
+            params.put("latitude", String.valueOf(query.getLatitude()));
+            params.put("longtitude", String.valueOf(query.getLongitude()));
+            params.put("radius", String.valueOf(query.getRadius()));
+        }
+
         Response.Listener<JSONObject> searchResponse = response ->
         {
             ApiResponse<List<Activity>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Activity>>>(){}.getType());
@@ -324,7 +331,7 @@ public class ApiDataSource
             result.setValue(new DataSourceResponse<>("Network error"));
         };
 
-        if (query.getCity() != null && !query.getCity().isEmpty())
+        if (query.getCity() != null && !query.getCity().isEmpty() && query.getLatitude() == 0)
         {
             HashMap<String, String> geoParams = new HashMap<>();
             geoParams.put("key", "255230665c9249b28259b49dacc2c198");
@@ -443,6 +450,13 @@ public class ApiDataSource
         }
         params.put("city", query.getCity());
 
+        if (query.getLatitude() != 0)
+        {
+            params.put("latitude", String.valueOf(query.getLatitude()));
+            params.put("longtitude", String.valueOf(query.getLongitude()));
+            params.put("radius", String.valueOf(query.getRadius()));
+        }
+
         Response.Listener<JSONObject> searchResponse = response ->
         {
             ApiResponse<List<Post>> apiResponse = new Gson().fromJson(response.toString(), new TypeToken<ApiResponse<List<Post>>>(){}.getType());
@@ -464,7 +478,7 @@ public class ApiDataSource
             result.setValue(new DataSourceResponse<>("Network error"));
         };
 
-        if (query.getCity() != null && !query.getCity().isEmpty())
+        if (query.getCity() != null && !query.getCity().isEmpty() && query.getLatitude() == 0)
         {
             HashMap<String, String> geoParams = new HashMap<>();
             geoParams.put("key", "255230665c9249b28259b49dacc2c198");
@@ -687,6 +701,8 @@ public class ApiDataSource
                     activitySubmitModel.put("Country", activity.getCountry().code);
                     activitySubmitModel.put("City", activity.getCity());
                     activitySubmitModel.put("Tags", activity.getTags());
+                    activitySubmitModel.put("latitude", activity.getLatitude());
+                    activitySubmitModel.put("longtitude", activity.getLongtitude());
                 }
                 catch (JSONException e)
                 {
@@ -700,9 +716,12 @@ public class ApiDataSource
                 {
                     try
                     {
-                        JSONObject coordinates = response12.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                        activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
-                        activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                        if (activitySubmitModel.getDouble("latitude") == 0)
+                        {
+                            JSONObject coordinates = response12.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                            activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
+                            activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                        }
                     }
                     catch (JSONException e)
                     {
@@ -801,6 +820,8 @@ public class ApiDataSource
                         activitySubmitModel.put("Country", activity.getCountry().code);
                         activitySubmitModel.put("City", activity.getCity());
                         activitySubmitModel.put("Tags", activity.getTags());
+                        activitySubmitModel.put("latitude", activity.getLatitude());
+                        activitySubmitModel.put("longtitude", activity.getLongtitude());
                     }
                     catch (JSONException e)
                     {
@@ -814,9 +835,12 @@ public class ApiDataSource
                     {
                         try
                         {
-                            JSONObject coordinates = response1.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                            activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
-                            activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                            if (activitySubmitModel.getDouble("latitude") == 0)
+                            {
+                                JSONObject coordinates = response1.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                                activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
+                                activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                            }
                         }
                         catch (JSONException e)
                         {
@@ -879,8 +903,11 @@ public class ApiDataSource
                 activitySubmitModel.put("Title", activity.getTitle());
                 activitySubmitModel.put("Description", activity.getDescription());
                 activitySubmitModel.put("Address", activity.getAddress());
+                activitySubmitModel.put("City", activity.getCity());
                 activitySubmitModel.put("Country", activity.getCountry().code);
                 activitySubmitModel.put("Tags", activity.getTags());
+                activitySubmitModel.put("latitude", activity.getLatitude());
+                activitySubmitModel.put("longtitude", activity.getLongtitude());
             }
             catch (JSONException e)
             {
@@ -894,9 +921,12 @@ public class ApiDataSource
             {
                 try
                 {
-                    JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                    activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
-                    activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                    if (activitySubmitModel.getDouble("latitude") == 0)
+                    {
+                        JSONObject coordinates = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                        activitySubmitModel.put("Latitude", coordinates.getDouble("lat"));
+                        activitySubmitModel.put("Longtitude", coordinates.getDouble("lng"));
+                    }
                 }
                 catch (JSONException e)
                 {

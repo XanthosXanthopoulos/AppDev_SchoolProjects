@@ -118,8 +118,10 @@ public class AddMemoryFragment extends Fragment
             String address = data.getStringExtra("address");
             String description = data.getStringExtra("description");
             String tags = data.getStringExtra("tags");
+            double latitude = data.getDoubleExtra("latitude", 0);
+            double longitude = data.getDoubleExtra("longitude", 0);
 
-            viewModel.addMemory("", title, country, city, address, description, tags);
+            viewModel.addMemory("", title, country, city, address, description, tags, latitude, longitude);
         }
         else if (requestCode == ACTIVITY_SELECT && resultCode == RESULT_OK && data != null)
         {
