@@ -156,10 +156,12 @@ namespace WebServer.Controllers
                                                       ID = a.ActivityID,
                                                       Title = a.Title,
                                                       Description = a.Description,
-                                                      Address = a.Address + ", " + a.City + ", " + a.Country.Description(),
+                                                      Address = a.Address,
                                                       City = a.City,
                                                       Tags = a.Tags,
-                                                      Country = a.Country.ToString()
+                                                      Country = a.Country.ToString(),
+                                                      Latitude = a.Coordinates.Y,
+                                                      Longtitude = a.Coordinates.X
                                                   }).ToList(),
                                                   Comments = p.Comments.Select(c => new CommentResponse
                                                   {

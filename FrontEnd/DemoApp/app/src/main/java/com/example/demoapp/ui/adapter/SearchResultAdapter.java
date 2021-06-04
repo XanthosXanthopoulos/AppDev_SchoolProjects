@@ -99,7 +99,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 activityViewHolder.title.setText(activity.getTitle());
                 activityViewHolder.description.setText(activity.getDescription());
-                activityViewHolder.address.setText(activity.getAddress());
+                activityViewHolder.address.setText(activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
                 activityViewHolder.tags.setText("Tags: " + activity.getTags());
 
                 if (itemClickListener != null)
