@@ -916,7 +916,7 @@ public class ApiDataSource
 
             HashMap<String, String> geoParams = new HashMap<>();
             geoParams.put("key", "255230665c9249b28259b49dacc2c198");
-            geoParams.put("q", activity.getAddress() + " ," + activity.getCountry().label);
+            geoParams.put("q", activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
             initialRequest = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
                 try

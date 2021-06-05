@@ -42,21 +42,17 @@ public class CreateMemoryViewModel extends ViewModel
             }
         });
 
-        locationInfo = Transformations.map(repository.getPlaceResult(), new Function<RepositoryResponse<Event<Place>>, Event<Place>>()
+        locationInfo = Transformations.map(repository.getPlaceResult(), input ->
         {
-            @Override
-            public Event<Place> apply(RepositoryResponse<Event<Place>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    Event<Place> event = new Event<>(new Place());
-                    event.setHandled(true);
-                    return event;
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                Event<Place> event = new Event<>(new Place());
+                event.setHandled(true);
+                return event;
             }
         });
     }
