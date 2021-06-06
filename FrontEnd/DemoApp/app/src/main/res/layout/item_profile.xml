@@ -48,6 +48,8 @@
         app:layout_constraintTop_toTopOf="@id/account_image"
         app:layout_constraintBottom_toBottomOf="@id/account_image"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="10dp" />
+        android:layout_margin="10dp"
+        android:background="@drawable/ic_cancel"
+        android:backgroundTint="@color/colorPrimary"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

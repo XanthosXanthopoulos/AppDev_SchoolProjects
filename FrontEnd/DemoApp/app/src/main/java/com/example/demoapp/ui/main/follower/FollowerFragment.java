@@ -9,20 +9,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.demoapp.R;
 import com.example.demoapp.actions.FollowActions;
-import com.example.demoapp.data.model.Follow;
-import com.example.demoapp.data.model.Status;
 import com.example.demoapp.ui.adapter.FollowListAdapter;
 import com.example.demoapp.util.ViewModelFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FollowerFragment extends Fragment
 {
@@ -76,13 +70,12 @@ public class FollowerFragment extends Fragment
             public void cancel(String userID) { }
         });
 
-        viewModel.getFollowersList().observe(getViewLifecycleOwner(), new Observer<List<Follow>>()
+        viewModel.getFollowersList().observe(getViewLifecycleOwner(), event ->
         {
-            @Override
-            public void onChanged(List<Follow> follows)
-            {
-                adapter.setItems(follows);
-            }
+            if (event.isHandled()) return;
+
+            event.setHandled(true);
+            adapter.setItems(event.getData());
         });
 
         viewModel.getFollowers();

@@ -108,4 +108,14 @@ public class NotificationHub
     {
         hubConnection.send("SendLike", postID);
     }
+
+    public void logout()
+    {
+        notifications.clear();
+        Event<Notification> event = new Event<>(null);
+        event.setHandled(true);
+        notificationsLiveData.postValue(event);
+
+        hubConnection.stop();
+    }
 }

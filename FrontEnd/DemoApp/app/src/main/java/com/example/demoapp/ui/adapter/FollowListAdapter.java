@@ -88,12 +88,12 @@ public class FollowListAdapter extends RecyclerView.Adapter<FollowListAdapter.Vi
 
         holder.deleteButton.setOnClickListener(v ->
         {
-            Button button = (Button)v;
-
             switch (items.get(position).getStatus())
             {
                 case PENDING_INCOMING:
                     actions.decline(items.get(position).getUserID());
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, getItemCount());
                     break;
             }
         });
@@ -124,6 +124,7 @@ public class FollowListAdapter extends RecyclerView.Adapter<FollowListAdapter.Vi
                     button.setText("Remove");
                     items.get(position).setStatus(Status.FOLLOWED);
                     actions.accept(items.get(position).getUserID());
+                    holder.deleteButton.setVisibility(View.GONE);
                     break;
                 case PENDING_OUTCOMING:
                     button.setText("Follow");

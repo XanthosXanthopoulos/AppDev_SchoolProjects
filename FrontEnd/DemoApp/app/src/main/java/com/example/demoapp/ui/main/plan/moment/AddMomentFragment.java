@@ -51,15 +51,11 @@ public class AddMomentFragment extends Fragment
         momentList.setLayoutManager(new GridLayoutManager(getContext(), 3));
         momentList.setAdapter(adapter);
 
-        viewModel.getImagesLiveData().observe(getViewLifecycleOwner(), new Observer<Iterable<String>>()
+        viewModel.getImagesLiveData().observe(getViewLifecycleOwner(), paths ->
         {
-            @Override
-            public void onChanged(Iterable<String> paths)
-            {
-                List<Uri> uris = new ArrayList<>();
-                paths.forEach(path -> uris.add(Uri.parse(path)));
-                adapter.setItems(uris);
-            }
+            List<Uri> uris = new ArrayList<>();
+            paths.forEach(path -> uris.add(Uri.parse(path)));
+            adapter.setItems(uris);
         });
 
         addImageButton.setOnClickListener(v ->

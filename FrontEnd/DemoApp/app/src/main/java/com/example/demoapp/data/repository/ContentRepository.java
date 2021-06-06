@@ -1,12 +1,8 @@
 package com.example.demoapp.data.repository;
 
-import android.provider.ContactsContract;
-
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 
 import com.example.demoapp.data.Event;
 import com.example.demoapp.data.datasource.ApiDataSource;
@@ -18,7 +14,6 @@ import com.example.demoapp.data.model.api.request.SearchQueryModel;
 import com.example.demoapp.data.model.datasource.DataSourceResponse;
 import com.example.demoapp.data.model.repository.RepositoryResponse;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

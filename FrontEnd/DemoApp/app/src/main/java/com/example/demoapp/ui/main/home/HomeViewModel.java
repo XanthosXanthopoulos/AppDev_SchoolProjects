@@ -77,6 +77,7 @@ public class HomeViewModel extends ViewModel
 
     public void logout()
     {
+        hub.logout();
         userRepository.logout();
     }
 }

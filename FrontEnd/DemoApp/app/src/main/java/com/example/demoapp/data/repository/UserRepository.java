@@ -43,7 +43,7 @@ public class UserRepository extends Repository
     }
 
     private final MediatorLiveData<RepositoryResponse<Event<Boolean>>> actionResult;
-    private final MediatorLiveData<RepositoryResponse<List<Follow>>> followResult;
+    private final MediatorLiveData<RepositoryResponse<Event<List<Follow>>>> followResult;
 
     private UserRepository(ApiDataSource dataSource)
     {
@@ -174,7 +174,7 @@ public class UserRepository extends Repository
         {
             if (response.isSuccessful())
             {
-                followResult.setValue(new RepositoryResponse<>(response.getResponse()));
+                followResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
             }
             else
             {
@@ -192,7 +192,7 @@ public class UserRepository extends Repository
         {
             if (response.isSuccessful())
             {
-                followResult.setValue(new RepositoryResponse<>(response.getResponse()));
+                followResult.setValue(new RepositoryResponse<>(new Event<>(response.getResponse())));
             }
             else
             {
@@ -213,7 +213,7 @@ public class UserRepository extends Repository
         return result;
     }
 
-    public MediatorLiveData<RepositoryResponse<List<Follow>>> getFollowResult()
+    public MediatorLiveData<RepositoryResponse<Event<List<Follow>>>> getFollowResult()
     {
         return followResult;
     }

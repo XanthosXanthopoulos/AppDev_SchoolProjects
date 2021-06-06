@@ -1,43 +1,39 @@
 package com.example.demoapp.ui.main.followee;
 
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.example.demoapp.data.Event;
 import com.example.demoapp.data.hub.NotificationHub;
 import com.example.demoapp.data.model.Follow;
-import com.example.demoapp.data.model.Notification;
-import com.example.demoapp.data.model.repository.RepositoryResponse;
 import com.example.demoapp.data.repository.UserRepository;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class FolloweeViewModel extends ViewModel
 {
-    private UserRepository repository;
-    private final LiveData<List<Follow>> followList;
-    private NotificationHub hub;
+    private final UserRepository repository;
+    private final LiveData<Event<List<Follow>>> followList;
+    private final NotificationHub hub;
 
     public FolloweeViewModel(UserRepository repository, NotificationHub hub)
     {
         this.repository = repository;
         this.hub = hub;
 
-        followList = Transformations.map(repository.getFollowResult(), new Function<RepositoryResponse<List<Follow>>, List<Follow>>()
+        followList = Transformations.map(repository.getFollowResult(), input ->
         {
-            @Override
-            public List<Follow> apply(RepositoryResponse<List<Follow>> input)
+            if (input.isSuccessful())
             {
-                if (input.isSuccessful())
-                {
-                    return input.getResponse();
-                }
-                else
-                {
-                    return new ArrayList<>();
-                }
+                return input.getResponse();
+            }
+            else
+            {
+                Event<List<Follow>> event = new Event<>(new LinkedList<>());
+                event.setHandled(true);
+                return event;
             }
         });
     }
@@ -62,7 +58,7 @@ public class FolloweeViewModel extends ViewModel
         hub.unfollow(userID);
     }
 
-    public LiveData<List<Follow>> getFollowList()
+    public LiveData<Event<List<Follow>>> getFollowList()
     {
         return followList;
     }
