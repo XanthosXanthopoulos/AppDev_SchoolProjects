@@ -231,11 +231,14 @@ namespace WebServer.Controllers
         {
             string userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            Post post = _context.Posts.Include(p => p.User).Where(p => p.PostID == postID).First();
+            Post post = _context.Posts.Include(p => p.User).Include(p => p.Likes).Include(p => p.Comments).Where(p => p.PostID == postID).First();
 
             if (userID != post.User.UserID) return StatusCode(StatusCodes.Status401Unauthorized);
 
             ICollection<Image> images = await _context.Posts.Include(p => p.Images).Where(p => p.PostID == postID).Select(p => p.Images).FirstAsync();
+
+            _context.Comments.RemoveRange(post.Comments);
+            _context.Likes.RemoveRange(post.Likes);
 
             _context.Posts.Remove(post);
 
