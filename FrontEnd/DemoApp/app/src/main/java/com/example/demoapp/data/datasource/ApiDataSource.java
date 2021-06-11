@@ -334,7 +334,7 @@ public class ApiDataSource
         if (query.getCity() != null && !query.getCity().isEmpty() && query.getLatitude() == 0)
         {
             HashMap<String, String> geoParams = new HashMap<>();
-            geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+            geoParams.put("key", "GEO_API_KEY");
             geoParams.put("q", query.getCity());
             JsonObjectRequest init = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
@@ -481,7 +481,7 @@ public class ApiDataSource
         if (query.getCity() != null && !query.getCity().isEmpty() && query.getLatitude() == 0)
         {
             HashMap<String, String> geoParams = new HashMap<>();
-            geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+            geoParams.put("key", "GEO_API_KEY");
             geoParams.put("q", query.getCity());
             JsonObjectRequest init = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
@@ -710,7 +710,7 @@ public class ApiDataSource
                 }
 
                 HashMap<String, String> geoParams = new HashMap<>();
-                geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+                geoParams.put("key", "GEO_API_KEY");
                 geoParams.put("q", activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
                 request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response12 ->
                 {
@@ -829,7 +829,7 @@ public class ApiDataSource
                     }
 
                     HashMap<String, String> geoParams = new HashMap<>();
-                    geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+                    geoParams.put("key", "GEO_API_KEY");
                     geoParams.put("q", activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
                     request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response1 ->
                     {
@@ -915,7 +915,7 @@ public class ApiDataSource
             }
 
             HashMap<String, String> geoParams = new HashMap<>();
-            geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+            geoParams.put("key", "GEO_API_KEY");
             geoParams.put("q", activity.getAddress() + ", " + activity.getCity() + ", " + activity.getCountry().label);
             initialRequest = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
             {
@@ -1195,7 +1195,7 @@ public class ApiDataSource
         ApiHandler apiHandler = ApiHandler.getInstance();
 
         HashMap<String, String> geoParams = new HashMap<>();
-        geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+        geoParams.put("key", "GEO_API_KEY");
         geoParams.put("q", latitude + "+" + longitude);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
         {
@@ -1239,7 +1239,7 @@ public class ApiDataSource
         ApiHandler apiHandler = ApiHandler.getInstance();
 
         HashMap<String, String> geoParams = new HashMap<>();
-        geoParams.put("key", "255230665c9249b28259b49dacc2c198");
+        geoParams.put("key", "GEO_API_KEY");
         geoParams.put("q", query);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, ApiRoutes.getGeoRoute(geoParams), null, response ->
         {

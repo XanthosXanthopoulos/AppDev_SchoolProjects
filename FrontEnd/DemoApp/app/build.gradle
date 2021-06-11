@@ -23,8 +23,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            manifestPlaceholders = [ MAPS_API_KEY: "AIzaSyAxbRRMDly4v6n4hJj2aukMW0WHrIfuSjs"]
-//            manifestPlaceholders = [ GEOCODING_API_KEY: "AIzaSyB9m7JnvBSQ2bz0J3bTNtYZoDL92eVyOlg"]
+            manifestPlaceholders = [ MAPS_API_KEY: "MAPS_API_KEY"]
         }
     }
     compileOptions {
